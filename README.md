@@ -1,0 +1,85 @@
+# Canadian Healthy Aging Policy Observatory
+
+**A research infrastructure for monitoring, quantifying, and evaluating the effects of aging-related public policy across Canadian governments.**
+
+> Part of the **Healthy Aging Intelligence Lab (HAIL)** — using AI, data science, and policy analysis to help Canada build a fairer, more efficient, and more sustainable system of support for an aging population.
+
+> **Status: Design stage (v1 whitepaper).** This repository currently contains *design documents only* — no application code or ingested data yet. It is the blueprint for the platform and the foundation for the first research paper, *"Design of a Healthy Aging Policy Observatory."* See [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md) for how the build proceeds from here.
+
+---
+
+## 中文概览
+
+`aging-policy-lab` 不是一个普通的政策网站,而是一座**研究基础设施(Research Infrastructure)**。它的核心不是"收集政策",而是**持续监测、量化评估、预测加拿大各级政府老龄化政策的效果**。
+
+平台定位为 **Canadian Healthy Aging Policy Observatory(加拿大健康老龄化政策观察平台)**,隶属于一个十年愿景的实验室 **Healthy Aging Intelligence Lab(HAIL)**。它同时承担三重角色:
+
+- **研究平台** —— 持续产出论文与数据,而非一次性课题;
+- **创业项目** —— 未来可发展为 SaaS 或研究服务;
+- **研究资产库** —— 不断积累数据库、指标体系、AI Agent、文献知识库、政策知识图谱与可视化看板。
+
+第一版(v1)先聚焦 **Nova Scotia + 联邦(Federal)** 作为可复制的模板,未来扩展至全加拿大。本仓库当前阶段只交付**设计文档/白皮书**,作为后续开发蓝图与第一篇论文的基础。
+
+平台由五个核心模块组成:① Policy Library(政策库)② Data Hub(数据中心)③ Indicators / HAPI(指标体系)④ Policy Analytics(政策分析)⑤ AI Research Assistant(AI 研究助手)。
+
+---
+
+## Why an "Observatory," not a website
+
+A policy website *collects and displays* documents. An **observatory** does something categorically different: it continuously **observes a system, measures it against a consistent yardstick, and reports change over time.** That distinction is the whole point of this project.
+
+| A policy website | This observatory |
+|---|---|
+| Stores policy text | Tracks each policy's lifecycle, budget, target population, and KPIs over time |
+| Uses whatever metrics governments publish | Maintains an independent, transparent index (**HAPI**) with documented methodology |
+| Answers "what policies exist?" | Answers "did policy X move outcome Y — and how confidently can we say so?" |
+| A static reference | A reproducible, versioned, citable research instrument |
+
+## The five modules
+
+| # | Module | What it does |
+|---|--------|--------------|
+| ① | **[Policy Library](docs/04-module-policy-library.md)** | A jurisdiction-aware, time-axis catalog of aging policies (Canada → Federal / Nova Scotia), each record carrying release date, department, full text, AI summary, budget, target population, KPIs, and lifecycle. |
+| ② | **[Data Hub](docs/05-module-data-hub.md)** | A versioned, lineage-tracked ingestion layer over Canada's open data: StatCan, Health Infobase, CIHI, Nova Scotia Open Data, Census, and more. |
+| ③ | **[Indicators / HAPI](docs/06-module-indicators-hapi.md)** | The **Healthy Aging Policy Index** — an independent index across six domains (Health, Independence, Social Participation, Financial Security, Care Access, Digital Inclusion) with documented data sourcing and scoring. |
+| ④ | **[Policy Analytics](docs/07-module-policy-analytics.md)** | Association analysis over open data — with explicit, rigorous separation of correlation from causation (ITS, DiD, synthetic control). |
+| ⑤ | **[AI Research Assistant](docs/08-module-ai-research-assistant.md)** | A retrieval-augmented agent over the policy corpus + literature that finds policies, papers, data, and trends, and drafts cited literature reviews. |
+
+## Documentation index
+
+| Doc | Contents |
+|-----|----------|
+| [`00-vision.md`](docs/00-vision.md) | HAIL Lab mission & vision; the "observatory ≠ website" thesis; value proposition |
+| [`01-platform-overview.md`](docs/01-platform-overview.md) | How the five modules fit together; system context diagram; user roles |
+| [`02-architecture.md`](docs/02-architecture.md) | Tech stack & rationale; monorepo layout; deployment & SaaS path; security/privacy |
+| [`03-data-model.md`](docs/03-data-model.md) | Core schema (Jurisdiction / Policy / Indicator / DataSource / Observation); ER diagram |
+| [`04-module-policy-library.md`](docs/04-module-policy-library.md) | Policy Library design |
+| [`05-module-data-hub.md`](docs/05-module-data-hub.md) | Data Hub & ETL pipeline design |
+| [`06-module-indicators-hapi.md`](docs/06-module-indicators-hapi.md) | HAPI indicator system & scoring methodology |
+| [`07-module-policy-analytics.md`](docs/07-module-policy-analytics.md) | Analytics & causal-inference rigor |
+| [`08-module-ai-research-assistant.md`](docs/08-module-ai-research-assistant.md) | AI research assistant design |
+| [`09-research-roadmap.md`](docs/09-research-roadmap.md) | The four-paper research arc & research-asset ledger |
+| [`10-data-sources-catalog.md`](docs/10-data-sources-catalog.md) | Concrete NS + Federal data sources (URLs, access, licence, cadence) |
+| [`11-implementation-roadmap.md`](docs/11-implementation-roadmap.md) | Phased build plan & milestones |
+
+## Tech stack (planned)
+
+- **Frontend / dashboards:** Next.js (TypeScript)
+- **Data pipeline / analytics:** Python (ingestion, ETL, statistics)
+- **Storage:** PostgreSQL
+- **AI layer:** Claude API (policy summarization, the research assistant, HAPI scoring assistance)
+
+See [`docs/02-architecture.md`](docs/02-architecture.md) for the full rationale and monorepo layout.
+
+## Scope of v1
+
+- **Geography:** Nova Scotia + Federal (a replicable template; pan-Canadian expansion later).
+- **Deliverable now:** design documents / whitepaper only — *no application code, no data ingestion yet.*
+
+## License
+
+Documentation is intended to be released under **CC-BY-4.0** (see [`LICENSE`](LICENSE)). The licence for future code will be decided when the codebase is created.
+
+## A note on rigor
+
+This platform analyzes public data to surface *associations* and to support *evidence-based* evaluation. Association is not causation. Causal claims require careful quasi-experimental designs (interrupted time series, difference-in-differences, synthetic control), each with stated assumptions and limitations. The observatory is built to make that distinction explicit at every step — see [`docs/07-module-policy-analytics.md`](docs/07-module-policy-analytics.md).
