@@ -96,13 +96,18 @@ class Connector(ABC):
     def parse(self, payload: RawPayload) -> list[ObservationRecord]:
         """Parse a raw payload into canonical observation records."""
 
-    def extract(self, live: bool = False) -> RawPayload:
-        """Return a payload from the live source (and refresh the fixture) or
-        from the vendored fixture (default, deterministic/offline)."""
+    def extract(self, live: bool = False, capture: bool = True) -> RawPayload:
+        """Return a payload from the live source or the vendored fixture.
+
+        live=True   fetch from the real upstream; when capture=True also refresh
+                    the vendored fixture (capture=False for dry runs).
+        live=False  read the deterministic, offline fixture.
+        """
         if live:
             payload = self.fetch_live()
-            self.fixture_path.parent.mkdir(parents=True, exist_ok=True)
-            self.fixture_path.write_bytes(payload.content)
+            if capture:
+                self.fixture_path.parent.mkdir(parents=True, exist_ok=True)
+                self.fixture_path.write_bytes(payload.content)
             return payload
         content = self.fixture_path.read_bytes()
         return RawPayload(

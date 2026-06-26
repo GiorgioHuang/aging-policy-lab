@@ -103,7 +103,8 @@ npm run dev                              # http://localhost:3000 — tree + /dat
 ```
 
 Per-area setup: [`db/README.md`](db/README.md), [`apps/web/README.md`](apps/web/README.md),
-[`pipeline/README.md`](pipeline/README.md).
+[`pipeline/README.md`](pipeline/README.md). To pull **real** data (live connectors) and
+automate ingestion, see [`RUNBOOK.md`](RUNBOOK.md).
 
 ## Scope of v1
 
