@@ -121,6 +121,52 @@ h1 {
   color: var(--muted);
 }
 
+.meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0.5rem 0 1rem;
+}
+.series {
+  margin: 0;
+}
+.series-head {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+svg.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart-axis {
+  fill: var(--muted);
+  font-size: 11px;
+}
+.chart-last {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lineage > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.lineage[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
 table.data {
   width: 100%;
   border-collapse: collapse;
