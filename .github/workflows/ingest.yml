@@ -4,20 +4,13 @@ name: Data Hub ingest
 # outbound internet, so the StatCan / NS connectors fetch live; CIHI falls back
 # to its vendored fixture. Requires a repository secret DATABASE_URL (RUNBOOK.md §C).
 #
-# Triggers: weekly schedule, manual dispatch, and pushes to the bootstrap branch
-# (so we can run it before merging to the default branch). If DATABASE_URL is not
-# set yet, the ingest job is skipped (not failed).
+# Triggers: weekly schedule + manual dispatch. If DATABASE_URL is not set, the
+# ingest job is skipped (not failed).
 
 on:
   schedule:
     - cron: "17 6 * * 1" # Mondays 06:17 UTC
   workflow_dispatch: {}
-  push:
-    branches: [claude/elegant-cannon-x8uzep] # bootstrap; remove once on default branch
-    paths:
-      - ".github/workflows/ingest.yml"
-      - "pipeline/**"
-      - "db/**"
 
 concurrency:
   group: data-hub-ingest
