@@ -7,6 +7,7 @@ export type LineageRow = {
   unit: string | null;
   jurisdictionCode: string;
   periodStart: string;
+  periodEnd: string;
   value: string | null; // numeric arrives as string from pg
   qualityFlag: string;
   datasourceName: string;
@@ -36,6 +37,7 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
     unit: string | null;
     jurisdiction_code: string;
     period_start: string;
+    period_end: string;
     value: string | null;
     quality_flag: string;
     datasource_name: string;
@@ -45,8 +47,8 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
     checksum: string | null;
   }>(
     `SELECT indicator_code, indicator_domain, indicator_name, unit,
-            jurisdiction_code, period_start::text, value::text, quality_flag,
-            datasource_name, publisher, licence, source_version, checksum
+            jurisdiction_code, period_start::text, period_end::text, value::text,
+            quality_flag, datasource_name, publisher, licence, source_version, checksum
        FROM observation_lineage
    ORDER BY indicator_domain, indicator_code, jurisdiction_code, period_start`,
   );
@@ -60,6 +62,7 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
       unit: r.unit,
       jurisdictionCode: r.jurisdiction_code,
       periodStart: r.period_start,
+      periodEnd: r.period_end,
       value: r.value,
       qualityFlag: r.quality_flag,
       datasourceName: r.datasource_name,

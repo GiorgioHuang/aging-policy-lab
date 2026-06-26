@@ -29,24 +29,24 @@ downloading the latest table from
 <https://www.cihi.ca/en/access-data-and-reports/data-tables> and replacing
 `cihi_home_care_clients_65plus.csv`.
 
-## Source identifiers (verified 2026-06 via web search)
+## Source identifiers (confirmed 2026-06 via `hapi inspect` against the live sources)
 
-- **StatCan:** Table **17-10-0005** "Population estimates on July 1, by age and
-  gender" → productId **`17100005`**; the connector filters to age
-  `65 years and over`, total gender, GEO ∈ {Canada, Nova Scotia}.
+- **StatCan:** Table **17-10-0005** → productId **`17100005`**; real columns
+  `REF_DATE, GEO, Gender, Age group, …, VALUE, STATUS`. The connector filters to age
+  **`65 years and older`** (the exact member label), gender `Total - gender`,
+  GEO ∈ {Canada, Nova Scotia}.
 - **NS:** dataset "Accessing Primary Care in Nova Scotia", Socrata resource
-  **`fac5-58sq`** (Need a Family Practice Registry — % of population needing a
-  provider; `lower_is_better`).
+  **`fac5-58sq`** — real columns `zone, type, date, measure_name, actual` (by health
+  zone; no provincial total, no percent). The connector sums **Community Pharmacy
+  PCC visits** across zones per month → a provincial monthly count (`higher_is_better`).
 
-Still **to confirm on the first `--live` run** (direct fetch was blocked here, so
-these are handled defensively in code): the StatCan gender member label across
-vintages (`Both sexes` vs `Total - gender` — both accepted) and the exact NS
-Socrata column names (discovered heuristically by `parse()`).
+Verified by running `hapi inspect` on a networked GitHub runner (the sandbox blocks
+the source domains); fixtures mirror the confirmed real shapes.
 
 ## Files
 
 | File | Source format | Connector | Indicator |
 |------|---------------|-----------|-----------|
 | `statcan_population_65plus.csv` | StatCan full-table CSV (filtered) | `statcan_wds` | `demography.population_65plus` |
-| `ns_primary_care_registry.json` | Socrata SODA JSON | `ns_open_data` | `care_access.primary_care_unmet_need_pct` |
+| `ns_accessing_primary_care.json` | Socrata SODA JSON (zone/type/date/measure/actual) | `ns_open_data` | `care_access.pharmacy_primary_care_visits` |
 | `cihi_home_care_clients_65plus.csv` | CIHI data-table CSV (incl. an `x` suppression) | `cihi_irrs` | `care_access.home_care_clients_65plus` |

@@ -9,6 +9,17 @@ function fmt(value: string | null): string {
   return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 1 }) : value;
 }
 
+// Postgres stores daterange canonically as [lower, upper) — the upper bound is
+// exclusive, so a full calendar year is [YYYY-01-01, (YYYY+1)-01-01). Show such a
+// range as "YYYY"; anything shorter (e.g. a month) shows as "YYYY-MM".
+function periodLabel(start: string, end: string): string {
+  const year = Number(start.slice(0, 4));
+  if (start.endsWith("-01-01") && end === `${year + 1}-01-01`) {
+    return String(year);
+  }
+  return start.slice(0, 7);
+}
+
 function GroupTable({ g }: { g: IndicatorGroup }) {
   const sample = g.rows[0];
   return (
@@ -39,7 +50,7 @@ function GroupTable({ g }: { g: IndicatorGroup }) {
           {g.rows.map((r, i) => (
             <tr key={`${r.jurisdictionCode}-${r.periodStart}-${i}`}>
               <td>{r.jurisdictionCode}</td>
-              <td>{r.periodStart.slice(0, 4)}</td>
+              <td>{periodLabel(r.periodStart, r.periodEnd)}</td>
               <td style={{ textAlign: "right" }}>{fmt(r.value)}</td>
               <td>
                 {r.qualityFlag === "ok" ? (

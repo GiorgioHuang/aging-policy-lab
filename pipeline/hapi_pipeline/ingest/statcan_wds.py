@@ -32,7 +32,9 @@ WDS_FULL_CSV = (
 )
 
 GEO_TO_JURISDICTION = {"Canada": "CA", "Nova Scotia": "CA-NS"}
-AGE_TARGET = "65 years and over"
+# Verified 2026-06 via `hapi inspect`: the aggregate member is "65 years and older"
+# (not "...and over"); gender total is "Total - gender".
+AGE_TARGET = "65 years and older"
 GENDER_TARGETS = {"total - gender", "both sexes", "total - sex"}
 MIN_YEAR = 2019
 
