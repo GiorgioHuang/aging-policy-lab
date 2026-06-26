@@ -22,6 +22,7 @@ export type IndicatorGroup = {
   domain: string;
   name: string;
   unit: string | null;
+  direction: string | null;
   datasourceName: string;
   publisher: string | null;
   isFixture: boolean;
@@ -78,6 +79,7 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
         domain: r.indicator_domain,
         name: r.indicator_name,
         unit: r.unit,
+        direction: null,
         datasourceName: r.datasource_name,
         publisher: r.publisher,
         isFixture: (r.source_version ?? "").startsWith("fixture:"),
@@ -87,5 +89,16 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
     }
     g.rows.push(row);
   }
+
+  // Indicator direction drives chart colour; read it from the indicator table
+  // (the lineage view doesn't expose it) — no schema change needed.
+  const dirs = await pool.query<{ code: string; direction: string | null }>(
+    `SELECT code, direction FROM indicator`,
+  );
+  const dirByCode = new Map(dirs.rows.map((d) => [d.code, d.direction]));
+  for (const g of groups.values()) {
+    g.direction = dirByCode.get(g.code) ?? null;
+  }
+
   return [...groups.values()];
 }

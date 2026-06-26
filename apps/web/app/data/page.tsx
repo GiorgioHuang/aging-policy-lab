@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getIndicatorGroups, type IndicatorGroup } from "@/lib/observations";
+import {
+  getIndicatorGroups,
+  type IndicatorGroup,
+  type LineageRow,
+} from "@/lib/observations";
+import { TrendChart, type ChartPoint } from "@/components/TrendChart";
 
 export const dynamic = "force-dynamic";
 
@@ -20,15 +25,30 @@ function periodLabel(start: string, end: string): string {
   return start.slice(0, 7);
 }
 
-function GroupTable({ g }: { g: IndicatorGroup }) {
+// One time series per jurisdiction (nulls/suppressed points dropped).
+function seriesByJurisdiction(rows: LineageRow[]): { code: string; points: ChartPoint[] }[] {
+  const map = new Map<string, ChartPoint[]>();
+  for (const r of rows) {
+    if (r.value === null) continue;
+    const v = Number(r.value);
+    if (!Number.isFinite(v)) continue;
+    const arr = map.get(r.jurisdictionCode) ?? [];
+    arr.push({ label: periodLabel(r.periodStart, r.periodEnd), value: v });
+    map.set(r.jurisdictionCode, arr);
+  }
+  return [...map.entries()].map(([code, points]) => ({ code, points }));
+}
+
+function GroupPanel({ g }: { g: IndicatorGroup }) {
   const sample = g.rows[0];
+  const series = seriesByJurisdiction(g.rows);
   return (
     <section className="panel">
       <h2>
         {g.name} <span className="badge">{g.domain}</span>
         {g.unit ? <span className="code"> {g.unit}</span> : null}
       </h2>
-      <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginTop: 0 }}>
+      <p className="meta">
         <code className="code">{g.code}</code> · source: {g.datasourceName}
         {sample?.checksum ? (
           <>
@@ -37,32 +57,47 @@ function GroupTable({ g }: { g: IndicatorGroup }) {
         ) : null}{" "}
         <span className="badge">{g.isFixture ? "fixture" : "live"}</span>
       </p>
-      <table className="data">
-        <thead>
-          <tr>
-            <th>Jurisdiction</th>
-            <th>Period</th>
-            <th style={{ textAlign: "right" }}>Value</th>
-            <th>Quality</th>
-          </tr>
-        </thead>
-        <tbody>
-          {g.rows.map((r, i) => (
-            <tr key={`${r.jurisdictionCode}-${r.periodStart}-${i}`}>
-              <td>{r.jurisdictionCode}</td>
-              <td>{periodLabel(r.periodStart, r.periodEnd)}</td>
-              <td style={{ textAlign: "right" }}>{fmt(r.value)}</td>
-              <td>
-                {r.qualityFlag === "ok" ? (
-                  <span style={{ color: "var(--muted)" }}>ok</span>
-                ) : (
-                  <span className="badge">{r.qualityFlag}</span>
-                )}
-              </td>
-            </tr>
+
+      {series.length > 0 && (
+        <div className="charts">
+          {series.map((s) => (
+            <figure className="series" key={s.code}>
+              <figcaption className="series-head">{s.code}</figcaption>
+              <TrendChart points={s.points} direction={g.direction} unit={g.unit} />
+            </figure>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
+
+      <details className="lineage">
+        <summary>Data &amp; lineage ({g.rows.length} observations)</summary>
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Jurisdiction</th>
+              <th>Period</th>
+              <th style={{ textAlign: "right" }}>Value</th>
+              <th>Quality</th>
+            </tr>
+          </thead>
+          <tbody>
+            {g.rows.map((r, i) => (
+              <tr key={`${r.jurisdictionCode}-${r.periodStart}-${i}`}>
+                <td>{r.jurisdictionCode}</td>
+                <td>{periodLabel(r.periodStart, r.periodEnd)}</td>
+                <td style={{ textAlign: "right" }}>{fmt(r.value)}</td>
+                <td>
+                  {r.qualityFlag === "ok" ? (
+                    <span style={{ color: "var(--muted)" }}>ok</span>
+                  ) : (
+                    <span className="badge">{r.qualityFlag}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
     </section>
   );
 }
@@ -87,9 +122,9 @@ export default async function DataHub() {
       </p>
       <h1>Data Hub</h1>
       <p className="lede">
-        Every value below traces back to its source through an immutable
-        observation and a versioned dataset (Observation → DatasetVersion →
-        DataSource). Re-ingesting unchanged data is a no-op.
+        Every value traces back to its source through an immutable observation and
+        a versioned dataset (Observation → DatasetVersion → DataSource). Re-ingesting
+        unchanged data is a no-op.
       </p>
 
       {fixtureSources.length > 0 && (
@@ -117,7 +152,7 @@ export default async function DataHub() {
           </p>
         </div>
       ) : groups && groups.length > 0 ? (
-        groups.map((g) => <GroupTable key={g.code} g={g} />)
+        groups.map((g) => <GroupPanel key={g.code} g={g} />)
       ) : (
         <p style={{ color: "var(--muted)" }}>
           No observations yet — run{" "}
