@@ -61,6 +61,23 @@ python -m hapi_pipeline.cli score               # compute HAPI v1 domain + compo
   normalization, weights, `method_version` v1) writing auditable `hapi_score` rows
   (each carries the indicator codes, raw values, and normalized inputs).
 
+## Analytics & AI assistant (Phase 4)
+
+```bash
+python -m hapi_pipeline.cli analyze             # Tier-1 trends + one worked ITS
+python -m hapi_pipeline.cli literature seed     # starter literature KB
+python -m hapi_pipeline.cli assistant "NS dementia policy"   # evidence pack (+ cited draft w/ key)
+```
+
+- `analytics/` — `descriptive.py` (trends; **association** only) and `its.py`
+  (interrupted time series via statsmodels + Newey-West HAC SEs; **causal** tier
+  with assumptions/limitations). `runner.py` stores `analysis_finding` rows; the
+  Association/Causal tag is explicit on every finding (docs/07 §3).
+- `literature/` — starter literature KB seed + loader.
+- `ai/assistant.py` — topic → grounded **evidence pack** (policies + literature +
+  findings + indicators, each with a citation id) → Claude **cited draft** where
+  every claim cites a pack item; graceful without `ANTHROPIC_API_KEY`.
+
 > **Fixtures vs live.** Default runs read vendored sample payloads under
 > `ingest/fixtures/` (this environment can't reach the live source domains), so
 > the numbers are realistic but **not** official statistics — their provenance is

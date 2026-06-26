@@ -60,10 +60,12 @@ jobs:
         run: python -m hapi_pipeline.cli ingest --live
         working-directory: pipeline
 
-      - name: Seed Policy Library + compute HAPI
+      - name: Seed Policy Library + compute HAPI + analytics
         run: |
           python -m hapi_pipeline.cli policies seed
           python -m hapi_pipeline.cli score
+          python -m hapi_pipeline.cli literature seed
+          python -m hapi_pipeline.cli analyze
         working-directory: pipeline
 
       - name: Show loaded observations

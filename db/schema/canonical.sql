@@ -5,6 +5,10 @@
 -- Do not edit by hand; change a migration and regenerate.
 -- ─────────────────────────────────────────────────────────────────────────────
 
+CREATE TYPE public.analysis_tier AS ENUM (
+    'association',
+    'causal'
+);
 CREATE TYPE public.datasource_access_method AS ENUM (
     'api',
     'csv',
@@ -61,6 +65,30 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+CREATE TABLE public.analysis_finding (
+    id bigint NOT NULL,
+    slug text NOT NULL,
+    title text NOT NULL,
+    tier public.analysis_tier NOT NULL,
+    method text NOT NULL,
+    policy_id bigint,
+    indicator_code text,
+    jurisdiction_code text,
+    window_spec jsonb,
+    result jsonb,
+    assumptions text,
+    limitations text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+COMMENT ON TABLE public.analysis_finding IS 'Auditable analytic results; tier makes the Association/Causal distinction explicit (docs/07 §3).';
+ALTER TABLE public.analysis_finding ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.analysis_finding_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
 CREATE TABLE public.dataset_version (
     id bigint NOT NULL,
     datasource_id bigint NOT NULL,
@@ -153,6 +181,26 @@ CREATE TABLE public.jurisdiction (
 COMMENT ON TABLE public.jurisdiction IS 'Tree of governments. Adding a province/region is a row insert, not a schema change.';
 ALTER TABLE public.jurisdiction ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.jurisdiction_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+CREATE TABLE public.literature (
+    id bigint NOT NULL,
+    slug text NOT NULL,
+    title text NOT NULL,
+    authors text,
+    year integer,
+    venue text,
+    url text,
+    abstract text,
+    topics text[],
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+ALTER TABLE public.literature ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.literature_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -254,6 +302,10 @@ ALTER TABLE public.policy_version ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTI
     NO MAXVALUE
     CACHE 1
 );
+ALTER TABLE ONLY public.analysis_finding
+    ADD CONSTRAINT analysis_finding_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.analysis_finding
+    ADD CONSTRAINT analysis_finding_slug_key UNIQUE (slug);
 ALTER TABLE ONLY public.dataset_version
     ADD CONSTRAINT dataset_version_datasource_id_checksum_key UNIQUE (datasource_id, checksum);
 ALTER TABLE ONLY public.dataset_version
@@ -274,6 +326,10 @@ ALTER TABLE ONLY public.jurisdiction
     ADD CONSTRAINT jurisdiction_code_key UNIQUE (code);
 ALTER TABLE ONLY public.jurisdiction
     ADD CONSTRAINT jurisdiction_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.literature
+    ADD CONSTRAINT literature_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.literature
+    ADD CONSTRAINT literature_slug_key UNIQUE (slug);
 ALTER TABLE ONLY public.observation
     ADD CONSTRAINT observation_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.policy_indicator
@@ -285,9 +341,12 @@ ALTER TABLE ONLY public.policy_version
 ALTER TABLE ONLY public.policy_version
     ADD CONSTRAINT policy_version_policy_id_version_no_key UNIQUE (policy_id, version_no);
 CREATE INDEX idx_dataset_version_source ON public.dataset_version USING btree (datasource_id);
+CREATE INDEX idx_finding_indicator ON public.analysis_finding USING btree (indicator_code);
+CREATE INDEX idx_finding_policy ON public.analysis_finding USING btree (policy_id);
 CREATE INDEX idx_hapi_score_jurisdiction ON public.hapi_score USING btree (jurisdiction_id);
 CREATE INDEX idx_indicator_domain ON public.indicator USING btree (domain);
 CREATE INDEX idx_jurisdiction_parent ON public.jurisdiction USING btree (parent_id);
+CREATE INDEX idx_literature_topics ON public.literature USING gin (topics);
 CREATE INDEX idx_observation_dsv ON public.observation USING btree (dataset_version_id);
 CREATE INDEX idx_observation_indicator ON public.observation USING btree (indicator_id);
 CREATE INDEX idx_observation_jurisdiction ON public.observation USING btree (jurisdiction_id);
@@ -299,6 +358,8 @@ CREATE TRIGGER trg_datasource_updated BEFORE UPDATE ON public.datasource FOR EAC
 CREATE TRIGGER trg_indicator_updated BEFORE UPDATE ON public.indicator FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_jurisdiction_updated BEFORE UPDATE ON public.jurisdiction FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER trg_policy_updated BEFORE UPDATE ON public.policy FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+ALTER TABLE ONLY public.analysis_finding
+    ADD CONSTRAINT analysis_finding_policy_id_fkey FOREIGN KEY (policy_id) REFERENCES public.policy(id);
 ALTER TABLE ONLY public.dataset_version
     ADD CONSTRAINT dataset_version_datasource_id_fkey FOREIGN KEY (datasource_id) REFERENCES public.datasource(id) ON DELETE CASCADE;
 ALTER TABLE ONLY public.hapi_score

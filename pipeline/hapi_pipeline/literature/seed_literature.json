@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "who-2015-ageing-health",
+    "title": "World report on ageing and health",
+    "authors": "World Health Organization",
+    "year": 2015,
+    "venue": "WHO",
+    "url": "https://www.who.int/publications/i/item/9789241565042",
+    "abstract": "Reframes healthy ageing around functional ability and intrinsic capacity, and argues for age-friendly environments and integrated, person-centred long-term care systems.",
+    "topics": ["healthy aging", "long-term care", "policy framework"]
+  },
+  {
+    "slug": "cihi-dementia-in-canada",
+    "title": "Dementia in Canada",
+    "authors": "Canadian Institute for Health Information",
+    "year": 2022,
+    "venue": "CIHI",
+    "url": "https://www.cihi.ca/en/dementia-in-canada",
+    "abstract": "Describes the prevalence of dementia in Canada, use of home care and long-term care by people living with dementia, caregiver burden, and avoidable acute-care use.",
+    "topics": ["dementia", "home care", "long-term care", "Canada"]
+  },
+  {
+    "slug": "phac-2019-dementia-strategy-evidence",
+    "title": "Evidence informing A Dementia Strategy for Canada",
+    "authors": "Public Health Agency of Canada",
+    "year": 2019,
+    "venue": "PHAC",
+    "url": "https://www.canada.ca/en/public-health/services/publications/diseases-conditions/dementia-strategy.html",
+    "abstract": "Summarizes evidence behind Canada's national dementia strategy: prevention, therapy and cure, and improving quality of life for people living with dementia and their caregivers.",
+    "topics": ["dementia", "Canada", "policy framework"]
+  },
+  {
+    "slug": "home-care-avoidable-ed-review",
+    "title": "Home care and avoidable emergency department use among older adults: a review",
+    "authors": "Synthesis of health-services literature",
+    "year": 2021,
+    "venue": "Health services research (review)",
+    "url": "https://www.cihi.ca/en/access-data-and-reports",
+    "abstract": "Reviews evidence on whether expanded home care is associated with reduced avoidable emergency department visits and hospitalizations among older adults, noting heterogeneity and confounding challenges.",
+    "topics": ["home care", "emergency department", "older adults", "care access"]
+  },
+  {
+    "slug": "aging-in-place-evidence",
+    "title": "Aging in place: outcomes of community-based supports for older adults",
+    "authors": "Gerontology literature synthesis",
+    "year": 2020,
+    "venue": "Gerontology (review)",
+    "url": "https://www.who.int/publications/i/item/9789241565042",
+    "abstract": "Examines whether home and community care supports help older adults remain in their homes longer and the effect on independence, social participation, and care costs.",
+    "topics": ["home care", "independence", "social participation", "aging in place"]
+  },
+  {
+    "slug": "ns-primary-care-access-reporting",
+    "title": "Public reporting and primary care access in Nova Scotia",
+    "authors": "Nova Scotia Health / Department of Health and Wellness",
+    "year": 2023,
+    "venue": "Government of Nova Scotia",
+    "url": "https://novascotia.ca/actionforhealth/",
+    "abstract": "Describes Nova Scotia's Action for Health measures and public dashboard, including the Need a Family Practice Registry and expanded pharmacy and urgent-care primary-care access.",
+    "topics": ["primary care", "care access", "Nova Scotia", "pharmacy"]
+  },
+  {
+    "slug": "statcan-population-aging",
+    "title": "Canada's population estimates: age and sex",
+    "authors": "Statistics Canada",
+    "year": 2025,
+    "venue": "The Daily, Statistics Canada",
+    "url": "https://www150.statcan.gc.ca/n1/daily-quotidien/250924/dq250924a-eng.htm",
+    "abstract": "Reports July 1 population estimates by age and gender, documenting the growth of the population aged 65 and over in Canada and the provinces, the denominator for per-capita aging indicators.",
+    "topics": ["demography", "population aging", "Canada", "Nova Scotia"]
+  }
+]

@@ -158,6 +158,50 @@ def _cmd_score(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_analyze(_args: argparse.Namespace) -> int:
+    from .analytics.runner import run_analyses
+    from .db import connect
+
+    with connect() as conn:
+        n = run_analyses(conn)
+    print(f"✓ analytics: wrote {n} finding(s) (Tier-1 trends + worked ITS)")
+    return 0
+
+
+def _cmd_literature_seed(_args: argparse.Namespace) -> int:
+    from .db import connect
+    from .literature.loader import load_literature
+
+    with connect() as conn:
+        ins, upd = load_literature(conn)
+    print(f"✓ literature: +{ins} inserted, {upd} updated")
+    return 0
+
+
+def _cmd_assistant(args: argparse.Namespace) -> int:
+    from .ai.assistant import research
+    from .db import connect
+
+    with connect() as conn:
+        out = research(conn, args.topic, model=args.model)
+    pack = out["pack"]
+    print(f"=== Evidence pack for: {args.topic} ===")
+    print(f"  policies: {len(pack['policies'])} · literature: {len(pack['literature'])} "
+          f"· findings: {len(pack['findings'])} · indicators: {len(pack['indicators'])}")
+    for p in pack["policies"]:
+        print(f"  [{p['cite']}] {p['title']} ({p['jurisdiction']}, {p['released_at']})")
+    for lit in pack["literature"]:
+        print(f"  [{lit['cite']}] {lit['title']} — {lit['authors']} ({lit['year']})")
+    for f in pack["findings"]:
+        print(f"  [{f['cite']}] {f['title']} · {f['tier_label']}")
+    print()
+    if out["draft"]:
+        print("=== Cited draft ===\n" + out["draft"])
+    else:
+        print("(no draft — set ANTHROPIC_API_KEY to generate a cited review from this pack)")
+    return 0
+
+
 def _cmd_inspect(args: argparse.Namespace) -> int:
     from .ingest.registry import all_connectors, get_connector
 
@@ -205,6 +249,18 @@ def main(argv: list[str] | None = None) -> int:
     p_sum.set_defaults(func=_cmd_policies_summarize)
 
     sub.add_parser("score", help="compute HAPI v1 scores").set_defaults(func=_cmd_score)
+    sub.add_parser("analyze", help="compute analytic findings (Tier-1 + ITS)").set_defaults(
+        func=_cmd_analyze)
+
+    p_lit = sub.add_parser("literature", help="literature KB")
+    lit_sub = p_lit.add_subparsers(dest="lit_cmd", required=True)
+    lit_sub.add_parser("seed", help="load the starter literature set").set_defaults(
+        func=_cmd_literature_seed)
+
+    p_as = sub.add_parser("assistant", help="topic -> evidence pack + cited draft")
+    p_as.add_argument("topic", help="research topic, e.g. 'NS dementia policy'")
+    p_as.add_argument("--model", help="Claude model id (default: HAPI_SUMMARY_MODEL or opus)")
+    p_as.set_defaults(func=_cmd_assistant)
 
     args = parser.parse_args(argv)
     return args.func(args)

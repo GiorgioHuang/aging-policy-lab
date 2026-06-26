@@ -8,8 +8,8 @@ const MODULES: Array<{ n: string; name: string; desc: string; href?: string }> =
   { n: "①", name: "Policy Library", desc: "Timeline of federal & provincial aging policy", href: "/policies" },
   { n: "②", name: "Data Hub", desc: "Versioned open-data ingestion & lineage", href: "/data" },
   { n: "③", name: "Indicators (HAPI)", desc: "Healthy Aging Policy Index", href: "/hapi" },
-  { n: "④", name: "Policy Analytics", desc: "Association + quasi-experimental evaluation" },
-  { n: "⑤", name: "AI Research Assistant", desc: "Cited evidence packs & literature reviews" },
+  { n: "④", name: "Policy Analytics", desc: "Association + quasi-experimental evaluation", href: "/analytics" },
+  { n: "⑤", name: "AI Research Assistant", desc: "Cited evidence packs & literature reviews", href: "/assistant" },
 ];
 
 function TreeNode({ node }: { node: JurisdictionNode }) {
