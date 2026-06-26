@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getJurisdictionTree, type JurisdictionNode } from "@/lib/jurisdictions";
 
 // Always read live from the database (no static caching of the tree).
@@ -91,8 +92,9 @@ export default async function Home() {
           ))}
         </ul>
         <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginBottom: 0 }}>
-          Phase 1 (scaffold + schema) is live. See <code className="code">docs/</code> for
-          the design whitepaper and <code className="code">docs/11</code> for the roadmap.
+          Phase 2 (Data Hub) is live — explore ingested, lineage-tracked values in the{" "}
+          <Link href="/data">Data Hub →</Link>. See <code className="code">docs/</code> for the
+          design whitepaper and <code className="code">docs/11</code> for the roadmap.
         </p>
       </section>
     </main>

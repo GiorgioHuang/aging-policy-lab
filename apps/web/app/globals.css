@@ -121,6 +121,28 @@ h1 {
   color: var(--muted);
 }
 
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+table.data th,
+table.data td {
+  text-align: left;
+  padding: 0.3rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+table.data th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+table.data tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .error {
   border-color: #5a2730;
   background: #21161a;

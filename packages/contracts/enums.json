@@ -8,8 +8,10 @@
     "social_participation",
     "financial_security",
     "care_access",
-    "digital_inclusion"
+    "digital_inclusion",
+    "demography"
   ],
+  "$comment_indicator_domain": "The first six are the HAPI domains (docs/06). 'demography' is a non-HAPI utility domain for population denominators (added in db/migrations/0002); it never rolls up into a HapiScore.",
   "indicator_direction": ["higher_is_better", "lower_is_better"],
   "datasource_access_method": ["api", "csv", "portal_download", "web_scrape"],
   "observation_quality_flag": ["ok", "estimated", "suppressed", "provisional"],
