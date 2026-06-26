@@ -1,0 +1,8 @@
+# Pinned-loosely runtime deps; mirror of pyproject [project.dependencies].
+# Install:  python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+psycopg[binary]>=3.2
+python-dotenv>=1.0
+requests>=2.32
+pandas>=2.2
+statsmodels>=0.14
+anthropic>=0.40

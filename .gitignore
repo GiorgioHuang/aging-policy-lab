@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env.python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Env / secrets — never commit
+.env
+.env.local
+.env.*.local
+*.env
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/build/
+.vercel
+*.tsbuildinfo
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local data / scratch
+/data/
+/tmp/
+*.local

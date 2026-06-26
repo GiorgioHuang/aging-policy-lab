@@ -1,0 +1,24 @@
+{
+  "name": "aging-policy-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Canadian Healthy Aging Policy Observatory — research infrastructure monorepo",
+  "license": "CC-BY-4.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "start": "npm run start --workspace apps/web",
+    "lint": "npm run lint --workspace apps/web",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:migrate": "bash db/migrate.sh",
+    "db:seed": "bash db/migrate.sh --seed"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
