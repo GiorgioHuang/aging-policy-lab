@@ -118,6 +118,46 @@ class StatCanWDSConnector(Connector):
             ])
         return out.getvalue()
 
+    def _raw_csv(self) -> str:
+        with urllib.request.urlopen(WDS_FULL_CSV, timeout=60) as resp:  # noqa: S310
+            meta = json.loads(resp.read().decode("utf-8"))
+        with urllib.request.urlopen(meta["object"], timeout=180) as resp:  # noqa: S310
+            zbytes = resp.read()
+        with zipfile.ZipFile(io.BytesIO(zbytes)) as zf:
+            data_name = next(
+                n for n in zf.namelist()
+                if n.lower().endswith(".csv") and "metadata" not in n.lower()
+            )
+            return zf.read(data_name).decode("utf-8-sig")
+
+    def inspect_live(self) -> str:
+        reader = csv.DictReader(io.StringIO(self._raw_csv()))
+        fields = reader.fieldnames or []
+        geos: set[str] = set()
+        ages: set[str] = set()
+        genders: set[str] = set()
+        samples: list[str] = []
+        age_field = "Age group" if "Age group" in fields else (
+            "Age group at July 1" if "Age group at July 1" in fields else "")
+        gender_field = "Gender" if "Gender" in fields else ("Sex" if "Sex" in fields else "")
+        for row in reader:
+            geos.add(_col(row, "GEO"))
+            if age_field:
+                ages.add(row.get(age_field, ""))
+            if gender_field:
+                genders.add(row.get(gender_field, ""))
+            if _col(row, "GEO") == "Canada" and len(samples) < 3:
+                samples.append({k: row.get(k) for k in fields})  # type: ignore[arg-type]
+        age_65 = sorted(a for a in ages if "65" in a)
+        return (
+            f"headers: {fields}\n"
+            f"age column: {age_field!r}; gender column: {gender_field!r}\n"
+            f"GEO has Canada={'Canada' in geos}, Nova Scotia={'Nova Scotia' in geos}\n"
+            f"age values containing '65': {age_65}\n"
+            f"gender values: {sorted(genders)}\n"
+            f"sample Canada rows: {samples}"
+        )
+
     def parse(self, payload: RawPayload) -> list[ObservationRecord]:
         reader = csv.DictReader(io.StringIO(payload.content.decode("utf-8-sig")))
         records: list[ObservationRecord] = []

@@ -126,6 +126,20 @@ def _cmd_observations(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_inspect(args: argparse.Namespace) -> int:
+    from .ingest.registry import all_connectors, get_connector
+
+    connectors = [get_connector(args.source)] if args.source else all_connectors()
+    for c in connectors:
+        print(f"=== {c.name} ===")
+        try:
+            print(c.inspect_live())
+        except Exception as exc:  # noqa: BLE001
+            print(f"inspect failed: {exc}", file=sys.stderr)
+        print()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="hapi", description="HAPI pipeline CLI")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -144,6 +158,10 @@ def main(argv: list[str] | None = None) -> int:
     p_obs = sub.add_parser("observations", help="print loaded values with lineage")
     p_obs.add_argument("--limit", type=int, default=50)
     p_obs.set_defaults(func=_cmd_observations)
+
+    p_ins = sub.add_parser("inspect", help="dump the real upstream schema (needs network)")
+    p_ins.add_argument("--source", help="inspect only this connector")
+    p_ins.set_defaults(func=_cmd_inspect)
 
     args = parser.parse_args(argv)
     return args.func(args)

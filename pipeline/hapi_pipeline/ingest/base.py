@@ -96,6 +96,12 @@ class Connector(ABC):
     def parse(self, payload: RawPayload) -> list[ObservationRecord]:
         """Parse a raw payload into canonical observation records."""
 
+    def inspect_live(self) -> str:
+        """Fetch the real upstream and return a human-readable schema dump
+        (column names, distinct dimension values, sample rows). Used by
+        `hapi inspect` to confirm parsing assumptions against the real source."""
+        return "(no live inspection implemented for this connector)"
+
     def extract(self, live: bool = False, capture: bool = True) -> RawPayload:
         """Return a payload from the live source or the vendored fixture.
 

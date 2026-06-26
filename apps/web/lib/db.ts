@@ -7,10 +7,20 @@ declare global {
   var _hapiPool: Pool | undefined;
 }
 
+const connectionString = process.env.DATABASE_URL ?? "";
+
+// Managed Postgres (e.g. Neon) requires TLS. Neon's certificates are publicly
+// trusted, so verify them (rejectUnauthorized). Local Postgres needs no SSL.
+const needsSsl =
+  /sslmode=require/.test(connectionString) ||
+  /\.neon\.tech/.test(connectionString) ||
+  process.env.PGSSL === "require";
+
 export const pool: Pool =
   global._hapiPool ??
   new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString,
+    ssl: needsSsl ? { rejectUnauthorized: true } : undefined,
     // Keep the dev pool small.
     max: 5,
   });

@@ -79,6 +79,24 @@ class NSOpenDataConnector(Connector):
         return RawPayload(content=content, source_version=f"SODA:{NS_RESOURCE}",
                           content_type="application/json")
 
+    def inspect_live(self) -> str:
+        payload = self.fetch_live()
+        rows = json.loads(payload.content.decode("utf-8"))
+        if not rows:
+            return "no rows returned"
+        keys = list(rows[0].keys())
+        geo_key = _find_key(rows[0], _GEO_HINTS)
+        date_key = _find_key(rows[0], _DATE_HINTS)
+        pct_key = _find_key(rows[0], _PCT_HINTS)
+        geos = sorted({str(r.get(geo_key, "")) for r in rows})[:30] if geo_key else []
+        return (
+            f"row count: {len(rows)}\n"
+            f"keys: {keys}\n"
+            f"detected date={date_key!r}, geo={geo_key!r}, pct={pct_key!r}\n"
+            f"distinct geo values (<=30): {geos}\n"
+            f"sample rows: {rows[:3]}"
+        )
+
     def parse(self, payload: RawPayload) -> list[ObservationRecord]:
         rows = json.loads(payload.content.decode("utf-8"))
         records: list[ObservationRecord] = []

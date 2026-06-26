@@ -1,0 +1,29 @@
+name: Inspect sources
+
+# One-shot schema introspection: fetch the real StatCan / NS payloads on a
+# GitHub runner (which can reach the source domains) and dump their column
+# names + distinct dimension values, so the connectors can be aligned to the
+# real schema. No database / secret needed. Temporary diagnostic — safe to
+# delete once the connectors are confirmed.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [claude/elegant-cannon-x8uzep]
+    paths:
+      - "pipeline/hapi_pipeline/ingest/**"
+      - ".github/workflows/inspect.yml"
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r pipeline/requirements.txt
+      - name: Inspect StatCan + NS schemas
+        run: python -m hapi_pipeline.cli inspect --source statcan_wds; python -m hapi_pipeline.cli inspect --source ns_open_data
+        working-directory: pipeline
