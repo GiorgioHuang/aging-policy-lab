@@ -20,10 +20,14 @@ export function TrendChart({
   points,
   direction,
   unit,
+  yMin,
+  yMax,
 }: {
   points: ChartPoint[];
   direction?: string | null;
   unit?: string | null;
+  yMin?: number;
+  yMax?: number;
 }) {
   if (points.length === 0) return null;
 
@@ -39,8 +43,8 @@ export function TrendChart({
   const y0 = padT;
 
   const values = points.map((p) => p.value);
-  let min = Math.min(...values);
-  let max = Math.max(...values);
+  let min = yMin ?? Math.min(...values);
+  let max = yMax ?? Math.max(...values);
   if (min === max) {
     const d = Math.abs(min) || 1;
     min -= d * 0.05;
