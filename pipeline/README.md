@@ -45,6 +45,22 @@ python -m hapi_pipeline.cli observations       # print loaded values with full l
 To confirm the connectors against the **real** sources and then automate
 ingestion (GitHub Actions + managed Postgres), follow [`../RUNBOOK.md`](../RUNBOOK.md).
 
+## Policy Library & HAPI (Phase 3)
+
+```bash
+python -m hapi_pipeline.cli policies seed       # load curated NS + Federal policies
+python -m hapi_pipeline.cli policies summarize  # AI summaries (needs ANTHROPIC_API_KEY; optional)
+python -m hapi_pipeline.cli score               # compute HAPI v1 domain + composite scores
+```
+
+- `policies/` — curated `seed_policies.json` + idempotent loader (upserts policies,
+  initial PolicyVersion, and `policy_indicator` links to existing indicators).
+- `ai/summarize.py` — Claude-generated `ai_summary` per policy, versioned; graceful
+  no-op without `ANTHROPIC_API_KEY` (model via `HAPI_SUMMARY_MODEL`, default opus).
+- `indicators/hapi_v1.py` + `engine.py` — HAPI v1 methodology (per-capita
+  normalization, weights, `method_version` v1) writing auditable `hapi_score` rows
+  (each carries the indicator codes, raw values, and normalized inputs).
+
 > **Fixtures vs live.** Default runs read vendored sample payloads under
 > `ingest/fixtures/` (this environment can't reach the live source domains), so
 > the numbers are realistic but **not** official statistics — their provenance is
