@@ -76,7 +76,9 @@ export default async function DataHub() {
     error = e instanceof Error ? e.message : String(e);
   }
 
-  const anyFixture = groups?.some((g) => g.isFixture) ?? false;
+  const fixtureSources = groups
+    ? [...new Set(groups.filter((g) => g.isFixture).map((g) => g.datasourceName))]
+    : [];
 
   return (
     <main className="container">
@@ -90,13 +92,13 @@ export default async function DataHub() {
         DataSource). Re-ingesting unchanged data is a no-op.
       </p>
 
-      {anyFixture && (
+      {fixtureSources.length > 0 && (
         <div className="panel error">
-          <strong>Sample data.</strong> Some series are loaded from vendored{" "}
-          <em>fixture</em> payloads (this environment can&apos;t reach the live
-          source domains). They are realistic but <strong>not</strong> official
-          statistics; provenance is recorded as <code className="code">fixture:…</code>.
-          Refresh with <code className="code">hapi ingest --live</code> where the network allows.
+          <strong>Fixture-sourced series.</strong> {fixtureSources.join("; ")} —
+          tagged <code className="code">fixture</code> below — load from a vendored
+          payload rather than a live pull (CIHI has no open API). Provenance is
+          recorded as <code className="code">fixture:…</code>; live series instead
+          show <code className="code">WDS:</code> / <code className="code">SODA:</code>.
         </div>
       )}
 
