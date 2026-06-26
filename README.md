@@ -4,7 +4,7 @@
 
 > Part of the **Healthy Aging Intelligence Lab (HAIL)** — using AI, data science, and policy analysis to help Canada build a fairer, more efficient, and more sustainable system of support for an aging population.
 
-> **Status: Design stage (v1 whitepaper).** This repository currently contains *design documents only* — no application code or ingested data yet. It is the blueprint for the platform and the foundation for the first research paper, *"Design of a Healthy Aging Policy Observatory."* See [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md) for how the build proceeds from here.
+> **Status: Phase 1 — scaffold + schema.** The design whitepaper is in [`docs/`](docs/), and the platform scaffold is now standing: a monorepo (`apps/web` Next.js · `pipeline` Python · `db` migrations · `packages/contracts`), a `docker-compose` Postgres, the [data model](docs/03-data-model.md) implemented as migrations, and the seeded jurisdiction tree read by a minimal web app. Data ingestion and the HAPI engine arrive next — see [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
 
 ---
 
@@ -62,7 +62,7 @@ A policy website *collects and displays* documents. An **observatory** does some
 | [`10-data-sources-catalog.md`](docs/10-data-sources-catalog.md) | Concrete NS + Federal data sources (URLs, access, licence, cadence) |
 | [`11-implementation-roadmap.md`](docs/11-implementation-roadmap.md) | Phased build plan & milestones |
 
-## Tech stack (planned)
+## Tech stack
 
 - **Frontend / dashboards:** Next.js (TypeScript)
 - **Data pipeline / analytics:** Python (ingestion, ETL, statistics)
@@ -71,10 +71,37 @@ A policy website *collects and displays* documents. An **observatory** does some
 
 See [`docs/02-architecture.md`](docs/02-architecture.md) for the full rationale and monorepo layout.
 
+## Repository layout
+
+```
+apps/web/            Next.js (TypeScript) — UI/dashboards; reads the data model
+pipeline/            Python — ingestion, ETL, HAPI indicators, analytics (skeleton)
+db/                  schema, versioned migrations, seed, and a psql migration runner
+packages/contracts/  shared, language-neutral enum contracts (TS + Python)
+docs/                the v1 design whitepaper
+docker-compose.yml   local Postgres
+```
+
+## Getting started (Phase 1)
+
+```bash
+cp .env.example .env
+docker compose up -d db                 # local Postgres
+npm run db:migrate -- --seed            # apply schema + seed Canada → Federal / NS
+                                         # (or: bash db/migrate.sh --seed)
+
+npm install
+echo "DATABASE_URL=postgresql://hapi:hapi_dev_password@localhost:5432/hapi" > apps/web/.env.local
+npm run dev                              # http://localhost:3000 — renders the jurisdiction tree
+```
+
+Per-area setup: [`db/README.md`](db/README.md), [`apps/web/README.md`](apps/web/README.md),
+[`pipeline/README.md`](pipeline/README.md).
+
 ## Scope of v1
 
 - **Geography:** Nova Scotia + Federal (a replicable template; pan-Canadian expansion later).
-- **Deliverable now:** design documents / whitepaper only — *no application code, no data ingestion yet.*
+- **Now live:** the design whitepaper plus the Phase 1 scaffold (monorepo, schema, seed, web read). Data ingestion and HAPI scoring come in Phases 2–3 ([`docs/11`](docs/11-implementation-roadmap.md)).
 
 ## License
 

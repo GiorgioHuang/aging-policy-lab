@@ -1,0 +1,130 @@
+:root {
+  --bg: #0f1420;
+  --panel: #161d2e;
+  --border: #27314a;
+  --text: #e6eaf2;
+  --muted: #9aa6bf;
+  --accent: #4f9dff;
+  --good: #3ecf8e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 0.5rem;
+}
+
+.lede {
+  color: var(--muted);
+  margin: 0 0 2rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.panel h2 {
+  font-size: 1.05rem;
+  margin: 0 0 0.75rem;
+}
+
+.tree {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+.tree ul {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--border);
+}
+.tree li {
+  margin: 0.35rem 0;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+.code {
+  color: var(--good);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+}
+
+.modules {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.modules li {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+.modules .num {
+  color: var(--accent);
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+.modules small {
+  color: var(--muted);
+}
+
+.error {
+  border-color: #5a2730;
+  background: #21161a;
+}
+.error code {
+  color: #ff9b9b;
+}

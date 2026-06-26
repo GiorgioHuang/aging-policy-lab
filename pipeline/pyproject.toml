@@ -1,0 +1,22 @@
+[project]
+name = "hapi-pipeline"
+version = "0.1.0"
+description = "Data ingestion, ETL, HAPI indicators, and analytics for the Healthy Aging Policy Observatory"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "python-dotenv>=1.0",
+    "requests>=2.32",
+    "pandas>=2.2",
+    # Quasi-experimental / time-series methods land in Phase 4:
+    "statsmodels>=0.14",
+    # Claude API (AI summaries + research assistant; Phase 3/4):
+    "anthropic>=0.40",
+]
+
+[project.scripts]
+hapi = "hapi_pipeline.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hapi_pipeline*"]
