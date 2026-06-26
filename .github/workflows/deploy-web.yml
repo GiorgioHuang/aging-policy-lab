@@ -1,0 +1,71 @@
+name: Deploy web (Cloud Run)
+
+# Manual deploy of apps/web to Google Cloud Run via Cloud Build + the repo
+# Dockerfile. Requires Workload Identity Federation and these repo secrets:
+#   GCP_PROJECT_ID, GCP_WIF_PROVIDER, GCP_SERVICE_ACCOUNT
+# and a Secret Manager secret DATABASE_URL (the Neon pooled connection string).
+# See RUNBOOK.md §D. Skipped (not failed) if the secrets are absent.
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: Cloud Run region
+        default: northamerica-northeast1
+      service:
+        description: Cloud Run service name
+        default: hapi-web
+
+permissions:
+  contents: read
+  id-token: write # required for Workload Identity Federation
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.s.outputs.ok }}
+    steps:
+      - id: s
+        env:
+          WIF: ${{ secrets.GCP_WIF_PROVIDER }}
+          SA: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          PROJ: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          if [ -z "$WIF" ] || [ -z "$SA" ] || [ -z "$PROJ" ]; then
+            echo "::warning::GCP secrets not set — skipping deploy. See RUNBOOK.md §D."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: check
+    if: needs.check.outputs.ok == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "${{ inputs.service }}" \
+            --source . \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --region "${{ inputs.region }}" \
+            --allow-unauthenticated \
+            --update-secrets DATABASE_URL=DATABASE_URL:latest \
+            --min-instances 0 \
+            --quiet
