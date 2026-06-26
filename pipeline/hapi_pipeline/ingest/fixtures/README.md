@@ -1,18 +1,26 @@
 # Vendored connector fixtures
 
-## ⚠️ These are representative sample payloads, not authoritative pulls
+## What these are
 
-This environment's network policy blocks the live source domains
-(`statcan.gc.ca`, `data.novascotia.ca`, `cihi.ca`), so these fixtures are
-**representative sample payloads in the exact wire format each real source
-returns**. They exist so the Data Hub runs end-to-end offline and the
-lineage/idempotency behaviour is fully verifiable.
+Vendored payloads in the exact wire format each source returns, so the Data Hub
+runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
 
-**Do not treat the numbers here as official statistics.** They are realistic but
-illustrative. Provenance is recorded explicitly: every observation loaded from a
-fixture gets `dataset_version.source_version = 'fixture:<filename>'`, so fixture
-data is never confused with a live retrieval in the database, the `hapi
-observations` output, or the web `/data` page.
+- **`statcan_population_65plus.csv` — real data.** Authentic Table 17-10-0005
+  values captured from a live `--live` run on 2026-06 (Canada + Nova Scotia, 65+,
+  2019–2025).
+- **`ns_accessing_primary_care.json` — real values.** The actual provincial
+  monthly Community-Pharmacy-PCC visit totals from the live SODA pull (2026-06).
+  The live connector reads the full per-zone rows; here the per-zone rows are
+  collapsed to one provincial-total row per month, which `parse()` sums to the
+  same totals.
+- **`cihi_home_care_clients_65plus.csv` — representative sample, NOT official.**
+  CIHI has no open API (manual portal download / controlled access), so these
+  numbers are illustrative pending a manual refresh. Treat as sample data.
+
+Provenance is always explicit: anything loaded from a fixture gets
+`dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
+values are distinguishable from a live retrieval in the DB, `hapi observations`,
+and the web `/data` page (where a live run instead shows `WDS:` / `SODA:`).
 
 ## Refreshing with real data
 
