@@ -126,6 +126,38 @@ def _cmd_observations(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_policies_seed(_args: argparse.Namespace) -> int:
+    from .db import connect
+    from .policies.loader import load_policies
+
+    with connect() as conn:
+        r = load_policies(conn)
+    print(f"✓ policies: +{r.inserted} inserted, {r.updated} updated, {r.links} indicator link(s)")
+    if r.missing_indicators:
+        print(f"  · referenced indicators not yet in DB (skipped): {', '.join(r.missing_indicators)}")
+    return 0
+
+
+def _cmd_policies_summarize(args: argparse.Namespace) -> int:
+    from .ai.summarize import summarize_policies
+    from .db import connect
+
+    with connect() as conn:
+        n = summarize_policies(conn, model=args.model, limit=args.limit)
+    print(f"✓ summarized {n} policy(ies)")
+    return 0
+
+
+def _cmd_score(_args: argparse.Namespace) -> int:
+    from .db import connect
+    from .indicators.engine import compute_hapi
+
+    with connect() as conn:
+        n = compute_hapi(conn)
+    print(f"✓ HAPI: wrote {n} score row(s) (method_version v1)")
+    return 0
+
+
 def _cmd_inspect(args: argparse.Namespace) -> int:
     from .ingest.registry import all_connectors, get_connector
 
@@ -162,6 +194,17 @@ def main(argv: list[str] | None = None) -> int:
     p_ins = sub.add_parser("inspect", help="dump the real upstream schema (needs network)")
     p_ins.add_argument("--source", help="inspect only this connector")
     p_ins.set_defaults(func=_cmd_inspect)
+
+    p_pol = sub.add_parser("policies", help="Policy Library: seed / summarize")
+    pol_sub = p_pol.add_subparsers(dest="pol_cmd", required=True)
+    pol_sub.add_parser("seed", help="load the curated policy seed").set_defaults(
+        func=_cmd_policies_seed)
+    p_sum = pol_sub.add_parser("summarize", help="AI summaries (needs ANTHROPIC_API_KEY)")
+    p_sum.add_argument("--model", help="Claude model id (default: HAPI_SUMMARY_MODEL or opus)")
+    p_sum.add_argument("--limit", type=int, default=None)
+    p_sum.set_defaults(func=_cmd_policies_summarize)
+
+    sub.add_parser("score", help="compute HAPI v1 scores").set_defaults(func=_cmd_score)
 
     args = parser.parse_args(argv)
     return args.func(args)

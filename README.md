@@ -4,7 +4,7 @@
 
 > Part of the **Healthy Aging Intelligence Lab (HAIL)** — using AI, data science, and policy analysis to help Canada build a fairer, more efficient, and more sustainable system of support for an aging population.
 
-> **Status: Phase 2 — Data Hub MVP.** On top of the Phase 1 scaffold (monorepo · `docker-compose` Postgres · [data model](docs/03-data-model.md) migrations · seeded jurisdiction tree), the **Data Hub** now ingests Care-Access-first data through real connectors (StatCan WDS · NS Open Data / Socrata · CIHI/IRRS) with full lineage: every value traces back through an immutable `Observation → DatasetVersion → DataSource`, re-ingesting unchanged data is a no-op, and the web `/data` page surfaces it. The HAPI indicator engine is next — see [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
+> **Status: Phase 3 — Policy Library + HAPI v1.** On top of the Data Hub (Phase 2), the platform now has a **Policy Library** (curated NS + Federal aging policies, lifecycle-tracked, linked to outcome indicators, AI-summarizable) and the **Healthy Aging Policy Index (HAPI v1)** — a versioned methodology that normalizes the Care-Access data (per-capita against the StatCan denominator) into auditable 0–100 domain + composite scores for Canada and Nova Scotia over time. The web app surfaces all of it (`/policies`, `/hapi`, `/data`); every HAPI score traces to its raw inputs. See [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
 >
 > ⚠️ This environment can't reach the live source domains, so connectors run against **vendored sample fixtures** by default (realistic but not official statistics; provenance recorded as `fixture:…`). Run `hapi ingest --live` where the network allows.
 
