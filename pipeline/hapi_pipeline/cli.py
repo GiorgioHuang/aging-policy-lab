@@ -40,6 +40,40 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     from .loader import ingest
 
     connectors = [get_connector(args.source)] if args.source else all_connectors()
+
+    # Dry run: fetch + parse + validate and print a sample, but touch no DB and
+    # do not overwrite fixtures. Ideal for confirming a connector against the
+    # real upstream (`--live --dry-run`) before loading.
+    if args.dry_run:
+        from .transform.quality import run_quality_checks
+
+        rc = 0
+        for c in connectors:
+            tag = "live" if args.live else "fixture"
+            try:
+                try:
+                    payload = c.extract(live=args.live, capture=False)
+                except NotImplementedError:
+                    payload = c.extract(live=False, capture=False)  # no live path
+                    tag = "fixture"
+                records = c.parse(payload)
+                kept, issues = run_quality_checks(c.indicators, records)
+            except Exception as exc:  # noqa: BLE001
+                print(f"✗ {c.name}: failed — {exc}", file=sys.stderr)
+                rc = 1
+                continue
+            print(
+                f"◇ {c.name} [{tag}] checksum {payload.checksum[:12]}… — "
+                f"parsed {len(records)}, would load {len(kept)}"
+            )
+            for r in kept[:3]:
+                val = "—" if r.value is None else f"{r.value:,.1f}"
+                print(f"    e.g. {r.indicator_code} {r.jurisdiction_code} "
+                      f"{r.period_start[:4]} = {val} [{r.quality_flag}]")
+            for issue in issues:
+                print(f"    ⚠ {issue}")
+        return rc
+
     rc = 0
     with connect() as conn:
         for c in connectors:
@@ -103,6 +137,8 @@ def main(argv: list[str] | None = None) -> int:
     p_ing.add_argument("--source", help="run only this connector (e.g. statcan_wds)")
     p_ing.add_argument("--live", action="store_true",
                        help="fetch from the real upstream and refresh fixtures")
+    p_ing.add_argument("--dry-run", action="store_true",
+                       help="fetch + parse + validate and print a sample; no DB writes")
     p_ing.set_defaults(func=_cmd_ingest)
 
     p_obs = sub.add_parser("observations", help="print loaded values with lineage")

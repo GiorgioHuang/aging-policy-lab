@@ -35,11 +35,15 @@ is a **no-op**; a changed payload creates a *new* version and *new* rows while
 old values are retained (docs/05 §3-4).
 
 ```bash
-python -m hapi_pipeline.cli ingest            # all connectors (idempotent)
+python -m hapi_pipeline.cli ingest             # all connectors (idempotent)
 python -m hapi_pipeline.cli ingest --source statcan_wds
-python -m hapi_pipeline.cli ingest --live     # fetch real upstreams + refresh fixtures
-python -m hapi_pipeline.cli observations      # print loaded values with full lineage
+python -m hapi_pipeline.cli ingest --live --dry-run  # fetch+parse+validate, no DB writes
+python -m hapi_pipeline.cli ingest --live      # fetch real upstreams + refresh fixtures
+python -m hapi_pipeline.cli observations       # print loaded values with full lineage
 ```
+
+To confirm the connectors against the **real** sources and then automate
+ingestion (GitHub Actions + managed Postgres), follow [`../RUNBOOK.md`](../RUNBOOK.md).
 
 > **Fixtures vs live.** Default runs read vendored sample payloads under
 > `ingest/fixtures/` (this environment can't reach the live source domains), so

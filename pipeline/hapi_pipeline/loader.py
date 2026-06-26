@@ -141,8 +141,16 @@ def _insert_observations(
 
 
 def ingest(conn, connector: Connector, *, live: bool = False) -> IngestResult:
-    """Run one connector end-to-end: extract -> validate -> load (idempotent)."""
-    payload = connector.extract(live=live)
+    """Run one connector end-to-end: extract -> validate -> load (idempotent).
+
+    A connector with no live path (e.g. CIHI, a manual portal download) falls
+    back to its vendored fixture even when live=True, so a `--live` run still
+    loads every source.
+    """
+    try:
+        payload = connector.extract(live=live)
+    except NotImplementedError:
+        payload = connector.extract(live=False)
     records = connector.parse(payload)
     kept, issues = run_quality_checks(connector.indicators, records)
 
