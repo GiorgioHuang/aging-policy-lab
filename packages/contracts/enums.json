@@ -1,0 +1,25 @@
+{
+  "$comment": "Language-neutral source of truth for the enums in db/migrations/0001_init.sql and docs/03. TypeScript (index.ts) and Python (pipeline) both read this file so the two layers never drift.",
+  "jurisdiction_level": ["country", "federal", "province", "region", "municipality"],
+  "policy_lifecycle": ["announced", "funded", "in_effect", "amended", "retired"],
+  "indicator_domain": [
+    "health",
+    "independence",
+    "social_participation",
+    "financial_security",
+    "care_access",
+    "digital_inclusion"
+  ],
+  "indicator_direction": ["higher_is_better", "lower_is_better"],
+  "datasource_access_method": ["api", "csv", "portal_download", "web_scrape"],
+  "observation_quality_flag": ["ok", "estimated", "suppressed", "provisional"],
+  "hapi_score_domain": [
+    "health",
+    "independence",
+    "social_participation",
+    "financial_security",
+    "care_access",
+    "digital_inclusion",
+    "overall"
+  ]
+}

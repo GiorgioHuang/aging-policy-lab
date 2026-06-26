@@ -1,0 +1,40 @@
+# Local development services for the Healthy Aging Policy Observatory.
+# Phase 1: just PostgreSQL. See docs/02-architecture.md §4.
+#
+#   cp .env.example .env       # then: docker compose up -d db
+#   npm run db:migrate         # apply schema + seed the jurisdiction tree
+#
+services:
+  db:
+    image: postgres:16
+    container_name: hapi_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hapi_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-hapi}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - hapi_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hapi} -d ${POSTGRES_DB:-hapi}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional: a DB admin UI. Start with: docker compose --profile admin up -d
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hapi_pgadmin
+    profiles: ["admin"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hapi.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  hapi_pgdata:
