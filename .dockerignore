@@ -1,0 +1,29 @@
+# Keep the build context small and never ship secrets.
+**/node_modules
+**/.next
+**/out
+**/dist
+**/build
+
+# Secrets / env
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Python pipeline (not part of the web image)
+pipeline/
+**/__pycache__
+**/.venv
+
+# VCS / CI / docs / local
+.git
+.github
+docs/
+*.md
+**/*.md
+db/
+docker-compose.yml
+**/.DS_Store
+**/*.log
+**/*.tsbuildinfo
