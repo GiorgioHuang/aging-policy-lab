@@ -7,12 +7,7 @@ name: Inspect sources
 # delete once the connectors are confirmed.
 
 on:
-  workflow_dispatch: {}
-  push:
-    branches: [claude/elegant-cannon-x8uzep]
-    paths:
-      - "pipeline/hapi_pipeline/ingest/**"
-      - ".github/workflows/inspect.yml"
+  workflow_dispatch: {} # run on demand from the Actions tab
 
 jobs:
   inspect:

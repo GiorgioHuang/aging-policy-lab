@@ -1,0 +1,11 @@
+[
+  {"zone": "Central", "type": "Community Pharmacy PCCs", "date": "2023-11-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "3120"},
+  {"zone": "Eastern", "type": "Community Pharmacy PCCs", "date": "2023-11-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "1450"},
+  {"zone": "Northern", "type": "Community Pharmacy PCCs", "date": "2023-11-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "980"},
+  {"zone": "Western", "type": "Community Pharmacy PCCs", "date": "2023-11-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "2918"},
+  {"zone": "Central", "type": "Community Pharmacy PCCs", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "3460"},
+  {"zone": "Eastern", "type": "Community Pharmacy PCCs", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "1610"},
+  {"zone": "Northern", "type": "Community Pharmacy PCCs", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "1075"},
+  {"zone": "Western", "type": "Community Pharmacy PCCs", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed at Community Pharmacy Primary Care Clinics", "actual": "3210"},
+  {"zone": "Western", "type": "UCC", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed at Urgent Care Centres", "actual": "567"}
+]
