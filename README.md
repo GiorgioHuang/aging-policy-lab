@@ -4,7 +4,9 @@
 
 > Part of the **Healthy Aging Intelligence Lab (HAIL)** — using AI, data science, and policy analysis to help Canada build a fairer, more efficient, and more sustainable system of support for an aging population.
 
-> **Status: Phase 1 — scaffold + schema.** The design whitepaper is in [`docs/`](docs/), and the platform scaffold is now standing: a monorepo (`apps/web` Next.js · `pipeline` Python · `db` migrations · `packages/contracts`), a `docker-compose` Postgres, the [data model](docs/03-data-model.md) implemented as migrations, and the seeded jurisdiction tree read by a minimal web app. Data ingestion and the HAPI engine arrive next — see [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
+> **Status: Phase 2 — Data Hub MVP.** On top of the Phase 1 scaffold (monorepo · `docker-compose` Postgres · [data model](docs/03-data-model.md) migrations · seeded jurisdiction tree), the **Data Hub** now ingests Care-Access-first data through real connectors (StatCan WDS · NS Open Data / Socrata · CIHI/IRRS) with full lineage: every value traces back through an immutable `Observation → DatasetVersion → DataSource`, re-ingesting unchanged data is a no-op, and the web `/data` page surfaces it. The HAPI indicator engine is next — see [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
+>
+> ⚠️ This environment can't reach the live source domains, so connectors run against **vendored sample fixtures** by default (realistic but not official statistics; provenance recorded as `fixture:…`). Run `hapi ingest --live` where the network allows.
 
 ---
 
@@ -90,9 +92,14 @@ docker compose up -d db                 # local Postgres
 npm run db:migrate -- --seed            # apply schema + seed Canada → Federal / NS
                                          # (or: bash db/migrate.sh --seed)
 
+cd pipeline && pip install -r requirements.txt && \
+  python -m hapi_pipeline.cli ingest && \
+  python -m hapi_pipeline.cli observations   # load Data Hub + show lineage
+cd ..
+
 npm install
 echo "DATABASE_URL=postgresql://hapi:hapi_dev_password@localhost:5432/hapi" > apps/web/.env.local
-npm run dev                              # http://localhost:3000 — renders the jurisdiction tree
+npm run dev                              # http://localhost:3000 — tree + /data lineage page
 ```
 
 Per-area setup: [`db/README.md`](db/README.md), [`apps/web/README.md`](apps/web/README.md),
@@ -101,7 +108,7 @@ Per-area setup: [`db/README.md`](db/README.md), [`apps/web/README.md`](apps/web/
 ## Scope of v1
 
 - **Geography:** Nova Scotia + Federal (a replicable template; pan-Canadian expansion later).
-- **Now live:** the design whitepaper plus the Phase 1 scaffold (monorepo, schema, seed, web read). Data ingestion and HAPI scoring come in Phases 2–3 ([`docs/11`](docs/11-implementation-roadmap.md)).
+- **Now live:** the design whitepaper, the Phase 1 scaffold (monorepo, schema, seed, web read), and the Phase 2 Data Hub (lineage-tracked ingestion + `/data` view). HAPI scoring comes in Phase 3 ([`docs/11`](docs/11-implementation-roadmap.md)).
 
 ## License
 

@@ -1,0 +1,34 @@
+[
+  {
+    "status": "SUCCESS",
+    "object": {
+      "responseStatusCode": 0,
+      "productId": 17100005,
+      "vectorId": 1,
+      "coordinate": "1.1.1.0.0.0.0.0.0.0",
+      "vectorDataPoint": [
+        {"refPer": "2019-01-01", "value": 6592611, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2020-01-01", "value": 6835866, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2021-01-01", "value": 7021430, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2022-01-01", "value": 7330605, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2023-01-01", "value": 7592072, "decimals": 0, "symbolCode": 0, "statusCode": 0}
+      ]
+    }
+  },
+  {
+    "status": "SUCCESS",
+    "object": {
+      "responseStatusCode": 0,
+      "productId": 17100005,
+      "vectorId": 2,
+      "coordinate": "1.12.1.0.0.0.0.0.0.0",
+      "vectorDataPoint": [
+        {"refPer": "2019-01-01", "value": 199318, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2020-01-01", "value": 204846, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2021-01-01", "value": 211827, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2022-01-01", "value": 221512, "decimals": 0, "symbolCode": 0, "statusCode": 0},
+        {"refPer": "2023-01-01", "value": 230472, "decimals": 0, "symbolCode": 0, "statusCode": 0}
+      ]
+    }
+  }
+]

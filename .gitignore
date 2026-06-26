@@ -25,6 +25,7 @@ apps/web/.next/
 apps/web/out/
 apps/web/build/
 .vercel
+*.tsbuildinfo
 
 # Build output
 dist/

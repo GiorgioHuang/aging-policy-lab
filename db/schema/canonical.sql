@@ -30,7 +30,8 @@ CREATE TYPE public.indicator_domain AS ENUM (
     'social_participation',
     'financial_security',
     'care_access',
-    'digital_inclusion'
+    'digital_inclusion',
+    'demography'
 );
 CREATE TYPE public.jurisdiction_level AS ENUM (
     'country',
@@ -177,6 +178,34 @@ ALTER TABLE public.observation ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY 
     NO MAXVALUE
     CACHE 1
 );
+CREATE VIEW public.observation_lineage AS
+ SELECT o.id AS observation_id,
+    i.code AS indicator_code,
+    i.domain AS indicator_domain,
+    i.name AS indicator_name,
+    i.unit,
+    j.code AS jurisdiction_code,
+    j.name AS jurisdiction_name,
+    lower(o.period) AS period_start,
+    upper(o.period) AS period_end,
+    o.value,
+    o.value_normalized,
+    o.quality_flag,
+    dv.id AS dataset_version_id,
+    dv.retrieved_at,
+    dv.source_version,
+    dv.checksum,
+    ds.id AS datasource_id,
+    ds.name AS datasource_name,
+    ds.publisher,
+    ds.licence,
+    ds.url AS source_url
+   FROM ((((public.observation o
+     JOIN public.indicator i ON ((i.id = o.indicator_id)))
+     JOIN public.jurisdiction j ON ((j.id = o.jurisdiction_id)))
+     JOIN public.dataset_version dv ON ((dv.id = o.dataset_version_id)))
+     JOIN public.datasource ds ON ((ds.id = dv.datasource_id)));
+COMMENT ON VIEW public.observation_lineage IS 'Forward traceability: every observation value joined to its dataset version, source, indicator, and jurisdiction (docs/05 §4).';
 CREATE TABLE public.policy (
     id bigint NOT NULL,
     jurisdiction_id bigint NOT NULL,
