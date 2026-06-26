@@ -88,4 +88,58 @@ time: Actions → "Data Hub ingest" → **Run workflow**.
 
 ### 4. (Optional) point the web app at the same managed Postgres
 Set `DATABASE_URL` wherever the Next.js app is hosted and it will read the same
-data. Full web hosting is deferred to a later phase (docs/11 Phase 5).
+data — see §D.
+
+---
+
+## D — Deploy the web app to Google Cloud Run
+
+The web tier is stateless (it only reads Postgres), so it fits Cloud Run's
+scale-to-zero model. The repo ships a standalone [`Dockerfile`](Dockerfile);
+Cloud Run reads `DATABASE_URL` from Secret Manager and connects to Neon over TLS.
+
+### 1. One-time GCP setup
+```bash
+gcloud config set project <PROJECT_ID>
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
+  artifactregistry.googleapis.com secretmanager.googleapis.com
+
+# store the Neon connection string (use the POOLED string for serverless)
+printf '%s' 'postgresql://<user>:<pwd>@<ep>-pooler.<region>.aws.neon.tech/<db>?sslmode=require' \
+  | gcloud secrets create DATABASE_URL --data-file=-
+```
+
+### 2. Deploy (Cloud Build builds the Dockerfile, then deploys)
+```bash
+gcloud run deploy hapi-web \
+  --source . \
+  --region northamerica-northeast1 \
+  --allow-unauthenticated \
+  --update-secrets DATABASE_URL=DATABASE_URL:latest \
+  --min-instances 0
+```
+`northamerica-northeast1` (Montreal) is closest to NS. The first deploy prints the
+service URL — open `<url>/data`.
+
+### 3. Grant the runtime service account access to the secret
+If the deploy reports it can't access the secret, bind it (default runtime SA shown):
+```bash
+PROJ_NUM=$(gcloud projects describe <PROJECT_ID> --format='value(projectNumber)')
+gcloud secrets add-iam-policy-binding DATABASE_URL \
+  --member="serviceAccount:${PROJ_NUM}-compute@developer.gserviceaccount.com" \
+  --role=roles/secretmanager.secretAccessor
+```
+
+### 4. (Optional) CI/CD
+[`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml) deploys on
+manual dispatch using Workload Identity Federation. Configure these repo secrets
+first (and grant the deploy service account `run.admin`, `iam.serviceAccountUser`,
+`cloudbuild.builds.editor`, `artifactregistry.writer`):
+`GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`, `GCP_SERVICE_ACCOUNT`.
+
+### Notes
+- Use Neon's **pooled** endpoint (`...-pooler...`) — Cloud Run can spin up many
+  instances and the pooler avoids exhausting Postgres connections.
+- The app binds `0.0.0.0:$PORT` (Cloud Run sets `PORT=8080`); the image already
+  handles this.
+- The container ships no secrets; `DATABASE_URL` is injected at runtime only.

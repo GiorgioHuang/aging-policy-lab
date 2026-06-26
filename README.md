@@ -103,8 +103,16 @@ npm run dev                              # http://localhost:3000 — tree + /dat
 ```
 
 Per-area setup: [`db/README.md`](db/README.md), [`apps/web/README.md`](apps/web/README.md),
-[`pipeline/README.md`](pipeline/README.md). To pull **real** data (live connectors) and
-automate ingestion, see [`RUNBOOK.md`](RUNBOOK.md).
+[`pipeline/README.md`](pipeline/README.md). To pull **real** data (live connectors),
+automate ingestion, and **deploy the web app to Google Cloud Run**, see
+[`RUNBOOK.md`](RUNBOOK.md) (§B live data · §C scheduled ingest · §D Cloud Run).
+
+Deploy the web tier in one command (Cloud Build builds the [`Dockerfile`](Dockerfile)):
+
+```bash
+gcloud run deploy hapi-web --source . --region northamerica-northeast1 \
+  --allow-unauthenticated --update-secrets DATABASE_URL=DATABASE_URL:latest
+```
 
 ## Scope of v1
 
