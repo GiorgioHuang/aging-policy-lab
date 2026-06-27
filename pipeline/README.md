@@ -18,7 +18,10 @@ pipeline/hapi_pipeline/
 ├── ingest/         one connector per data source                                (Phase 2)
 │   ├── base.py       Connector ABC + specs (DataSource/Indicator/Observation)
 │   ├── registry.py   list of connectors
+│   ├── _statcan.py   shared WDS full-table CSV fetch/filter/inspect helpers
 │   ├── statcan_wds.py · ns_open_data.py · cihi_irrs.py
+│   ├── statcan_low_income.py     financial_security (StatCan 11-10-0135)
+│   ├── statcan_internet_use.py   digital_inclusion  (StatCan 22-10-0135)
 │   └── fixtures/     vendored sample payloads (see fixtures/README.md)
 ├── transform/      cleaning, normalization, quality checks                       (Phase 2)
 ├── indicators/     HAPI computation                                             (Phase 3)
@@ -59,7 +62,12 @@ python -m hapi_pipeline.cli score               # compute HAPI v1 domain + compo
   no-op without `ANTHROPIC_API_KEY` (model via `HAPI_SUMMARY_MODEL`, default opus).
 - `indicators/hapi_v1.py` + `engine.py` — HAPI v1 methodology (per-capita
   normalization, weights, `method_version` v1) writing auditable `hapi_score` rows
-  (each carries the indicator codes, raw values, and normalized inputs).
+  (each carries the indicator codes, raw values, and normalized inputs). v1 now
+  spans **three data-backed domains** — Care Access (CIHI home care), Financial
+  Security (StatCan 11-10-0135 seniors' low-income rate), and Digital Inclusion
+  (StatCan 22-10-0135 seniors' internet use) — so `overall` is a real
+  multi-domain composite that blends whichever domains have data per
+  jurisdiction × year (recorded in each `overall` row's `inputs`).
 
 ## Analytics & AI assistant (Phase 4)
 
