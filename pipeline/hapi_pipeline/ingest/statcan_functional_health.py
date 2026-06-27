@@ -7,16 +7,18 @@ Canadian adults, 2015 to 2024"):
   * Functional health (Health Utilities Index Mark 3, eight attributes: vision,
     hearing, speech, cognition, dexterity, mobility, emotion, pain). "Very good to
     perfect functional health" = HUI3 score 0.89–1.00.
-  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age 65+, both sexes,
-    the percent statistic, "very good to perfect functional health".
+  * Schema CONFIRMED 2026-06 via `hapi inspect`: dimensions REF_DATE, GEO,
+    'Age group', 'Sex', 'Domains' (the functional-health category), 'Characteristics'
+    (the statistic), …, VALUE, STATUS. National GEO is "Canada (excluding territories)".
+  * The table has NO 65+ aggregate — age bands are "65 to 74 years" and "75 years
+    and over". v1 uses the **65–74** band (younger seniors) as the Independence
+    indicator; a 75+ companion can be added later. Filtered to GEO ∈
+    {Canada(excl. terr.), Nova Scotia}, age "65 to 74 years", both sexes,
+    statistic "Percentage", domain "Very good to perfect functional health".
 
-HAPI Independence indicator for older adults: the share of seniors with very-good-
-to-perfect functional health — a summary of independent functioning.
-higher_is_better.
-
-TO CONFIRM on first --live run via `hapi inspect statcan_functional_health`: the
-exact age / sex / statistic / functional-health member labels. Matching is
-tolerant (case-insensitive substring); tighten here if inspection differs.
+HAPI Independence indicator for younger seniors: the share of those aged 65–74
+with very-good-to-perfect functional health — a summary of independent
+functioning. higher_is_better.
 """
 from __future__ import annotations
 
@@ -28,18 +30,24 @@ from .base import Connector, DataSourceSpec, IndicatorSpec, ObservationRecord, R
 
 PRODUCT_ID = "13100966"
 MIN_YEAR = 2015
-INDICATOR = "independence.functional_health_65plus"
+INDICATOR = "independence.functional_health_65_74"
 
 _DIM_HINTS = {
     "age": ("age",),
     "sex": ("sex", "gender"),
-    "functional": ("functional", "indicator", "characteristic"),
-    "statistic": ("statistic", "characteristic"),
+    "domain": ("domain", "functional"),
+    "statistic": ("characteristic", "statistic"),
 }
 
 
+def _is_age_65_74(member: str) -> bool:
+    """The '65 to 74 years' band (the table has no 65+ aggregate)."""
+    m = member.strip().lower()
+    return "65" in m and "74" in m
+
+
 def _is_very_good(member: str) -> bool:
-    """The 'very good to perfect functional health' category."""
+    """The 'Very good to perfect functional health' domain category."""
     m = member.strip().lower()
     if m == "":
         return True
@@ -48,7 +56,7 @@ def _is_very_good(member: str) -> bool:
 
 def _is_percent(stat: str) -> bool:
     s = stat.strip().lower()
-    return s == "percent" or "percent" in s or s == ""
+    return "percent" in s or s == ""  # matches "Percent" and "Percentage"
 
 
 class StatCanFunctionalHealthConnector(Connector):
@@ -71,12 +79,13 @@ class StatCanFunctionalHealthConnector(Connector):
         IndicatorSpec(
             code=INDICATOR,
             domain="independence",
-            name="Functional health (very good to perfect), population 65+",
-            definition="Share of persons aged 65+ with very-good-to-perfect functional "
-                       "health (Health Utilities Index Mark 3, 0.89–1.00).",
-            formula="StatCan Table 13-10-0966: age 65+, both sexes, percent, "
-                    "'very good to perfect functional health'.",
-            unit="% of persons 65+",
+            name="Functional health (very good to perfect), ages 65–74",
+            definition="Share of persons aged 65–74 with very-good-to-perfect functional "
+                       "health (Health Utilities Index Mark 3, 0.89–1.00). The source "
+                       "table has no 65+ aggregate; v1 uses the 65–74 band.",
+            formula="StatCan Table 13-10-0966: age '65 to 74 years', both sexes, "
+                    "percentage, domain 'Very good to perfect functional health'.",
+            unit="% of persons 65–74",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 20.0, "max": 65.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
@@ -95,11 +104,11 @@ class StatCanFunctionalHealthConnector(Connector):
         fields = reader.fieldnames or []
         f_age = sc.find_field(fields, "age")
         f_sex = sc.find_field(fields, "sex", "gender")
-        # The "functional health" category dimension (members like "very good to
-        # perfect functional health"); falls back to any non-statistic characteristic.
-        f_func = sc.find_field(fields, "functional", "indicator")
+        # 'Domains' carries the functional-health category; 'Characteristics' is the
+        # statistic (Number / Percentage / CI bounds).
+        f_dom = sc.find_field(fields, "domain", "functional")
         f_stat = next((f for f in fields
-                       if "characteristic" in f.lower() and f != f_func), "")
+                       if "characteristic" in f.lower() and f != f_dom), "")
         if not f_stat:
             f_stat = sc.find_field(fields, "statistic")
         out = io.StringIO()
@@ -108,13 +117,13 @@ class StatCanFunctionalHealthConnector(Connector):
         for row in reader:
             if sc.map_geo(sc.col(row, "GEO")) is None:
                 continue
-            if f_age and not sc.is_age_65plus(row.get(f_age, "")):
+            if f_age and not _is_age_65_74(row.get(f_age, "")):
                 continue
             if f_sex and not sc.is_total_gender(row.get(f_sex, "")):
                 continue
             if f_stat and not _is_percent(row.get(f_stat, "")):
                 continue
-            if f_func and not _is_very_good(row.get(f_func, "")):
+            if f_dom and not _is_very_good(row.get(f_dom, "")):
                 continue
             writer.writerow([sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])

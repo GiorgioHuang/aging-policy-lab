@@ -34,10 +34,11 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   Product id (13-10-0096) + schema confirmed via `hapi inspect`; bootstrap values
   are illustrative until the first `--live` run.
 - **`statcan_functional_health_65plus.csv` — representative sample, NOT official.**
-  Plausible functional-health (very good to perfect) values for 65+ (→
-  Independence), CA + NS, in the slim format
-  `statcan_functional_health._filter_csv()` emits. Product id (13-10-0966)
-  confirmed; bootstrap values illustrative until the first `--live` run.
+  Plausible functional-health (very good to perfect) values for ages 65–74 (→
+  Independence; the table has no 65+ aggregate), CA + NS, in the slim format
+  `statcan_functional_health._filter_csv()` emits. Product id (13-10-0966) +
+  schema confirmed via `hapi inspect`; bootstrap values illustrative until the
+  first `--live` run.
 
 Provenance is always explicit: anything loaded from a fixture gets
 `dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
@@ -104,8 +105,9 @@ downloading the latest table from
   is "Canada (excluding territories)"); filtered to 65+, both sexes, percent,
   sense of community belonging (strong).
 - **StatCan (Independence):** Table **13-10-0966** → productId **`13100966`**
-  ("Functional health", CCHS 2015/2019/2024…); filtered to 65+, both sexes,
-  percent, very good to perfect functional health (HUI Mark 3).
+  ("Functional health", CCHS 2015/2019/2024…; dims Age group / Sex / 'Domains' /
+  'Characteristics'); no 65+ aggregate, so filtered to **age 65–74**, both sexes,
+  percentage, domain "Very good to perfect functional health" (HUI Mark 3).
 
 All four shapes (population, NS primary care, low income, internet use) were
 verified end-to-end via `hapi inspect` + a live `--live` run on a networked
@@ -123,4 +125,4 @@ captured values, so offline runs reproduce the production numbers.
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
 | `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_cchs` | `social_participation.community_belonging_65plus` |
-| `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_functional_health` | `independence.functional_health_65plus` |
+| `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_functional_health` | `independence.functional_health_65_74` |
