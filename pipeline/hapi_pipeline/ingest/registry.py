@@ -10,6 +10,7 @@ from .statcan_functional_health import StatCanFunctionalHealthConnector
 from .statcan_internet_use import StatCanInternetUseConnector
 from .statcan_life_expectancy import StatCanLifeExpectancyConnector
 from .statcan_low_income import StatCanLowIncomeConnector
+from .statcan_ltc_employment import StatCanLTCEmploymentConnector
 from .statcan_wds import StatCanWDSConnector
 
 # CIHI home-care client counts (cihi_irrs) were retired: CIHI's HCRS/IRRS Quick
@@ -25,6 +26,7 @@ CONNECTORS: list[Connector] = [
     StatCanLifeExpectancyConnector(),
     StatCanCCHSConnector(),
     StatCanFunctionalHealthConnector(),
+    StatCanLTCEmploymentConnector(),
 ]
 
 

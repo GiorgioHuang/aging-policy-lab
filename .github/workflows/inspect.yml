@@ -29,4 +29,5 @@ jobs:
           python -m hapi_pipeline.cli inspect --source statcan_cchs
           python -m hapi_pipeline.cli inspect --source statcan_functional_health
           python -m hapi_pipeline.cli inspect --source ns_ltc_waitlist
+          python -m hapi_pipeline.cli inspect --source statcan_ltc_employment
         working-directory: pipeline

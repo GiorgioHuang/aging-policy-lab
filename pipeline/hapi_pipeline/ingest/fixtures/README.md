@@ -48,6 +48,14 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   `INDICATOR`-tagged format `statcan_functional_health._filter_csv()` emits. The
   65–74 rows are real captured values; the 75+ rows are representative until the
   next `--live` run. Product id (13-10-0966) + schema confirmed via `hapi inspect`.
+- **`statcan_ltc_employment.csv` — representative sample, NOT official.** Plausible
+  annual employee counts in nursing & residential care facilities (NAICS 623) for
+  CA + NS (→ a Care Access *supply/capacity* indicator), in the slim
+  `REF_DATE,GEO,VALUE,STATUS` format `statcan_ltc_employment._filter_csv()` emits.
+  Product id (14-10-0202, SEPH) and access path are confirmed; the NAICS-623 member
+  label and any "Type of employee" dimension are confirmed on a networked runner via
+  `hapi inspect` before the first `--live` run replaces these bootstrap values with
+  official numbers (and the provisional normalization range is tightened).
 
 Provenance is always explicit: anything loaded from a fixture gets
 `dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
@@ -66,6 +74,7 @@ hapi ingest --live --source statcan_internet_use     # getFullTableDownloadCSV(2
 hapi ingest --live --source statcan_life_expectancy  # getFullTableDownloadCSV(13100389), filtered
 hapi ingest --live --source statcan_cchs             # getFullTableDownloadCSV(13100096), filtered
 hapi ingest --live --source statcan_functional_health # getFullTableDownloadCSV(13100966), filtered
+hapi ingest --live --source statcan_ltc_employment   # getFullTableDownloadCSV(14100202), filtered
 ```
 
 The two StatCan additions share the WDS full-table mechanism but their dimension
@@ -78,6 +87,7 @@ hapi inspect statcan_internet_use
 hapi inspect statcan_life_expectancy
 hapi inspect statcan_cchs
 hapi inspect statcan_functional_health
+hapi inspect statcan_ltc_employment   # confirm the NAICS-623 label + employee-type dimension
 ```
 
 The `_filter_csv` matchers are intentionally tolerant (case-insensitive
@@ -119,6 +129,10 @@ Waitlist (`ns_ltc_waitlist`, Socrata `c39g-gsdd`) replaces them.
   'Characteristics'); no 65+ aggregate, so filtered to **both senior bands
   (65–74 and 75+)**, both sexes, percentage, domain "Very good to perfect
   functional health" (HUI Mark 3). HAPI averages the two bands within the domain.
+- **StatCan (Care Access — supply):** Table **14-10-0202** → productId **`14100202`**
+  ("Employment by industry, annual", from SEPH); filtered to NAICS **623 (nursing &
+  residential care facilities)**, all employees, GEO ∈ {Canada, Nova Scotia}. A
+  supply/capacity indicator: care workers per 1,000 pop 65+ (higher is better).
 
 All four shapes (population, NS primary care, low income, internet use) were
 verified end-to-end via `hapi inspect` + a live `--live` run on a networked
@@ -135,6 +149,7 @@ captured values, so offline runs reproduce the production numbers.
 | `cihi_caregiver_distress.csv` | CIHI indicator export, slimmed (manual) | `cihi_caregiver_distress` | `independence.caregiver_distress` |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
+| `statcan_ltc_employment.csv` | StatCan full-table CSV (slim, filtered) | `statcan_ltc_employment` | `care_access.ltc_workforce_per_1k_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
 | `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_cchs` | `social_participation.community_belonging_65plus`, `care_access.regular_provider_65plus` |
 | `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_functional_health` | `independence.functional_health_65_74`, `independence.functional_health_75plus` |

@@ -110,6 +110,22 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Supply/capacity view of Care Access: nursing & residential-care workforce
+        # (NAICS 623, SEPH) per 1,000 seniors. CA + NS, annual.
+        "code": "care_access.ltc_workforce_per_1k_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",  # more care workers per senior = better
+        "per_capita": {
+            "denominator": "demography.population_65plus",
+            "scale": 1000,
+            "unit": "workers per 1,000 pop 65+",
+        },
+        # PROVISIONAL range — tighten after the first --live run reveals the real
+        # 623-employee magnitudes (representative fixture for now).
+        "normalization": {"method": "min_max", "min": 20.0, "max": 100.0},
+        "weight": 1.0,
+    },
+    {
         "code": "financial_security.low_income_rate_65plus",
         "domain": "financial_security",
         "direction": "lower_is_better",  # a lower senior poverty rate scores higher

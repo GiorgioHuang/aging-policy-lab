@@ -27,6 +27,7 @@ pipeline/hapi_pipeline/
 │   ├── statcan_life_expectancy.py  health             (StatCan 13-10-0389)
 │   ├── statcan_cchs.py             social_participation + care_access (StatCan 13-10-0096)
 │   ├── statcan_functional_health.py independence       (StatCan 13-10-0966)
+│   ├── statcan_ltc_employment.py   care_access (LTC/residential-care workforce, StatCan 14-10-0202)
 │   └── fixtures/     vendored sample payloads (see fixtures/README.md)
 ├── transform/      cleaning, normalization, quality checks                       (Phase 2)
 ├── indicators/     HAPI computation                                             (Phase 3)
