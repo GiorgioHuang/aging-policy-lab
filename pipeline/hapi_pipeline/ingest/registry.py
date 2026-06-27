@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from .base import Connector
 from .cihi_caregiver_distress import CIHICaregiverDistressConnector
-from .cihi_irrs import CIHIIRRSConnector
+from .ns_ltc_waitlist import NSLTCWaitlistConnector
 from .ns_open_data import NSOpenDataConnector
 from .statcan_cchs import StatCanCCHSConnector
 from .statcan_functional_health import StatCanFunctionalHealthConnector
@@ -12,10 +12,13 @@ from .statcan_life_expectancy import StatCanLifeExpectancyConnector
 from .statcan_low_income import StatCanLowIncomeConnector
 from .statcan_wds import StatCanWDSConnector
 
+# CIHI home-care client counts (cihi_irrs) were retired: CIHI's HCRS/IRRS Quick
+# Stats exclude Nova Scotia entirely (NS does not submit), so they cannot back an
+# NS Care-Access indicator. The NS LTC Waitlist (Socrata, live) replaces it.
 CONNECTORS: list[Connector] = [
     StatCanWDSConnector(),
     NSOpenDataConnector(),
-    CIHIIRRSConnector(),
+    NSLTCWaitlistConnector(),
     CIHICaregiverDistressConnector(),
     StatCanLowIncomeConnector(),
     StatCanInternetUseConnector(),

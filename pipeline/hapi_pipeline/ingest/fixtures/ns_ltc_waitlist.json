@@ -1,0 +1,10 @@
+[
+  {"week_ending": "2022-03-31", "number_waiting": "1280"},
+  {"week_ending": "2022-09-30", "number_waiting": "1340"},
+  {"week_ending": "2023-03-31", "number_waiting": "1410"},
+  {"week_ending": "2023-09-30", "number_waiting": "1490"},
+  {"week_ending": "2024-03-31", "number_waiting": "1580"},
+  {"week_ending": "2024-09-30", "number_waiting": "1620"},
+  {"week_ending": "2025-03-31", "number_waiting": "1560"},
+  {"week_ending": "2025-09-30", "number_waiting": "1540"}
+]

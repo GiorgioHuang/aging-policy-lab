@@ -13,11 +13,11 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   The live connector reads the full per-zone rows; here the per-zone rows are
   collapsed to one provincial-total row per month, which `parse()` sums to the
   same totals.
-- **`cihi_home_care_clients_65plus.csv` — representative sample, NOT official.**
-  CIHI has no open API (manual portal download / controlled access), so these
-  numbers are illustrative pending a manual refresh (RUNBOOK.md §E). This series is
-  now a **complement** to Care Access — the live backbone is CCHS "has a regular
-  healthcare provider" (below) — so it no longer gates live/official coverage.
+- **`ns_ltc_waitlist.json` — representative sample, NOT official.** Plausible
+  weekly Nova Scotia long-term-care waitlist counts (→ Care Access), in the Socrata
+  JSON shape `ns_ltc_waitlist` returns. Replaced by the live `--live` pull (NS Open
+  Data resource `c39g-gsdd`). This **replaces** the retired CIHI home-care client
+  count, which had no Nova Scotia data (NS does not submit to CIHI's HCRS/IRRS).
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -83,11 +83,11 @@ hapi inspect statcan_functional_health
 The `_filter_csv` matchers are intentionally tolerant (case-insensitive
 substring); tighten them in the connector if inspection shows different wording.
 
-`cihi_irrs` has no `--live` path: CIHI publishes data tables as **manual portal
-downloads** (record-level data is controlled access), so refreshing means
-downloading the latest table from
-<https://www.cihi.ca/en/access-data-and-reports/data-tables> and replacing
-`cihi_home_care_clients_65plus.csv`.
+`cihi_caregiver_distress` has no `--live` path (CIHI has no open API): it holds
+**real** captured values; refresh via RUNBOOK.md §E. CIHI's home-care client
+counts were **retired** — their Quick Stats exclude Nova Scotia entirely (NS does
+not submit), so they can't back an NS Care-Access indicator; the live NS LTC
+Waitlist (`ns_ltc_waitlist`, Socrata `c39g-gsdd`) replaces them.
 
 ## Source identifiers (confirmed 2026-06 via `hapi inspect` against the live sources)
 
@@ -131,7 +131,7 @@ captured values, so offline runs reproduce the production numbers.
 |------|---------------|-----------|-----------|
 | `statcan_population_65plus.csv` | StatCan full-table CSV (filtered) | `statcan_wds` | `demography.population_65plus` |
 | `ns_accessing_primary_care.json` | Socrata SODA JSON (zone/type/date/measure/actual) | `ns_open_data` | `care_access.pharmacy_primary_care_visits` |
-| `cihi_home_care_clients_65plus.csv` | CIHI data-table CSV (manual; incl. an `x` suppression) | `cihi_irrs` | `care_access.home_care_clients_65plus` (complement) |
+| `ns_ltc_waitlist.json` | NS Open Data Socrata JSON (`c39g-gsdd`) | `ns_ltc_waitlist` | `care_access.ltc_waitlist_ns` |
 | `cihi_caregiver_distress.csv` | CIHI indicator export, slimmed (manual) | `cihi_caregiver_distress` | `independence.caregiver_distress` |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |

@@ -91,18 +91,18 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
-        # Complementary CIHI home-care signal (manual refresh — no open API).
-        "code": "care_access.home_care_clients_65plus",
+        # Real, live NS continuing-care access signal (Socrata). Replaces the CIHI
+        # home-care count, which has no Nova Scotia data. NS-only (no federal row).
+        "code": "care_access.ltc_waitlist_ns",
         "domain": "care_access",
-        "direction": "higher_is_better",
-        # raw count -> rate per 1,000 population 65+ (uses the StatCan denominator)
+        "direction": "lower_is_better",  # fewer people waiting = better access
+        # count -> people waiting per 1,000 population 65+ (StatCan denominator)
         "per_capita": {
             "denominator": "demography.population_65plus",
             "scale": 1000,
-            "unit": "clients per 1,000 pop 65+",
+            "unit": "waiting per 1,000 pop 65+",
         },
-        # min-max against a documented reference range, then clamp to [0,100]
-        "normalization": {"method": "min_max", "min": 100.0, "max": 250.0},
+        "normalization": {"method": "min_max", "min": 2.0, "max": 12.0},
         "weight": 1.0,
     },
     {

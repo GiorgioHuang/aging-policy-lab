@@ -38,7 +38,8 @@ Per-source things to eyeball:
 |--------|---------|-------------------|
 | `statcan_wds` | population 65+ for CA & CA-NS, ~6–7M / ~200–230k | check the gender label in Table 17-10-0005 (`Both sexes` vs `Total - gender`); both are accepted in `statcan_wds.py` |
 | `ns_open_data` | NS unmet-need % (single-digit to mid-teens) | the Socrata columns of `fac5-58sq` may have renamed; adjust the `_*_HINTS` in `ns_open_data.py` |
-| `cihi_irrs` | falls back to fixture | expected — refresh the CSV by hand from CIHI |
+| `ns_ltc_waitlist` | NS LTC waitlist count (hundreds–thousands) | confirm the date/count columns of `c39g-gsdd` via `hapi inspect ns_ltc_waitlist`; adjust the `_*_HINTS` in `ns_ltc_waitlist.py` |
+| `cihi_caregiver_distress` | falls back to fixture (real values) | expected — CIHI has no API; refresh by hand (RUNBOOK §E) |
 
 ### 2. Load for real (writes DB + refreshes the StatCan/NS fixtures with live data)
 ```bash
@@ -144,35 +145,28 @@ first (and grant the deploy service account `run.admin`, `iam.serviceAccountUser
   handles this.
 - The container ships no secrets; `DATABASE_URL` is injected at runtime only.
 
-## E — Refresh the CIHI home-care complement (manual)
+## E — CIHI sources (no open API)
 
-CIHI has **no open API**: home-care data (now the Integrated interRAI Reporting
-System, IRRS, after HCRS/HCRS-CA retired 2025-03) is published as **manual data
-tables** (Excel/CSV portal downloads); record-level data is controlled access.
-So `hapi ingest --live` cannot auto-fetch CIHI — the loader degrades to the
+CIHI has **no open API**: its data is published as **manual data tables**
+(Excel/CSV portal downloads); record-level data is controlled access. So
+`hapi ingest --live` cannot auto-fetch CIHI — the loader degrades to the
 vendored fixture and logs `live fetch failed; fell back to vendored fixture`.
 
-This source is a **complement**, not the backbone, of Care Access: the live,
-auto-refreshing Care-Access indicator is CCHS "has a regular healthcare provider"
-(`statcan_cchs`, StatCan 13-10-0096). The CIHI series adds a home-care
-*utilization* view on a manual cadence. To refresh it with official figures:
+> **CIHI home-care client counts were retired.** An earlier `cihi_irrs`
+> connector tried to back Care Access with CIHI home-care client counts, but
+> CIHI's Home Care Reporting System / Integrated interRAI Reporting System
+> (HCRS → IRRS) **excludes Nova Scotia entirely** — NS does not submit, so every
+> NS cell is blank and the "Total" is a partial aggregate, not a Canada total.
+> That can't feed an NS/Federal HAPI, so it was removed in favour of a **real**
+> Nova Scotia measure: the live **NS Long-Term Care Waitlist** (`ns_ltc_waitlist`,
+> NS Open Data Socrata `c39g-gsdd`, lower-is-better). The live, auto-refreshing
+> Care-Access backbone remains CCHS "has a regular healthcare provider"
+> (`statcan_cchs`, StatCan 13-10-0096); the NS LTC waitlist joins it as an
+> NS-specific access-pressure view. Confirm the NS waitlist schema on a networked
+> runner with `hapi inspect ns_ltc_waitlist`, then `hapi ingest --live --source
+> ns_ltc_waitlist` — it needs no manual refresh.
 
-1. Open CIHI's home-care data tables: <https://www.cihi.ca/en/topics/home-care/data-tables>
-   (or the IRRS/Quick Stats releases). Pick the table with **home care clients by
-   province and age group** (65+).
-2. Download the Excel/CSV and read off the count of home-care clients aged 65+
-   for **Canada** and **Nova Scotia**, by year.
-3. Replace `pipeline/hapi_pipeline/ingest/fixtures/cihi_home_care_clients_65plus.csv`
-   with those values, keeping the header `jurisdiction_code,year,value` (use the
-   real suppression marker, e.g. `x`, where CIHI suppresses a cell). Record the
-   table edition/date in the commit message.
-4. Re-run scoring (locally `hapi score`, or dispatch the ingest workflow): the new
-   checksum creates a fresh immutable `DatasetVersion` and the Care Access domain
-   picks up the official numbers; the old version is retained for lineage.
-
-Until step 3 is done, the fixture holds clearly-labelled **representative** values
-(see `ingest/fixtures/README.md`); they do not affect the live CCHS-based
-Care-Access backbone.
+The one remaining CIHI source is **Caregiver Distress** (Independence), below.
 
 ### Refreshing the CIHI Caregiver Distress indicator (Independence)
 

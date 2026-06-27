@@ -17,7 +17,7 @@ DRAFT_SYSTEM = (
     "You draft cited literature-review starting points for a Canadian healthy-aging "
     "policy research platform. STRICT RULES: (1) Every factual claim must end with a "
     "citation tag in square brackets referencing an item id from the EVIDENCE PACK "
-    "(e.g. [P3], [L2], [F1], [I:care_access.home_care_clients_65plus]). (2) Use ONLY "
+    "(e.g. [P3], [L2], [F1], [I:care_access.regular_provider_65plus]). (2) Use ONLY "
     "the pack — never invent sources, numbers, or references. (3) When you mention an "
     "analytic finding, state its tier exactly as given (Association or Causal(ITS)) and "
     "NEVER upgrade an association to a causal claim. (4) This is a draft + evidence for "

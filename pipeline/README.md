@@ -19,7 +19,8 @@ pipeline/hapi_pipeline/
 │   ├── base.py       Connector ABC + specs (DataSource/Indicator/Observation)
 │   ├── registry.py   list of connectors
 │   ├── _statcan.py   shared WDS full-table CSV fetch/filter/inspect helpers
-│   ├── statcan_wds.py · ns_open_data.py · cihi_irrs.py
+│   ├── statcan_wds.py · ns_open_data.py
+│   ├── ns_ltc_waitlist.py          care_access (NS LTC Waitlist, Socrata c39g-gsdd)
 │   ├── cihi_caregiver_distress.py  independence (CIHI Caregiver Distress, manual)
 │   ├── statcan_low_income.py       financial_security (StatCan 11-10-0135)
 │   ├── statcan_internet_use.py     digital_inclusion  (StatCan 22-10-0135)
@@ -97,12 +98,13 @@ python -m hapi_pipeline.cli assistant "NS dementia policy"   # evidence pack (+ 
 - **Care Access / CIHI data sourcing.** CIHI has no open API (manual portal
   downloads / controlled access), so the live, auto-refreshing Care-Access
   indicator is CCHS "has a regular healthcare provider" (`statcan_cchs`,
-  13-10-0096). CIHI series are manually-refreshed *complements* (RUNBOOK.md §E),
-  falling back to their (real, captured) fixtures on `--live`: `cihi_irrs`
-  (home-care clients → Care Access) and `cihi_caregiver_distress` (caregiver
-  distress of long-stay home-care clients → Independence; National → CA, NS → CA-NS).
-  Independence therefore averages functional health (65–74, 75+) with caregiver
-  distress; Care Access averages the live provider rate with CIHI home-care use.
+  13-10-0096), joined by the **live NS Long-Term Care Waitlist** (`ns_ltc_waitlist`,
+  Socrata `c39g-gsdd`, lower-is-better, NS-only). CIHI's home-care client counts
+  were **retired** — their Quick Stats exclude Nova Scotia (NS doesn't submit) —
+  in favour of that real NS measure. The remaining CIHI source,
+  `cihi_caregiver_distress` (Independence; National → CA, NS → CA-NS), has **real**
+  captured values and is manually refreshed (RUNBOOK.md §E, no CIHI API).
+  Independence averages functional health (65–74, 75+) with caregiver distress.
 - `literature/` — starter literature KB seed + loader.
 - `ai/assistant.py` — topic → grounded **evidence pack** (policies + literature +
   findings + indicators, each with a citation id) → Claude **cited draft** where

@@ -13,7 +13,7 @@
     "kpis": ["increase dementia awareness", "expand surveillance data", "support caregivers"],
     "lifecycle_status": "in_effect",
     "theme": ["dementia", "health"],
-    "indicators": ["care_access.home_care_clients_65plus"]
+    "indicators": ["care_access.regular_provider_65plus"]
   },
   {
     "slug": "ca-fed-new-horizons-seniors",
@@ -93,7 +93,7 @@
     "kpis": ["increase home care clients", "reduce home care wait times"],
     "lifecycle_status": "in_effect",
     "theme": ["home care", "care access"],
-    "indicators": ["care_access.home_care_clients_65plus"]
+    "indicators": ["care_access.ltc_waitlist_ns"]
   },
   {
     "slug": "ns-ltc-build-renovate-replace",
@@ -109,7 +109,7 @@
     "kpis": ["add long-term care beds", "increase single rooms", "increase direct care hours"],
     "lifecycle_status": "funded",
     "theme": ["LTC", "care access"],
-    "indicators": ["care_access.home_care_clients_65plus"]
+    "indicators": ["care_access.ltc_waitlist_ns"]
   },
   {
     "slug": "ns-cca-workforce-2022",
@@ -125,6 +125,6 @@
     "kpis": ["graduate more CCAs", "reduce care staff vacancy rate"],
     "lifecycle_status": "in_effect",
     "theme": ["LTC", "home care", "care access"],
-    "indicators": ["care_access.home_care_clients_65plus"]
+    "indicators": ["care_access.ltc_waitlist_ns"]
   }
 ]
