@@ -72,7 +72,8 @@ python -m hapi_pipeline.cli weights             # weighting schemes + composite 
   spans **all six HAPI domains** — Health (StatCan 13-10-0389 life expectancy at
   65), Independence (CCHS 13-10-0966 functional health), Social Participation
   (CCHS 13-10-0096 community belonging), Financial Security (StatCan 11-10-0135
-  seniors' low-income rate), Care Access (CIHI home care), and Digital Inclusion
+  seniors' low-income rate), Care Access (CCHS regular healthcare provider + live
+  NS long-term-care waitlist), and Digital Inclusion
   (StatCan 22-10-0135 seniors' internet use) — so `overall` is a real six-domain
   composite that blends whichever domains have data per jurisdiction × year
   (recorded in each `overall` row's `inputs`). The composite is **weighted** with

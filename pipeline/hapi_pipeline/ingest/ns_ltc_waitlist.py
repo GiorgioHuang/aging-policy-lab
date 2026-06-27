@@ -11,10 +11,14 @@ year, normalized per 1,000 population aged 65+ (the StatCan denominator), and
 scored lower_is_better (fewer people waiting = better access). NS-only (→ CA-NS);
 there is no federal/national equivalent here.
 
-TO CONFIRM on first --live run via `hapi inspect ns_ltc_waitlist`: the exact
-column names for the date and the waitlist count, and whether rows carry a zone /
-region breakdown (summed to a provincial total per week). The parser detects
-these by keyword and is intentionally tolerant; tighten here once inspected.
+Schema confirmed via `hapi inspect ns_ltc_waitlist` (2026-06): resource
+`c39g-gsdd` returns weekly province-wide rows (no zone breakdown) with columns
+`year, date, waiting_in_the_community, waiting_in_hospital,
+total_waiting_for_initial_placement, waiting_for_inter_facility_transfer`,
+covering 2011-04 .. 2026-03. We take **`total_waiting_for_initial_placement`**
+(community + hospital) as the headline count — the people waiting for an initial
+LTC placement — not the `waiting_in_the_community` subset. The matchers stay
+tolerant (and prefer the total) in case the column wording shifts.
 """
 from __future__ import annotations
 
@@ -31,6 +35,13 @@ NS_RESOURCE = "c39g-gsdd"  # Long-Term Care Waitlist
 _DATE_HINTS = ("date", "week", "month", "period", "as_of", "reporting", "snapshot")
 _COUNT_HINTS = ("wait", "number", "count", "clients", "individuals", "people", "total", "value")
 _ZONE_HINTS = ("zone", "region", "network", "area", "geography", "geo", "district")
+# Preferred count columns, most-specific first: the headline "total waiting for an
+# initial placement" beats the community-only / hospital-only / transfer subsets.
+_COUNT_PREFER = (
+    "total_waiting_for_initial_placement",
+    "total_waiting",
+    "initial_placement",
+)
 SUPPRESSED = {None, "", "x", "..", "n/a", "N/A"}
 
 
@@ -42,6 +53,15 @@ def _find_key(row: dict, hints: tuple[str, ...], avoid: tuple[str, ...] = ()) ->
         if any(h in kl for h in hints):
             return k
     return None
+
+
+def _find_count_key(row: dict) -> str | None:
+    norm = {k: k.lower().replace(" ", "_") for k in row}
+    for pref in _COUNT_PREFER:
+        for k, kl in norm.items():
+            if pref in kl:
+                return k
+    return _find_key(row, _COUNT_HINTS, avoid=_DATE_HINTS)
 
 
 def _to_float(v) -> float | None:
@@ -97,7 +117,7 @@ class NSLTCWaitlistConnector(Connector):
             return []
         sample = rows[0]
         f_date = _find_key(sample, _DATE_HINTS)
-        f_count = _find_key(sample, _COUNT_HINTS, avoid=_DATE_HINTS)
+        f_count = _find_count_key(sample)
         f_zone = _find_key(sample, _ZONE_HINTS)
         if not f_date or not f_count:
             return []
@@ -140,7 +160,7 @@ class NSLTCWaitlistConnector(Connector):
             return "no rows returned"
         keys = list(rows[0].keys())
         f_date = _find_key(rows[0], _DATE_HINTS)
-        f_count = _find_key(rows[0], _COUNT_HINTS, avoid=_DATE_HINTS)
+        f_count = _find_count_key(rows[0])
         f_zone = _find_key(rows[0], _ZONE_HINTS)
         zones = sorted({str(r.get(f_zone, "")) for r in rows}) if f_zone else []
         dates = sorted({str(r.get(f_date, ""))[:10] for r in rows}) if f_date else []

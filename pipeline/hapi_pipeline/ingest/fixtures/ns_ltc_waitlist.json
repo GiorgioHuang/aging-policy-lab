@@ -1,10 +1,10 @@
 [
-  {"week_ending": "2022-03-31", "number_waiting": "1280"},
-  {"week_ending": "2022-09-30", "number_waiting": "1340"},
-  {"week_ending": "2023-03-31", "number_waiting": "1410"},
-  {"week_ending": "2023-09-30", "number_waiting": "1490"},
-  {"week_ending": "2024-03-31", "number_waiting": "1580"},
-  {"week_ending": "2024-09-30", "number_waiting": "1620"},
-  {"week_ending": "2025-03-31", "number_waiting": "1560"},
-  {"week_ending": "2025-09-30", "number_waiting": "1540"}
+  {"year": "2022/23", "date": "2022-04-07T00:00:00.000", "waiting_in_the_community": "1480", "waiting_in_hospital": "320", "total_waiting_for_initial_placement": "1800", "waiting_for_inter_facility_transfer": "900"},
+  {"year": "2022/23", "date": "2022-10-06T00:00:00.000", "waiting_in_the_community": "1520", "waiting_in_hospital": "340", "total_waiting_for_initial_placement": "1860", "waiting_for_inter_facility_transfer": "910"},
+  {"year": "2023/24", "date": "2023-04-06T00:00:00.000", "waiting_in_the_community": "1610", "waiting_in_hospital": "360", "total_waiting_for_initial_placement": "1970", "waiting_for_inter_facility_transfer": "950"},
+  {"year": "2023/24", "date": "2023-10-05T00:00:00.000", "waiting_in_the_community": "1680", "waiting_in_hospital": "370", "total_waiting_for_initial_placement": "2050", "waiting_for_inter_facility_transfer": "960"},
+  {"year": "2024/25", "date": "2024-04-04T00:00:00.000", "waiting_in_the_community": "1740", "waiting_in_hospital": "390", "total_waiting_for_initial_placement": "2130", "waiting_for_inter_facility_transfer": "980"},
+  {"year": "2024/25", "date": "2024-10-03T00:00:00.000", "waiting_in_the_community": "1790", "waiting_in_hospital": "400", "total_waiting_for_initial_placement": "2190", "waiting_for_inter_facility_transfer": "1000"},
+  {"year": "2025/26", "date": "2025-04-03T00:00:00.000", "waiting_in_the_community": "1760", "waiting_in_hospital": "380", "total_waiting_for_initial_placement": "2140", "waiting_for_inter_facility_transfer": "990"},
+  {"year": "2025/26", "date": "2025-10-02T00:00:00.000", "waiting_in_the_community": "1730", "waiting_in_hospital": "370", "total_waiting_for_initial_placement": "2100", "waiting_for_inter_facility_transfer": "985"}
 ]

@@ -7,8 +7,9 @@ changing the method bumps METHOD_VERSION so past HapiScores stay interpretable.
 v1 scope: all six HAPI domains are now data-backed — Health (StatCan life
 expectancy at 65), Independence (CCHS functional health), Social Participation
 (CCHS community belonging), Financial Security (StatCan seniors' low-income
-rate), Care Access (CIHI home care), and Digital Inclusion (StatCan seniors'
-internet use). The composite blends whichever of these has data for a given
+rate), Care Access (CCHS regular healthcare provider + the live NS long-term-care
+waitlist), and Digital Inclusion (StatCan seniors' internet use). The composite
+blends whichever of these has data for a given
 jurisdiction × year, so `overall` is a genuine six-domain index. Indicators are
 added per domain without changing the model or this method's outputs.
 
@@ -96,13 +97,16 @@ INDICATORS: list[dict] = [
         "code": "care_access.ltc_waitlist_ns",
         "domain": "care_access",
         "direction": "lower_is_better",  # fewer people waiting = better access
-        # count -> people waiting per 1,000 population 65+ (StatCan denominator)
+        # count -> people waiting per 1,000 population 65+ (StatCan denominator).
+        # Headline = total_waiting_for_initial_placement (community + hospital).
         "per_capita": {
             "denominator": "demography.population_65plus",
             "scale": 1000,
             "unit": "waiting per 1,000 pop 65+",
         },
-        "normalization": {"method": "min_max", "min": 2.0, "max": 12.0},
+        # Range brackets the observed NS series (~1,600-2,600 people over ~205k
+        # pop 65+ ≈ 8-13 per 1,000); inspect-confirmed 2026-06 (c39g-gsdd).
+        "normalization": {"method": "min_max", "min": 2.0, "max": 16.0},
         "weight": 1.0,
     },
     {
