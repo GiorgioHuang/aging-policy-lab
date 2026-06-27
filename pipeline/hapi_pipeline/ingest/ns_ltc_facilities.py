@@ -6,21 +6,25 @@ typically with facility type, bed count, and health zone / municipality. This is
 a real, API-accessible NS **capacity / supply** source for Care Access.
 
 From the facility list we derive two provincial figures:
-  * total licensed beds → **beds per 1,000 population 65+** (the CIHI-comparable
-    capacity measure; CIHI reports NS ≈ 33 beds / 1,000 pop 65+), scored
-    higher_is_better;
+  * total licensed **nursing-home (LTC) permanent beds** → **beds per 1,000
+    population 65+** (the CIHI-comparable capacity measure; CIHI reports NS ≈ 33
+    LTC beds / 1,000 pop 65+), scored higher_is_better;
   * the **count of facilities** — a Data-Hub series (not scored into the
     composite, but recorded with full lineage).
+
+Schema confirmed via `hapi inspect ns_ltc_facilities` (2026-06): resource
+`x76a-axw2` returns one row per facility (145 in NS) with columns including
+`facility_type` (Nursing Home / Residential Care Facility / both), `zone`
+(Central/Eastern/Northern/Western), and separate bed counts
+`nursing_homes_nh_no_of_beds`, `nursing_homes_nh_no_of_respite_beds`,
+`residential_care_facilities_rcf_no_of_beds`, `rcf_respite_beds`. We sum the
+**nursing-home permanent-bed** column(s) only — excluding respite (short-stay)
+and residential-care beds — to match CIHI's "long-term care beds" definition
+(~8,000 beds ≈ 32-33 per 1,000 pop 65+).
 
 The resource is a **current snapshot** (no year column): each `--live` run records
 the facilities as they stand *now*, stamped with the ingest year, so running it
 once a year builds an annual capacity series. NS-only (→ CA-NS).
-
-TO CONFIRM on first run via `hapi inspect ns_ltc_facilities`: the exact column
-names for the bed count, facility type, and health zone, and whether any row is a
-non-facility/total. The parser detects these by keyword and is intentionally
-tolerant; tighten here once inspected. If the resource turns out to carry no bed
-column, the beds indicator falls away and only the facility count is emitted.
 """
 from __future__ import annotations
 
@@ -34,7 +38,6 @@ from .base import Connector, DataSourceSpec, IndicatorSpec, ObservationRecord, R
 NS_DOMAIN = "data.novascotia.ca"
 NS_RESOURCE = "x76a-axw2"  # Long-Term Care and Residential Care Facilities
 
-_BEDS_HINTS = ("bed", "licensed", "capacity", "spaces")
 _TYPE_HINTS = ("type", "category", "classification", "facility_type")
 _ZONE_HINTS = ("zone", "region", "health", "district", "network")
 SUPPRESSED = {None, "", "x", "..", "n/a", "N/A"}
@@ -48,6 +51,22 @@ def _find_key(row: dict, hints: tuple[str, ...], avoid: tuple[str, ...] = ()) ->
         if any(h in kl for h in hints):
             return k
     return None
+
+
+def _nh_bed_keys(row: dict) -> list[str]:
+    """Nursing-home (LTC) **permanent** bed columns: name has 'nursing' + 'bed',
+    excluding respite (short-stay) and residential-care beds. CIHI-comparable."""
+    keys = []
+    for k in row:
+        kl = k.lower()
+        if "bed" in kl and "nursing" in kl and "respite" not in kl:
+            keys.append(k)
+    # Fallback: if the wording shifts, any non-respite/non-RCF bed column.
+    if not keys:
+        keys = [k for k in row if "bed" in k.lower()
+                and "respite" not in k.lower() and "rcf" not in k.lower()
+                and "residential" not in k.lower()]
+    return keys
 
 
 def _to_float(v) -> float | None:
@@ -113,15 +132,15 @@ class NSLTCFacilitiesConnector(Connector):
         rows = json.loads(payload.content.decode("utf-8"))
         if not rows:
             return []
-        f_beds = _find_key(rows[0], _BEDS_HINTS)
+        bed_keys = _nh_bed_keys(rows[0])
 
         total_beds = 0.0
         beds_seen = False
         facilities = 0
         for row in rows:
             facilities += 1
-            if f_beds is not None:
-                b = _to_float(row.get(f_beds))
+            for bk in bed_keys:
+                b = _to_float(row.get(bk))
                 if b is not None:
                     total_beds += b
                     beds_seen = True
@@ -154,18 +173,18 @@ class NSLTCFacilitiesConnector(Connector):
         if not rows:
             return "no rows returned"
         keys = list(rows[0].keys())
-        f_beds = _find_key(rows[0], _BEDS_HINTS)
+        bed_keys = _nh_bed_keys(rows[0])
         f_type = _find_key(rows[0], _TYPE_HINTS)
         f_zone = _find_key(rows[0], _ZONE_HINTS)
         types = sorted({str(r.get(f_type, "")) for r in rows}) if f_type else []
         zones = sorted({str(r.get(f_zone, "")) for r in rows}) if f_zone else []
-        total_beds = sum((_to_float(r.get(f_beds)) or 0.0) for r in rows) if f_beds else None
+        total_beds = sum((_to_float(r.get(bk)) or 0.0) for r in rows for bk in bed_keys)
         return (
             f"row count (facilities): {len(rows)}\n"
             f"keys: {keys}\n"
-            f"detected beds={f_beds!r}, type={f_type!r}, zone={f_zone!r}\n"
+            f"detected nursing-home bed columns={bed_keys!r}, type={f_type!r}, zone={f_zone!r}\n"
             f"distinct types: {types[:20]}\n"
             f"distinct zones: {zones[:20]}\n"
-            f"summed beds: {total_beds}\n"
+            f"summed nursing-home beds: {total_beds}\n"
             f"sample rows: {rows[:3]}"
         )

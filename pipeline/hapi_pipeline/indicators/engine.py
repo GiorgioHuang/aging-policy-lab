@@ -39,6 +39,29 @@ def _latest_observations(cur, codes: list[str]) -> dict[tuple[str, str, int], fl
     return out
 
 
+def _denominator_index(obs: dict, denoms: set[str]) -> dict[tuple[str, str], list[tuple[int, float]]]:
+    """Per (denominator_code, jurisdiction) the sorted (year, value) series — for
+    carry-forward lookup when a numerator's year outruns the denominator series."""
+    idx: dict[tuple[str, str], list[tuple[int, float]]] = {}
+    for (code, jcode, yr), val in obs.items():
+        if code in denoms and val:
+            idx.setdefault((code, jcode), []).append((yr, val))
+    for key in idx:
+        idx[key].sort()
+    return idx
+
+
+def _lookup_denominator(idx: dict, denom: str, jcode: str, year: int) -> tuple[float | None, int | None]:
+    """Denominator value for (denom, jcode, year): the exact year if present, else
+    carried forward from the latest earlier year (population moves slowly), else
+    the earliest available year if `year` predates the series."""
+    series = idx.get((denom, jcode))
+    if not series:
+        return None, None
+    best = next((yv for yv in reversed(series) if yv[0] <= year), None) or series[0]
+    return best[1], best[0]
+
+
 def _normalize(value: float, norm: dict, direction: str) -> float:
     lo, hi = norm["min"], norm["max"]
     pct = 0.0 if hi == lo else (value - lo) / (hi - lo) * 100.0
@@ -53,6 +76,7 @@ def compute_hapi(conn, method_version: str = hapi_v1.METHOD_VERSION) -> int:
 
     with conn.cursor() as cur:
         obs = _latest_observations(cur, codes + denoms)
+        denom_idx = _denominator_index(obs, set(denoms))
         cur.execute("SELECT code, id FROM jurisdiction WHERE code IS NOT NULL")
         jur_ids = {c: i for c, i in cur.fetchall()}
 
@@ -68,22 +92,26 @@ def compute_hapi(conn, method_version: str = hapi_v1.METHOD_VERSION) -> int:
                     continue
                 value = raw
                 denom_val = None
+                denom_year = None
                 if ind.get("per_capita"):
-                    denom_val = obs.get((ind["per_capita"]["denominator"], jcode, year))
+                    denom_val, denom_year = _lookup_denominator(
+                        denom_idx, ind["per_capita"]["denominator"], jcode, year)
                     if not denom_val:
                         continue  # need the denominator to score a per-capita indicator
                     value = raw / denom_val * ind["per_capita"]["scale"]
                 normalized = _normalize(value, ind["normalization"], ind["direction"])
-                domain_inputs.setdefault(ind["domain"], []).append(
-                    {
-                        "code": ind["code"],
-                        "raw": raw,
-                        "denominator": denom_val,
-                        "value": round(value, 3),
-                        "normalized": round(normalized, 2),
-                        "weight": ind["weight"],
-                    }
-                )
+                entry = {
+                    "code": ind["code"],
+                    "raw": raw,
+                    "denominator": denom_val,
+                    "value": round(value, 3),
+                    "normalized": round(normalized, 2),
+                    "weight": ind["weight"],
+                }
+                # record when the denominator was carried forward from another year
+                if denom_year is not None and denom_year != year:
+                    entry["denominator_year"] = denom_year
+                domain_inputs.setdefault(ind["domain"], []).append(entry)
 
             if not domain_inputs:
                 continue

@@ -127,6 +127,23 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # NS LTC (nursing-home) bed capacity per 1,000 seniors, from the NS Open
+        # Data facilities directory (x76a-axw2). CIHI-comparable (~32-33/1,000).
+        # NS-only (no federal equivalent). inspect-confirmed 2026-06.
+        "code": "care_access.ltc_beds_per_1k_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",  # more beds per senior = better capacity
+        "per_capita": {
+            "denominator": "demography.population_65plus",
+            "scale": 1000,
+            "unit": "beds per 1,000 pop 65+",
+        },
+        # ~8,000 NH beds over ~247k pop 65+ ≈ 32.5/1,000; declines as the senior
+        # population outgrows bed supply. 15..50 brackets it without floor/ceiling.
+        "normalization": {"method": "min_max", "min": 15.0, "max": 50.0},
+        "weight": 1.0,
+    },
+    {
         "code": "financial_security.low_income_rate_65plus",
         "domain": "financial_security",
         "direction": "lower_is_better",  # a lower senior poverty rate scores higher

@@ -18,14 +18,17 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   JSON shape `ns_ltc_waitlist` returns. Replaced by the live `--live` pull (NS Open
   Data resource `c39g-gsdd`). This **replaces** the retired CIHI home-care client
   count, which had no Nova Scotia data (NS does not submit to CIHI's HCRS/IRRS).
-- **`ns_ltc_facilities.json` — representative sample, NOT official.** A small,
-  plausible set of NS long-term-care / residential-care facility rows (name, type,
-  beds, health zone) in the Socrata JSON shape `ns_ltc_facilities` returns. The
-  connector aggregates to provincial **total beds** (→ `care_access.ltc_beds_per_1k_65plus`)
-  and **facility count** (→ `care_access.ltc_facilities_ns`, a Data-Hub-only series).
-  Replaced by the live `--live` pull of NS Open Data resource `x76a-axw2`; the bed
-  column, type and zone labels are confirmed on a networked runner via `hapi inspect`
-  before the beds indicator is scored.
+- **`ns_ltc_facilities.json` — representative sample, NOT official.** 145 NS
+  long-term-care / residential-care facility rows in the real Socrata shape
+  `x76a-axw2` returns (`facility_type`, `zone`, and the
+  `nursing_homes_nh_no_of_beds` / `…_respite_beds` / `residential_care_facilities_rcf_no_of_beds`
+  columns). The names/towns are placeholders, but the count (145) and summed
+  nursing-home permanent beds (8,026 ≈ 32.5 / 1,000 pop 65+, matching CIHI's ~33)
+  reproduce the **real provincial aggregate** confirmed via `hapi inspect`, so the
+  offline beds indicator (`care_access.ltc_beds_per_1k_65plus`) and facility count
+  (`care_access.ltc_facilities_ns`, a Data-Hub-only series) score at the right
+  scale. A live `--live` pull of `x76a-axw2` replaces these with the real
+  facility-level rows. Schema/aggregate confirmed 2026-06 via `hapi inspect`.
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -137,6 +140,13 @@ Waitlist (`ns_ltc_waitlist`, Socrata `c39g-gsdd`) replaces them.
   'Characteristics'); no 65+ aggregate, so filtered to **both senior bands
   (65–74 and 75+)**, both sexes, percentage, domain "Very good to perfect
   functional health" (HUI Mark 3). HAPI averages the two bands within the domain.
+- **NS (Care Access — capacity):** dataset "Long-Term Care and Residential Care
+  Facilities", Socrata resource **`x76a-axw2`** — real columns include
+  `facility_name, facility_type, zone, nursing_homes_nh_no_of_beds,
+  nursing_homes_nh_no_of_respite_beds, residential_care_facilities_rcf_no_of_beds,
+  rcf_respite_beds` (145 NS facilities). The connector sums **nursing-home permanent
+  beds** → beds per 1,000 pop 65+ (CIHI-comparable) and counts facilities; current
+  snapshot stamped with the ingest year.
 - **StatCan (Care Access — supply):** Table **14-10-0202** → productId **`14100202`**
   ("Employment by industry, annual", from SEPH); filtered to NAICS **623 (nursing &
   residential care facilities)**, all employees, GEO ∈ {Canada, Nova Scotia}. A

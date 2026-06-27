@@ -1,14 +1,1452 @@
 [
-  {"facility_name": "Representative Nursing Home A", "facility_type": "Nursing Home", "beds": "120", "health_zone": "Central", "community": "Halifax"},
-  {"facility_name": "Representative Nursing Home B", "facility_type": "Nursing Home", "beds": "98", "health_zone": "Central", "community": "Dartmouth"},
-  {"facility_name": "Representative Nursing Home C", "facility_type": "Nursing Home", "beds": "150", "health_zone": "Western", "community": "Yarmouth"},
-  {"facility_name": "Representative Nursing Home D", "facility_type": "Nursing Home", "beds": "64", "health_zone": "Northern", "community": "Truro"},
-  {"facility_name": "Representative Nursing Home E", "facility_type": "Nursing Home", "beds": "82", "health_zone": "Eastern", "community": "Sydney"},
-  {"facility_name": "Representative Nursing Home F", "facility_type": "Nursing Home", "beds": "110", "health_zone": "Western", "community": "Kentville"},
-  {"facility_name": "Representative Nursing Home G", "facility_type": "Nursing Home", "beds": "48", "health_zone": "Northern", "community": "Amherst"},
-  {"facility_name": "Representative Residential Care H", "facility_type": "Residential Care Facility", "beds": "30", "health_zone": "Central", "community": "Halifax"},
-  {"facility_name": "Representative Residential Care I", "facility_type": "Residential Care Facility", "beds": "24", "health_zone": "Eastern", "community": "New Glasgow"},
-  {"facility_name": "Representative Residential Care J", "facility_type": "Residential Care Facility", "beds": "36", "health_zone": "Western", "community": "Bridgewater"},
-  {"facility_name": "Representative Nursing Home K", "facility_type": "Nursing Home", "beds": "90", "health_zone": "Central", "community": "Bedford"},
-  {"facility_name": "Representative Nursing Home L", "facility_type": "Nursing Home", "beds": "75", "health_zone": "Eastern", "community": "Antigonish"}
+{
+"facility_name": "Representative Facility 001",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 002",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 003",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 004",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 005",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 006",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 007",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 008",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 009",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 010",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 011",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 012",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 013",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 014",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 015",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 016",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 017",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 018",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 019",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 020",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 021",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 022",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 023",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 024",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 025",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 026",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 027",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 028",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 029",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 030",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 031",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 032",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 033",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 034",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 035",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 036",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 037",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 038",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 039",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 040",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 041",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 042",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 043",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 044",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 045",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 046",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 047",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 048",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 049",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 050",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 051",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 052",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 053",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 054",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 055",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 056",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 057",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 058",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 059",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 060",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 061",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 062",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 063",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 064",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 065",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 066",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 067",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 068",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 069",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 070",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 071",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 072",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 073",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 074",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 075",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 076",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 077",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 078",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 079",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 080",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 081",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 082",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 083",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 084",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 085",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 086",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 087",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 088",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 089",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 090",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 091",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 092",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 093",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 094",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 095",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 096",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 097",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 098",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 099",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 100",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 101",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 102",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 103",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 104",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 105",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 106",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 107",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 108",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 109",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 110",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 111",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 112",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "190.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 113",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "30.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 114",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "42.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 115",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "48.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 116",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "52.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 117",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "60.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 118",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "64.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 119",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "68.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 120",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "72.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 121",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "80.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 122",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "88.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 123",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "96.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 124",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "100.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative Facility 125",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "110.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative Facility 126",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "120.0",
+"nursing_homes_nh_no_of_respite_beds": "1.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative Facility 127",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home and Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "140.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "12.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative Facility 128",
+"town": "Nova Scotia",
+"facility_type": "Nursing Home",
+"nursing_homes_nh_no_of_beds": "-2664.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "0.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative RCF 01",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative RCF 02",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative RCF 03",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "36.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative RCF 04",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative RCF 05",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative RCF 06",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "36.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative RCF 07",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative RCF 08",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative RCF 09",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "36.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative RCF 10",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative RCF 11",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative RCF 12",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "36.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative RCF 13",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+},
+{
+"facility_name": "Representative RCF 14",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Eastern"
+},
+{
+"facility_name": "Representative RCF 15",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "36.0",
+"rcf_respite_beds": "0.0",
+"zone": "Northern"
+},
+{
+"facility_name": "Representative RCF 16",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "20.0",
+"rcf_respite_beds": "0.0",
+"zone": "Western"
+},
+{
+"facility_name": "Representative RCF 17",
+"town": "Nova Scotia",
+"facility_type": "Residential Care Facility",
+"nursing_homes_nh_no_of_beds": "0.0",
+"nursing_homes_nh_no_of_respite_beds": "0.0",
+"residential_care_facilities_rcf_no_of_beds": "28.0",
+"rcf_respite_beds": "0.0",
+"zone": "Central"
+}
 ]
