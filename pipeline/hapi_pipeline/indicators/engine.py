@@ -14,22 +14,31 @@ from . import hapi_v1
 
 
 def _latest_observations(cur, codes: list[str]) -> dict[tuple[str, str, int], float | None]:
-    """Map (indicator_code, jurisdiction_code, year) -> latest value (None if suppressed)."""
+    """Map (indicator_code, jurisdiction_code, year) -> the authoritative value.
+
+    Per (indicator, jurisdiction, period) pick the **live** retrieval over a
+    fixture one, then the most recent dataset_version within that class. This way
+    a transient fixture fallback (e.g. an upstream that was slow on one run) never
+    clobbers a value already loaded live on an earlier run — the live version
+    stays in the append-only store and remains authoritative for scoring.
+    """
     cur.execute(
         """
-        SELECT i.code, j.code, extract(year FROM lower(o.period))::int AS yr, o.value
-          FROM observation o
-          JOIN indicator i    ON i.id = o.indicator_id
-          JOIN jurisdiction j ON j.id = o.jurisdiction_id
-          JOIN (
-              SELECT indicator_id, jurisdiction_id, period, max(dataset_version_id) AS mdv
-                FROM observation GROUP BY indicator_id, jurisdiction_id, period
-          ) latest
-            ON latest.indicator_id = o.indicator_id
-           AND latest.jurisdiction_id = o.jurisdiction_id
-           AND latest.period = o.period
-           AND latest.mdv = o.dataset_version_id
-         WHERE i.code = ANY(%s)
+        SELECT code, jcode, yr, value FROM (
+            SELECT i.code AS code, j.code AS jcode,
+                   extract(year FROM lower(o.period))::int AS yr, o.value AS value,
+                   row_number() OVER (
+                       PARTITION BY o.indicator_id, o.jurisdiction_id, o.period
+                       ORDER BY (dv.source_version LIKE 'fixture:%%') ASC,
+                                o.dataset_version_id DESC
+                   ) AS rn
+              FROM observation o
+              JOIN indicator i       ON i.id = o.indicator_id
+              JOIN jurisdiction j    ON j.id = o.jurisdiction_id
+              JOIN dataset_version dv ON dv.id = o.dataset_version_id
+             WHERE i.code = ANY(%s)
+        ) ranked
+        WHERE rn = 1
         """,
         (codes,),
     )
