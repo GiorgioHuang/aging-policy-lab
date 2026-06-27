@@ -85,6 +85,17 @@ def is_age_65plus(age: str) -> bool:
     return "65" in a and ("over" in a or "older" in a) and "to" not in a and "-" not in a
 
 
+def map_geo(geo: str) -> str | None:
+    """Map a StatCan GEO member to our jurisdiction code, tolerating the CCHS
+    national label 'Canada (excluding territories)' as well as plain 'Canada'."""
+    g = geo.strip()
+    if g.startswith("Canada"):
+        return "CA"
+    if g == "Nova Scotia":
+        return "CA-NS"
+    return None
+
+
 def is_total_gender(g: str) -> bool:
     return g.strip().lower() in {
         "total - gender", "both sexes", "total - sex", "total, gender",

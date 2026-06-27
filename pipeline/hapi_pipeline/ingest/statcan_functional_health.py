@@ -1,19 +1,22 @@
-"""StatCan connector — CCHS community belonging (Table 13-10-0096), Social Participation.
+"""StatCan connector — functional health (Table 13-10-0966), Independence.
 
-Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_cchs` on a
-networked runner:
-  * Table 13-10-0096 "Health characteristics, annual estimates" (productId
-    13100096), Canada (excluding territories) + provinces, annual (CCHS).
-    https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310009601
-  * Real dimensions: REF_DATE, GEO, 'Age group', 'Sex', 'Indicators',
-    'Characteristics' (the statistic), …, VALUE, STATUS. The national GEO member
-    is "Canada (excluding territories)".
-  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age "65 years and
-    over", both sexes, statistic "Percent", indicator = sense of belonging to
-    local community (strong).
+Source confirmed 2026-06 (WebSearch; The Daily 2026-03-16 "Functional health of
+Canadian adults, 2015 to 2024"):
+  * Table 13-10-0966 "Functional health" (productId 13100966), CCHS cycles
+    (2015, 2019, 2024…), Canada (excluding territories) + provinces, by age group.
+  * Functional health (Health Utilities Index Mark 3, eight attributes: vision,
+    hearing, speech, cognition, dexterity, mobility, emotion, pain). "Very good to
+    perfect functional health" = HUI3 score 0.89–1.00.
+  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age 65+, both sexes,
+    the percent statistic, "very good to perfect functional health".
 
-HAPI Social Participation indicator for older adults: the share of seniors
-reporting a strong sense of community belonging. higher_is_better.
+HAPI Independence indicator for older adults: the share of seniors with very-good-
+to-perfect functional health — a summary of independent functioning.
+higher_is_better.
+
+TO CONFIRM on first --live run via `hapi inspect statcan_functional_health`: the
+exact age / sex / statistic / functional-health member labels. Matching is
+tolerant (case-insensitive substring); tighten here if inspection differs.
 """
 from __future__ import annotations
 
@@ -23,55 +26,59 @@ import io
 from . import _statcan as sc
 from .base import Connector, DataSourceSpec, IndicatorSpec, ObservationRecord, RawPayload
 
-PRODUCT_ID = "13100096"
+PRODUCT_ID = "13100966"
 MIN_YEAR = 2015
-INDICATOR = "social_participation.community_belonging_65plus"
+INDICATOR = "independence.functional_health_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
     "sex": ("sex", "gender"),
-    "indicator": ("indicator", "health characteristic"),
-    "statistic": ("characteristic",),
+    "functional": ("functional", "indicator", "characteristic"),
+    "statistic": ("statistic", "characteristic"),
 }
 
 
-def _is_belonging(indicator: str) -> bool:
-    h = indicator.strip().lower()
-    return "belonging" in h and "community" in h and "strong" in h
+def _is_very_good(member: str) -> bool:
+    """The 'very good to perfect functional health' category."""
+    m = member.strip().lower()
+    if m == "":
+        return True
+    return "very good" in m and ("perfect" in m or "functional" in m)
 
 
 def _is_percent(stat: str) -> bool:
     s = stat.strip().lower()
-    return s == "percent" or s == ""
+    return s == "percent" or "percent" in s or s == ""
 
 
-class StatCanCCHSConnector(Connector):
-    name = "statcan_cchs"
-    fixture_name = "statcan_cchs_65plus.csv"
+class StatCanFunctionalHealthConnector(Connector):
+    name = "statcan_functional_health"
+    fixture_name = "statcan_functional_health_65plus.csv"
 
     source = DataSourceSpec(
-        name="Statistics Canada — Health characteristics, annual estimates (Table 13-10-0096)",
+        name="Statistics Canada — Functional health (Table 13-10-0966)",
         publisher="Statistics Canada",
-        url="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310009601",
+        url="https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310096601",
         access_method="api",
         licence="Statistics Canada Open Licence",
-        update_frequency="annual",
-        notes="WDS getFullTableDownloadCSV(13100096), CCHS; filtered to 65+, both "
-              "sexes, percent, sense of community belonging (strong).",
+        update_frequency="periodic",
+        notes="WDS getFullTableDownloadCSV(13100966), CCHS (2015/2019/2024…); "
+              "filtered to 65+, both sexes, percent, very good to perfect "
+              "functional health (HUI Mark 3).",
     )
 
     indicators = [
         IndicatorSpec(
             code=INDICATOR,
-            domain="social_participation",
-            name="Sense of community belonging (strong), population 65+",
-            definition="Share of persons aged 65+ reporting a somewhat or very strong "
-                       "sense of belonging to their local community.",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Sense of belonging to local community, somewhat strong or very strong'.",
+            domain="independence",
+            name="Functional health (very good to perfect), population 65+",
+            definition="Share of persons aged 65+ with very-good-to-perfect functional "
+                       "health (Health Utilities Index Mark 3, 0.89–1.00).",
+            formula="StatCan Table 13-10-0966: age 65+, both sexes, percent, "
+                    "'very good to perfect functional health'.",
             unit="% of persons 65+",
             direction="higher_is_better",
-            normalization={"method": "min_max", "min": 50.0, "max": 90.0},
+            normalization={"method": "min_max", "min": 20.0, "max": 65.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
@@ -88,9 +95,13 @@ class StatCanCCHSConnector(Connector):
         fields = reader.fieldnames or []
         f_age = sc.find_field(fields, "age")
         f_sex = sc.find_field(fields, "sex", "gender")
-        f_ind = sc.find_field(fields, "indicator", "health characteristic")
+        # The "functional health" category dimension (members like "very good to
+        # perfect functional health"); falls back to any non-statistic characteristic.
+        f_func = sc.find_field(fields, "functional", "indicator")
         f_stat = next((f for f in fields
-                       if "characteristic" in f.lower() and f != f_ind), "")
+                       if "characteristic" in f.lower() and f != f_func), "")
+        if not f_stat:
+            f_stat = sc.find_field(fields, "statistic")
         out = io.StringIO()
         writer = csv.writer(out)
         writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
@@ -103,7 +114,7 @@ class StatCanCCHSConnector(Connector):
                 continue
             if f_stat and not _is_percent(row.get(f_stat, "")):
                 continue
-            if f_ind and not _is_belonging(row.get(f_ind, "")):
+            if f_func and not _is_very_good(row.get(f_func, "")):
                 continue
             writer.writerow([sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])

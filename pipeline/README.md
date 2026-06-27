@@ -23,7 +23,8 @@ pipeline/hapi_pipeline/
 │   ├── statcan_low_income.py       financial_security (StatCan 11-10-0135)
 │   ├── statcan_internet_use.py     digital_inclusion  (StatCan 22-10-0135)
 │   ├── statcan_life_expectancy.py  health             (StatCan 13-10-0389)
-│   ├── statcan_cchs.py             independence + social_participation (StatCan 13-10-0096)
+│   ├── statcan_cchs.py             social_participation (StatCan 13-10-0096)
+│   ├── statcan_functional_health.py independence       (StatCan 13-10-0966)
 │   └── fixtures/     vendored sample payloads (see fixtures/README.md)
 ├── transform/      cleaning, normalization, quality checks                       (Phase 2)
 ├── indicators/     HAPI computation                                             (Phase 3)
@@ -66,7 +67,7 @@ python -m hapi_pipeline.cli score               # compute HAPI v1 domain + compo
   normalization, weights, `method_version` v1) writing auditable `hapi_score` rows
   (each carries the indicator codes, raw values, and normalized inputs). v1 now
   spans **all six HAPI domains** — Health (StatCan 13-10-0389 life expectancy at
-  65), Independence (CCHS 13-10-0096 functional health), Social Participation
+  65), Independence (CCHS 13-10-0966 functional health), Social Participation
   (CCHS 13-10-0096 community belonging), Financial Security (StatCan 11-10-0135
   seniors' low-income rate), Care Access (CIHI home care), and Digital Inclusion
   (StatCan 22-10-0135 seniors' internet use) — so `overall` is a real six-domain

@@ -27,4 +27,5 @@ jobs:
           python -m hapi_pipeline.cli inspect --source statcan_internet_use
           python -m hapi_pipeline.cli inspect --source statcan_life_expectancy
           python -m hapi_pipeline.cli inspect --source statcan_cchs
+          python -m hapi_pipeline.cli inspect --source statcan_functional_health
         working-directory: pipeline

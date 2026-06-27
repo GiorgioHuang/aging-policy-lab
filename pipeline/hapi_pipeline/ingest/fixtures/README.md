@@ -29,11 +29,15 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   product id (13-10-0389) and access path are confirmed; these bootstrap values
   are illustrative until the first `--live` run replaces them with official data.
 - **`statcan_cchs_65plus.csv` — representative sample, NOT official.**
-  Plausible CCHS values for 65+ (functional health good-to-full → Independence;
-  community belonging strong → Social Participation), CA + NS, in the slim format
-  `statcan_cchs._filter_csv()` emits (with an `INDICATOR` column, since this one
-  connector feeds two indicators). Product id (13-10-0096) confirmed; bootstrap
-  values are illustrative until the first `--live` run.
+  Plausible CCHS community-belonging-strong values for 65+ (→ Social
+  Participation), CA + NS, in the slim format `statcan_cchs._filter_csv()` emits.
+  Product id (13-10-0096) + schema confirmed via `hapi inspect`; bootstrap values
+  are illustrative until the first `--live` run.
+- **`statcan_functional_health_65plus.csv` — representative sample, NOT official.**
+  Plausible functional-health (very good to perfect) values for 65+ (→
+  Independence), CA + NS, in the slim format
+  `statcan_functional_health._filter_csv()` emits. Product id (13-10-0966)
+  confirmed; bootstrap values illustrative until the first `--live` run.
 
 Provenance is always explicit: anything loaded from a fixture gets
 `dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
@@ -51,6 +55,7 @@ hapi ingest --live --source statcan_low_income       # getFullTableDownloadCSV(1
 hapi ingest --live --source statcan_internet_use     # getFullTableDownloadCSV(22100135), filtered
 hapi ingest --live --source statcan_life_expectancy  # getFullTableDownloadCSV(13100389), filtered
 hapi ingest --live --source statcan_cchs             # getFullTableDownloadCSV(13100096), filtered
+hapi ingest --live --source statcan_functional_health # getFullTableDownloadCSV(13100966), filtered
 ```
 
 The two StatCan additions share the WDS full-table mechanism but their dimension
@@ -62,6 +67,7 @@ hapi inspect statcan_low_income       # dumps headers + distinct dimension membe
 hapi inspect statcan_internet_use
 hapi inspect statcan_life_expectancy
 hapi inspect statcan_cchs
+hapi inspect statcan_functional_health
 ```
 
 The `_filter_csv` matchers are intentionally tolerant (case-insensitive
@@ -93,10 +99,13 @@ downloading the latest table from
 - **StatCan (Health):** Table **13-10-0389** → productId **`13100389`**
   ("Life expectancy, at birth and at age 65, by sex, three-year average");
   filtered to "at age 65", both sexes, the life-expectancy estimate.
-- **StatCan (Independence + Social Participation):** Table **13-10-0096** →
-  productId **`13100096`** ("Health characteristics, annual estimates", CCHS);
-  filtered to 65+, both sexes, percent — functional health (good to full) →
-  Independence, sense of community belonging (strong) → Social Participation.
+- **StatCan (Social Participation):** Table **13-10-0096** → productId
+  **`13100096`** ("Health characteristics, annual estimates", CCHS; national GEO
+  is "Canada (excluding territories)"); filtered to 65+, both sexes, percent,
+  sense of community belonging (strong).
+- **StatCan (Independence):** Table **13-10-0966** → productId **`13100966`**
+  ("Functional health", CCHS 2015/2019/2024…); filtered to 65+, both sexes,
+  percent, very good to perfect functional health (HUI Mark 3).
 
 All four shapes (population, NS primary care, low income, internet use) were
 verified end-to-end via `hapi inspect` + a live `--live` run on a networked
@@ -113,4 +122,5 @@ captured values, so offline runs reproduce the production numbers.
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
-| `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_cchs` | `independence.functional_health_65plus`, `social_participation.community_belonging_65plus` |
+| `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_cchs` | `social_participation.community_belonging_65plus` |
+| `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_functional_health` | `independence.functional_health_65plus` |

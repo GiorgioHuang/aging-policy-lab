@@ -43,8 +43,9 @@ INDICATORS: list[dict] = [
         "code": "independence.functional_health_65plus",
         "domain": "independence",
         "direction": "higher_is_better",
-        # already a rate (% of 65+ with good-to-full functional health)
-        "normalization": {"method": "min_max", "min": 40.0, "max": 90.0},
+        # % of 65+ with very-good-to-perfect functional health (HUI-3). Range
+        # brackets the observed senior span (lower than the all-ages rate).
+        "normalization": {"method": "min_max", "min": 20.0, "max": 65.0},
         "weight": 1.0,
     },
     {
