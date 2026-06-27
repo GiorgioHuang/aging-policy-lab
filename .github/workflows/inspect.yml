@@ -20,5 +20,9 @@ jobs:
           python-version: "3.11"
       - run: pip install -r pipeline/requirements.txt
       - name: Inspect StatCan + NS schemas
-        run: python -m hapi_pipeline.cli inspect --source statcan_wds; python -m hapi_pipeline.cli inspect --source ns_open_data
+        run: |
+          python -m hapi_pipeline.cli inspect --source statcan_wds
+          python -m hapi_pipeline.cli inspect --source ns_open_data
+          python -m hapi_pipeline.cli inspect --source statcan_low_income
+          python -m hapi_pipeline.cli inspect --source statcan_internet_use
         working-directory: pipeline
