@@ -1,0 +1,13 @@
+INDICATOR,REF_DATE,GEO,VALUE,STATUS
+independence.functional_health_65plus,2018,Canada,72.5,
+independence.functional_health_65plus,2019,Canada,72.0,
+independence.functional_health_65plus,2021,Canada,70.3,
+independence.functional_health_65plus,2018,Nova Scotia,69.8,
+independence.functional_health_65plus,2019,Nova Scotia,69.1,
+independence.functional_health_65plus,2021,Nova Scotia,67.4,
+social_participation.community_belonging_65plus,2018,Canada,77.9,
+social_participation.community_belonging_65plus,2019,Canada,77.2,
+social_participation.community_belonging_65plus,2021,Canada,75.1,
+social_participation.community_belonging_65plus,2018,Nova Scotia,80.1,
+social_participation.community_belonging_65plus,2019,Nova Scotia,79.3,
+social_participation.community_belonging_65plus,2021,Nova Scotia,77.0,

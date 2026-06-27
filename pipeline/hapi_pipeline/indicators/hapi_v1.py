@@ -4,13 +4,13 @@ Defines the indicator set, per-capita rules, normalization reference ranges, and
 weights for the first, defensible Healthy Aging Policy Index. Versioned as 'v1':
 changing the method bumps METHOD_VERSION so past HapiScores stay interpretable.
 
-v1 scope: four data-backed domains — Health (StatCan life expectancy at 65),
-Care Access (CIHI home care), Financial Security (StatCan seniors' low-income
-rate), and Digital Inclusion (StatCan seniors' internet use). The composite
-blends whichever of these has data for a given jurisdiction × year, so `overall`
-is a genuine multi-domain index, not a restatement of one domain. The remaining
-two domains (Independence, Social Participation) join as their connectors land,
-without changing the model or this method's outputs.
+v1 scope: all six HAPI domains are now data-backed — Health (StatCan life
+expectancy at 65), Independence (CCHS functional health), Social Participation
+(CCHS community belonging), Financial Security (StatCan seniors' low-income
+rate), Care Access (CIHI home care), and Digital Inclusion (StatCan seniors'
+internet use). The composite blends whichever of these has data for a given
+jurisdiction × year, so `overall` is a genuine six-domain index. Indicators are
+added per domain without changing the model or this method's outputs.
 """
 from __future__ import annotations
 
@@ -19,6 +19,8 @@ METHOD_VERSION = "v1"
 # Domain weights for the composite HAPI (equal across available domains in v1).
 DOMAIN_WEIGHTS: dict[str, float] = {
     "health": 1.0,
+    "independence": 1.0,
+    "social_participation": 1.0,
     "care_access": 1.0,
     "financial_security": 1.0,
     "digital_inclusion": 1.0,
@@ -35,6 +37,22 @@ INDICATORS: list[dict] = [
         # already in years; no per-capita step. Range brackets the observed CA+NS
         # span (~19.5-21 yrs of remaining life at 65).
         "normalization": {"method": "min_max", "min": 16.0, "max": 24.0},
+        "weight": 1.0,
+    },
+    {
+        "code": "independence.functional_health_65plus",
+        "domain": "independence",
+        "direction": "higher_is_better",
+        # already a rate (% of 65+ with good-to-full functional health)
+        "normalization": {"method": "min_max", "min": 40.0, "max": 90.0},
+        "weight": 1.0,
+    },
+    {
+        "code": "social_participation.community_belonging_65plus",
+        "domain": "social_participation",
+        "direction": "higher_is_better",
+        # already a rate (% of 65+ reporting strong community belonging)
+        "normalization": {"method": "min_max", "min": 50.0, "max": 90.0},
         "weight": 1.0,
     },
     {
