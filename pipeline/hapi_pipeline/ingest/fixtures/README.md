@@ -35,6 +35,13 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   the INDICATOR-tagged slim format `cihi_ltc_beds` reads (`beds_per_1k` /
   `beds_total` / `homes`). CIHI's NS figure (32.76 / 1,000) corroborates the live
   NS Open Data measure (~32.5). Manual refresh via RUNBOOK.md §E (no CIHI API).
+- **`cihi_ccrs_ltc.csv` — real data.** Official CIHI "CCRS/IRRS LTC Quick Stats"
+  (Residential and Hospital-Based Continuing Care) — the Nova Scotia residential-care
+  column, **2024–2025** (NS only began submitting to CCRS/IRRS-LTCF that year):
+  9,846 residents, 9,596 assessed, 100 facilities → CA-NS, in the INDICATOR-tagged
+  slim format `cihi_ccrs_ltc` reads. These are descriptive Data-Hub series (not
+  scored). The Quick Stats "Total" column is partial-coverage (submitting provinces
+  only, excludes Quebec), so no Canada total is loaded. Manual refresh via RUNBOOK.md §E.
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -172,6 +179,7 @@ captured values, so offline runs reproduce the production numbers.
 | `ns_ltc_waitlist.json` | NS Open Data Socrata JSON (`c39g-gsdd`) | `ns_ltc_waitlist` | `care_access.ltc_waitlist_ns` |
 | `cihi_caregiver_distress.csv` | CIHI indicator export, slimmed (manual) | `cihi_caregiver_distress` | `independence.caregiver_distress` |
 | `cihi_ltc_beds.csv` | CIHI LTC beds data table, slimmed (manual) | `cihi_ltc_beds` | `care_access.ltc_beds_cihi_per_1k_65plus`, `care_access.ltc_beds_cihi_total`, `care_access.ltc_homes_cihi` |
+| `cihi_ccrs_ltc.csv` | CIHI CCRS/IRRS LTC Quick Stats, slimmed (manual) | `cihi_ccrs_ltc` | `care_access.ltc_residents_cihi`, `care_access.ltc_residents_assessed_cihi`, `care_access.ltc_facilities_ccrs` |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_ltc_employment.csv` | StatCan full-table CSV (slim, filtered) | `statcan_ltc_employment` | `care_access.ltc_workforce_per_1k_65plus` |

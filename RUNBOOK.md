@@ -231,3 +231,27 @@ with a newer edition (Excel — no API):
    edition date in the commit, and re-run `hapi score` (or dispatch the ingest
    workflow). Only `beds_per_1k` is scored; `beds_total` + `homes` are Data-Hub
    series. CIHI's NS per-1,000 corroborates the live `ns_ltc_facilities` measure.
+
+### Refreshing / extending the CIHI CCRS LTC Quick Stats (Care Access)
+
+`cihi_ccrs_ltc` holds **real** captured values from CIHI's "Residential and
+Hospital-Based Continuing Care — LTC Quick Stats" (CCRS/IRRS-LTCF). Nova Scotia
+only began submitting in **2024–2025**, so the fixture currently has that one NS
+snapshot. To add a new fiscal-year edition (Excel — no API):
+
+1. Download the latest **LTC Quick Stats** from
+   <https://www.cihi.ca/en/topics/long-term-care> and open **Table 1 — Number of
+   facilities and residents** (tab `1 Number facs and res` / `Table 1`).
+2. Find the **Nova Scotia residential care** column (only present from 2024–2025
+   on) and read off `Number of residents`, `Number of assessed residents`, and
+   `Number of facilities`. Append rows to
+   `pipeline/hapi_pipeline/ingest/fixtures/cihi_ccrs_ltc.csv` tagged `residents` /
+   `assessed_residents` / `facilities`, `jurisdiction_code=CA-NS`, `year` = the
+   fiscal start year (e.g. `2024–2025` → `2024`).
+3. Record the edition in the commit and re-run `hapi score` (or dispatch ingest).
+   All three are **Data-Hub series** (not scored): the direction of "more LTC
+   residents" is not normative in a healthy-aging frame. Do **not** load the Quick
+   Stats "Total" column as CA — it covers only submitting provinces (excludes
+   Quebec), not all of Canada. The richer per-resident profile + quality-indicator
+   tabs (age/sex, diagnoses, ADL/CPS/CHESS, pain, restraints, pressure ulcers, …)
+   also carry NS from 2024–2025 and can be wired as further indicators when needed.

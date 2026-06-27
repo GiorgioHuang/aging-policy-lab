@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from .base import Connector
 from .cihi_caregiver_distress import CIHICaregiverDistressConnector
+from .cihi_ccrs_ltc import CIHICCRSLTCConnector
 from .cihi_ltc_beds import CIHILTCBedsConnector
 from .ns_ltc_facilities import NSLTCFacilitiesConnector
 from .ns_ltc_waitlist import NSLTCWaitlistConnector
@@ -25,6 +26,7 @@ CONNECTORS: list[Connector] = [
     NSLTCFacilitiesConnector(),
     CIHICaregiverDistressConnector(),
     CIHILTCBedsConnector(),
+    CIHICCRSLTCConnector(),
     StatCanLowIncomeConnector(),
     StatCanInternetUseConnector(),
     StatCanLifeExpectancyConnector(),
