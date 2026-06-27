@@ -44,8 +44,9 @@ INDICATORS: list[dict] = [
         "code": "financial_security.low_income_rate_65plus",
         "domain": "financial_security",
         "direction": "lower_is_better",  # a lower senior poverty rate scores higher
-        # already a rate (% of persons 65+); no per-capita step
-        "normalization": {"method": "min_max", "min": 2.0, "max": 20.0},
+        # already a rate (% of persons 65+); no per-capita step. Range brackets the
+        # observed CA+NS span (CA ~14-17%, NS up to ~25%) so neither floors/ceils.
+        "normalization": {"method": "min_max", "min": 2.0, "max": 30.0},
         "weight": 1.0,
     },
     {

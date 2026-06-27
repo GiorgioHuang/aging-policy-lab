@@ -16,15 +16,13 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
 - **`cihi_home_care_clients_65plus.csv` — representative sample, NOT official.**
   CIHI has no open API (manual portal download / controlled access), so these
   numbers are illustrative pending a manual refresh. Treat as sample data.
-- **`statcan_low_income_65plus.csv` — representative sample, NOT official.**
-  Plausible seniors' (65+) LIM-AT low-income rates for CA + NS, 2019–2023, in the
-  exact slim format `statcan_low_income._filter_csv()` emits. The product id
-  (11-10-0135) and access path are confirmed, but these bootstrap values are
-  illustrative until the first `--live` run replaces them with official figures.
-- **`statcan_internet_use_65plus.csv` — representative sample, NOT official.**
-  Plausible seniors' (65+) internet-use rates for CA + NS in the survey years
-  2020 & 2022 (CIUS is biennial), in the slim format
-  `statcan_internet_use._filter_csv()` emits. Illustrative until a `--live` run.
+- **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
+  seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
+  `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
+  national rate (20–25% vs ~14–17%).
+- **`statcan_internet_use_65plus.csv` — real data.** Official Table 22-10-0135
+  seniors' (65+) internet-use rates for CA + NS in the CIUS survey years
+  2018/2020/2022, captured from the same live run.
 
 Provenance is always explicit: anything loaded from a fixture gets
 `dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
@@ -78,10 +76,10 @@ downloading the latest table from
   ("Internet use by province and age group", from the Canadian Internet Use
   Survey, biennial); filtered to 65+ and the "used the Internet" characteristic.
 
-Product ids + access paths for the StatCan tables are confirmed; the population
-and NS shapes were verified end-to-end via `hapi inspect` on a networked GitHub
-runner (the sandbox blocks the source domains). The two newer StatCan tables ship
-with representative fixtures and tolerant matchers pending their first live pull.
+All four shapes (population, NS primary care, low income, internet use) were
+verified end-to-end via `hapi inspect` + a live `--live` run on a networked
+GitHub runner (the sandbox blocks the source domains); the fixtures hold the real
+captured values, so offline runs reproduce the production numbers.
 
 ## Files
 

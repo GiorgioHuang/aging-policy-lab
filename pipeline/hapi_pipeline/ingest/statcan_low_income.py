@@ -85,7 +85,7 @@ class StatCanLowIncomeConnector(Connector):
                     "and over', LIM-AT, percentage of persons in low income.",
             unit="% of persons 65+",
             direction="lower_is_better",
-            normalization={"method": "min_max", "min": 2.0, "max": 20.0},
+            normalization={"method": "min_max", "min": 2.0, "max": 30.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         )
     ]
