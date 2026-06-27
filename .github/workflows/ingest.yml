@@ -69,5 +69,5 @@ jobs:
         working-directory: pipeline
 
       - name: Show loaded observations
-        run: python -m hapi_pipeline.cli observations
+        run: python -m hapi_pipeline.cli observations --limit 500
         working-directory: pipeline
