@@ -25,8 +25,14 @@ def wds_full_csv_url(product_id: str) -> str:
     return f"https://www150.statcan.gc.ca/t1/wds/rest/getFullTableDownloadCSV/{product_id}/en"
 
 
-def _urlopen_retry(url: str, timeout: int, retries: int = 4, backoff: float = 2.0) -> bytes:
-    """Open `url` and return its bytes, retrying transient errors with backoff."""
+def _urlopen_retry(url: str, timeout: int, retries: int = 2, backoff: float = 2.0) -> bytes:
+    """Open `url` and return its bytes, retrying transient errors with backoff.
+
+    Kept deliberately short (few retries, modest timeouts) so a slow/stalling
+    upstream fails fast and the loader degrades to the vendored fixture rather
+    than burning the whole job's time budget — across several full-table
+    connectors the worst case must stay well under the workflow timeout.
+    """
     last: Exception | None = None
     for attempt in range(retries):
         try:
@@ -46,8 +52,8 @@ def _urlopen_retry(url: str, timeout: int, retries: int = 4, backoff: float = 2.
 
 def fetch_full_table_csv(product_id: str) -> str:
     """Return the full cube as CSV text (the real upstream; used only with --live)."""
-    meta = json.loads(_urlopen_retry(wds_full_csv_url(product_id), timeout=60).decode("utf-8"))
-    zbytes = _urlopen_retry(meta["object"], timeout=180)
+    meta = json.loads(_urlopen_retry(wds_full_csv_url(product_id), timeout=30).decode("utf-8"))
+    zbytes = _urlopen_retry(meta["object"], timeout=90)
     with zipfile.ZipFile(io.BytesIO(zbytes)) as zf:
         data_name = next(
             n for n in zf.namelist()
