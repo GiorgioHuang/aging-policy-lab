@@ -158,6 +158,41 @@ def _cmd_score(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_weights(_args: argparse.Namespace) -> int:
+    from .db import connect
+    from .indicators.weighting import DOMAINS, sensitivity
+
+    with connect() as conn:
+        out = sensitivity(conn)
+    schemes = out["schemes"]
+
+    print("=== HAPI domain weights (normalized %) ===")
+    print(f"{'domain':<22} " + "".join(f"{name:>11}" for name in schemes))
+    for d in DOMAINS:
+        cells = ""
+        for name in schemes:
+            w = schemes[name]
+            tot = sum(w.values()) or 1.0
+            cells += f"{(100 * w.get(d, 0.0) / tot):>10.1f}%"
+        print(f"{d:<22} {cells}")
+
+    print("\n=== Composite (overall HAPI) under each scheme, latest period ===")
+    print(f"{'jurisdiction':<14} {'period':<11} " + "".join(f"{n:>11}" for n in schemes))
+    max_spread = 0.0
+    for r in out["rows"]:
+        comp = r["composite"]
+        cells = "".join(("—" if comp[n] is None else f"{comp[n]:.1f}").rjust(11) for n in schemes)
+        vals = [v for v in comp.values() if v is not None]
+        if len(vals) >= 2:
+            max_spread = max(max_spread, max(vals) - min(vals))
+        print(f"{r['jurisdiction']:<14} {r['period']:<11} {cells}")
+    print(f"\nMax composite spread across schemes: {max_spread:.1f} points "
+          "(smaller = more robust to the weighting choice).")
+    print("expert = v1 default (theory-anchored); empirical = coefficient-of-variation, "
+          "indicative while coverage is NS + Federal.")
+    return 0
+
+
 def _cmd_analyze(_args: argparse.Namespace) -> int:
     from .analytics.runner import run_analyses
     from .db import connect
@@ -249,6 +284,8 @@ def main(argv: list[str] | None = None) -> int:
     p_sum.set_defaults(func=_cmd_policies_summarize)
 
     sub.add_parser("score", help="compute HAPI v1 scores").set_defaults(func=_cmd_score)
+    sub.add_parser("weights", help="domain weighting schemes + composite sensitivity").set_defaults(
+        func=_cmd_weights)
     sub.add_parser("analyze", help="compute analytic findings (Tier-1 + ITS)").set_defaults(
         func=_cmd_analyze)
 

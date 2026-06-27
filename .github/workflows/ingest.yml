@@ -64,6 +64,7 @@ jobs:
         run: |
           python -m hapi_pipeline.cli policies seed
           python -m hapi_pipeline.cli score
+          python -m hapi_pipeline.cli weights
           python -m hapi_pipeline.cli literature seed
           python -m hapi_pipeline.cli analyze
         working-directory: pipeline

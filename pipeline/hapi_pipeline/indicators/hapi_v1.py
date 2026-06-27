@@ -12,30 +12,25 @@ internet use). The composite blends whichever of these has data for a given
 jurisdiction × year, so `overall` is a genuine six-domain index. Indicators are
 added per domain without changing the model or this method's outputs.
 
-Weighting (v1). The composite is a weighted mean across available domains. v1
-weights the two most direct, policy-actionable, data-robust pillars of healthy
-aging — Health and Care Access — at 2×, and the other four domains at 1× (the
-ratio is what matters; the engine renormalizes by the sum of present domains, so
-a jurisdiction × year missing a domain is scored fairly on the rest). Within a
-domain, indicators are averaged by their per-indicator `weight` (e.g. Independence
-averages the 65–74 and 75+ functional-health bands). The scheme is intentionally
-simple and transparent; a future method version can revise it (and bump
-METHOD_VERSION) once an empirical/expert weighting is established.
+Weighting (v1). The composite is a weighted mean across available domains, using
+the **theory/literature-anchored "expert" tiers** defined in `weighting.py`
+(Health + Care Access tier 1; Financial Security + Independence tier 2; Social
+Participation + Digital Inclusion tier 3 — grounded in the WHO healthy-ageing and
+HelpAge AgeWatch frameworks). The engine renormalizes by the sum of the domains
+present, so a jurisdiction × year missing a domain is scored fairly on the rest.
+Within a domain, indicators are averaged by their per-indicator `weight` (e.g.
+Independence averages the 65–74 and 75+ functional-health bands).
+
+The weighting is auditable and sensitivity-tested: `hapi weights` reports the
+composite under equal / expert / empirical (data-driven) schemes side by side
+(OECD/JRC Handbook guidance). A future method version can adopt a re-estimated
+weighting and bump METHOD_VERSION.
 """
 from __future__ import annotations
 
-METHOD_VERSION = "v1"
+from .weighting import EXPERT as DOMAIN_WEIGHTS  # noqa: F401  (the active v1 scheme)
 
-# Domain weights for the composite HAPI. Health + Care Access (the core,
-# policy-actionable, data-robust pillars) are weighted 2×; the rest 1×.
-DOMAIN_WEIGHTS: dict[str, float] = {
-    "health": 2.0,
-    "care_access": 2.0,
-    "independence": 1.0,
-    "social_participation": 1.0,
-    "financial_security": 1.0,
-    "digital_inclusion": 1.0,
-}
+METHOD_VERSION = "v1"
 
 # Each scoring indicator: how to derive a 0-100 normalized value.
 # Reference ranges (normalization min/max) are documented method choices for v1;

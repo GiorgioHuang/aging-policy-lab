@@ -57,6 +57,7 @@ ingestion (GitHub Actions + managed Postgres), follow [`../RUNBOOK.md`](../RUNBO
 python -m hapi_pipeline.cli policies seed       # load curated NS + Federal policies
 python -m hapi_pipeline.cli policies summarize  # AI summaries (needs ANTHROPIC_API_KEY; optional)
 python -m hapi_pipeline.cli score               # compute HAPI v1 domain + composite scores
+python -m hapi_pipeline.cli weights             # weighting schemes + composite sensitivity
 ```
 
 - `policies/` — curated `seed_policies.json` + idempotent loader (upserts policies,
@@ -72,10 +73,13 @@ python -m hapi_pipeline.cli score               # compute HAPI v1 domain + compo
   seniors' low-income rate), Care Access (CIHI home care), and Digital Inclusion
   (StatCan 22-10-0135 seniors' internet use) — so `overall` is a real six-domain
   composite that blends whichever domains have data per jurisdiction × year
-  (recorded in each `overall` row's `inputs`). The composite is **weighted**:
-  Health + Care Access at 2×, the other four domains at 1× (renormalized over the
-  domains present). Within Independence, the 65–74 and 75+ functional-health bands
-  are averaged. See `indicators/hapi_v1.py` for the documented method.
+  (recorded in each `overall` row's `inputs`). The composite is **weighted** with
+  theory-anchored "expert" tiers (Health + Care Access tier 1; Financial Security
+  + Independence tier 2; Social Participation + Digital Inclusion tier 3),
+  renormalized over the domains present. Within Independence, the 65–74 and 75+
+  functional-health bands are averaged. The weighting is sensitivity-tested:
+  `hapi weights` shows the composite under equal / expert / empirical schemes
+  (see `indicators/weighting.py`).
 
 ## Analytics & AI assistant (Phase 4)
 
