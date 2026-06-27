@@ -55,8 +55,10 @@ def _is_very_good(member: str) -> bool:
 
 
 def _is_percent(stat: str) -> bool:
+    # Exact estimate only — NOT the "Low/High 95% confidence interval, percentage"
+    # bounds (which also contain "percent").
     s = stat.strip().lower()
-    return "percent" in s or s == ""  # matches "Percent" and "Percentage"
+    return s in ("percent", "percentage") or s == ""
 
 
 class StatCanFunctionalHealthConnector(Connector):
