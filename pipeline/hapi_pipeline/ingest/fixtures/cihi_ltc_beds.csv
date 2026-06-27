@@ -1,0 +1,7 @@
+indicator,jurisdiction_code,year,value
+beds_per_1k,CA,2021,28.997057578366807
+beds_per_1k,CA-NS,2021,32.76427630791333
+beds_total,CA,2021,198220
+beds_total,CA-NS,2021,6842
+homes,CA,2021,2076
+homes,CA-NS,2021,84

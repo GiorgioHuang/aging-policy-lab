@@ -144,6 +144,17 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # CIHI national LTC-beds table (manual). Gives CA a beds-capacity value and
+        # a separately-sourced NS benchmark (2021). Already a rate — no per_capita.
+        # Distinct from the live ns_ltc_facilities beds (different vintage/definition);
+        # the two never co-occur in a (jurisdiction, year) cell so they don't double up.
+        "code": "care_access.ltc_beds_cihi_per_1k_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 15.0, "max": 50.0},
+        "weight": 1.0,
+    },
+    {
         "code": "financial_security.low_income_rate_65plus",
         "domain": "financial_security",
         "direction": "lower_is_better",  # a lower senior poverty rate scores higher

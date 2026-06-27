@@ -211,3 +211,23 @@ Other provinces / health regions are present in the CIHI export but out of v1 sc
 (the jurisdiction tree is NS + Federal); add them when the tree expands. Note: CIHI
 indicators vary in whether NS reports them — e.g. **Wait Times for Home Care** has
 NS = "Not available" for every year, so it can't feed NS/Federal HAPI.
+
+### Refreshing the CIHI LTC Beds table (Care Access)
+
+`cihi_ltc_beds` holds **real** captured values from CIHI's "Long-Term Care Beds in
+Canada" data table (a dated snapshot; current fixture = March 31, 2021). To update
+with a newer edition (Excel — no API):
+
+1. Download the latest **Long-Term Care Beds in Canada — Data Table** from
+   <https://www.cihi.ca/en/topics/long-term-care/data-tables>. The data tab has
+   columns `Jurisdiction · Number of LTC homes · Number of LTC beds · Number of LTC
+   beds per 1,000 population age 65 and older · Population age 65 and older`.
+2. Slim it to `indicator,jurisdiction_code,year,value`, keeping the **Canada total**
+   row → `CA` and the **Nova Scotia** row → `CA-NS`, with three tagged rows each:
+   `beds_per_1k` (the per-1,000 column, used directly), `beds_total` (Number of LTC
+   beds), `homes` (Number of LTC homes). Use the snapshot's year (e.g. a March 31,
+   2021 edition → `2021`). (`pip install openpyxl`; a short script reads the tab.)
+3. Replace `pipeline/hapi_pipeline/ingest/fixtures/cihi_ltc_beds.csv`, record the
+   edition date in the commit, and re-run `hapi score` (or dispatch the ingest
+   workflow). Only `beds_per_1k` is scored; `beds_total` + `homes` are Data-Hub
+   series. CIHI's NS per-1,000 corroborates the live `ns_ltc_facilities` measure.

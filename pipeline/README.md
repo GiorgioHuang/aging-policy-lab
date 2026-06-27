@@ -23,6 +23,7 @@ pipeline/hapi_pipeline/
 │   ├── ns_ltc_waitlist.py          care_access (NS LTC Waitlist, Socrata c39g-gsdd)
 │   ├── ns_ltc_facilities.py        care_access (NS LTC/residential-care facilities + beds, Socrata x76a-axw2)
 │   ├── cihi_caregiver_distress.py  independence (CIHI Caregiver Distress, manual)
+│   ├── cihi_ltc_beds.py            care_access (CIHI LTC beds/homes per 1k 65+, manual)
 │   ├── statcan_low_income.py       financial_security (StatCan 11-10-0135)
 │   ├── statcan_internet_use.py     digital_inclusion  (StatCan 22-10-0135)
 │   ├── statcan_life_expectancy.py  health             (StatCan 13-10-0389)

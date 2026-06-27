@@ -29,6 +29,12 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   (`care_access.ltc_facilities_ns`, a Data-Hub-only series) score at the right
   scale. A live `--live` pull of `x76a-axw2` replaces these with the real
   facility-level rows. Schema/aggregate confirmed 2026-06 via `hapi inspect`.
+- **`cihi_ltc_beds.csv` — real data.** Official CIHI "Long-Term Care Beds in
+  Canada" data table (March 31, 2021 edition): LTC homes, LTC beds, and beds per
+  1,000 pop 65+ — the Canada-total row → CA and the Nova Scotia row → CA-NS, in
+  the INDICATOR-tagged slim format `cihi_ltc_beds` reads (`beds_per_1k` /
+  `beds_total` / `homes`). CIHI's NS figure (32.76 / 1,000) corroborates the live
+  NS Open Data measure (~32.5). Manual refresh via RUNBOOK.md §E (no CIHI API).
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -165,6 +171,7 @@ captured values, so offline runs reproduce the production numbers.
 | `ns_accessing_primary_care.json` | Socrata SODA JSON (zone/type/date/measure/actual) | `ns_open_data` | `care_access.pharmacy_primary_care_visits` |
 | `ns_ltc_waitlist.json` | NS Open Data Socrata JSON (`c39g-gsdd`) | `ns_ltc_waitlist` | `care_access.ltc_waitlist_ns` |
 | `cihi_caregiver_distress.csv` | CIHI indicator export, slimmed (manual) | `cihi_caregiver_distress` | `independence.caregiver_distress` |
+| `cihi_ltc_beds.csv` | CIHI LTC beds data table, slimmed (manual) | `cihi_ltc_beds` | `care_access.ltc_beds_cihi_per_1k_65plus`, `care_access.ltc_beds_cihi_total`, `care_access.ltc_homes_cihi` |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_ltc_employment.csv` | StatCan full-table CSV (slim, filtered) | `statcan_ltc_employment` | `care_access.ltc_workforce_per_1k_65plus` |
