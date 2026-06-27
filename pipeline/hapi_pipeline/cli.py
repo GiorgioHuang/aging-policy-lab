@@ -126,6 +126,81 @@ def _cmd_observations(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_prune_indicator(args: argparse.Namespace) -> int:
+    """Retire an indicator: remove its observations and (only) the datasources it
+    exclusively fed. Dry-run by default; --apply executes inside one transaction.
+
+    The observation store is otherwise append-only (immutable lineage). This is a
+    deliberate, audited maintenance path for an indicator that has been removed
+    from the methodology entirely (e.g. a source that turned out to exclude NS),
+    so it no longer clutters the Data Hub. Scores are unaffected — recompute with
+    `hapi score` after pruning if the indicator was ever part of a composite.
+    """
+    from .db import connect
+
+    code = args.code
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute("SELECT id, name FROM indicator WHERE code = %s", (code,))
+        row = cur.fetchone()
+        if not row:
+            print(f"✗ no indicator with code '{code}' — nothing to prune")
+            return 1
+        ind_id, ind_name = row
+
+        cur.execute("SELECT count(*) FROM observation WHERE indicator_id = %s", (ind_id,))
+        n_obs = cur.fetchone()[0]
+        cur.execute("SELECT count(*) FROM policy_indicator WHERE indicator_id = %s", (ind_id,))
+        n_pol = cur.fetchone()[0]
+        cur.execute("SELECT count(*) FROM indicator_source WHERE indicator_id = %s", (ind_id,))
+        n_src = cur.fetchone()[0]
+
+        # Datasources that fed ONLY this indicator (zero observations from any
+        # other indicator) — safe to delete; their dataset_versions cascade.
+        cur.execute(
+            """
+            SELECT ds.id, ds.name
+              FROM datasource ds
+             WHERE EXISTS (SELECT 1 FROM dataset_version dv
+                             JOIN observation o ON o.dataset_version_id = dv.id
+                            WHERE dv.datasource_id = ds.id AND o.indicator_id = %s)
+               AND NOT EXISTS (SELECT 1 FROM dataset_version dv
+                                 JOIN observation o ON o.dataset_version_id = dv.id
+                                WHERE dv.datasource_id = ds.id AND o.indicator_id <> %s)
+            """,
+            (ind_id, ind_id),
+        )
+        orphan_sources = cur.fetchall()
+
+        print(f"indicator: {code} (id {ind_id}) — {ind_name}")
+        print(f"  observations to delete:   {n_obs}")
+        print(f"  policy_indicator links:   {n_pol}")
+        print(f"  indicator_source links:   {n_src}")
+        if orphan_sources:
+            for sid, sname in orphan_sources:
+                cur.execute("SELECT count(*) FROM dataset_version WHERE datasource_id = %s", (sid,))
+                n_dv = cur.fetchone()[0]
+                print(f"  orphaned datasource:      '{sname}' (id {sid}, {n_dv} dataset_version(s))")
+        else:
+            print("  orphaned datasources:     none")
+
+        if not args.apply:
+            print("\n(dry run — re-run with --apply to execute the prune in one transaction)")
+            return 0
+
+        # Observations first (no cascade reaches them), then the indicator
+        # (cascades policy_indicator + indicator_source), then orphaned
+        # datasources (cascades their now-empty dataset_versions).
+        cur.execute("DELETE FROM observation WHERE indicator_id = %s", (ind_id,))
+        cur.execute("DELETE FROM indicator WHERE id = %s", (ind_id,))
+        for sid, _ in orphan_sources:
+            cur.execute("DELETE FROM datasource WHERE id = %s", (sid,))
+        conn.commit()
+        print(f"\n✓ pruned '{code}': removed {n_obs} observation(s), the indicator, "
+              f"{n_pol} policy link(s), {n_src} source link(s), "
+              f"{len(orphan_sources)} orphaned datasource(s).")
+    return 0
+
+
 def _cmd_policies_seed(_args: argparse.Namespace) -> int:
     from .db import connect
     from .policies.loader import load_policies
@@ -269,6 +344,13 @@ def main(argv: list[str] | None = None) -> int:
     p_obs = sub.add_parser("observations", help="print loaded values with lineage")
     p_obs.add_argument("--limit", type=int, default=50)
     p_obs.set_defaults(func=_cmd_observations)
+
+    p_prune = sub.add_parser("prune-indicator",
+                             help="retire an indicator + its observations (dry-run by default)")
+    p_prune.add_argument("code", help="indicator code to remove, e.g. care_access.home_care_clients_65plus")
+    p_prune.add_argument("--apply", action="store_true",
+                         help="execute the deletion (otherwise just report what would be removed)")
+    p_prune.set_defaults(func=_cmd_prune_indicator)
 
     p_ins = sub.add_parser("inspect", help="dump the real upstream schema (needs network)")
     p_ins.add_argument("--source", help="inspect only this connector")

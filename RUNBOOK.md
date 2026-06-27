@@ -168,6 +168,26 @@ vendored fixture and logs `live fetch failed; fell back to vendored fixture`.
 
 The one remaining CIHI source is **Caregiver Distress** (Independence), below.
 
+### Retiring an indicator from the Data Hub (maintenance)
+
+The observation store is append-only by design (immutable lineage). When an
+indicator is removed from the methodology **entirely** — e.g. a source that turns
+out to exclude Nova Scotia — its historical rows otherwise linger on `/data`. The
+deliberate, audited escape hatch is `hapi prune-indicator`:
+
+```bash
+hapi prune-indicator care_access.home_care_clients_65plus          # dry-run: report only
+hapi prune-indicator care_access.home_care_clients_65plus --apply  # delete in one transaction
+```
+
+It deletes the indicator's observations, the indicator row (cascading its policy
+and source links), and any datasource it **exclusively** fed (cascading that
+source's now-empty dataset_versions) — a datasource still feeding another
+indicator is left untouched. Scores are unaffected (the engine reads the live
+indicator set); run `hapi score` afterwards if the indicator was ever part of a
+composite. Against the managed Postgres, dispatch the **Prune retired indicator**
+workflow (`apply=false` first to preview, then `apply=true`).
+
 ### Refreshing the CIHI Caregiver Distress indicator (Independence)
 
 `cihi_caregiver_distress` holds **real** captured CIHI values. To update them with a

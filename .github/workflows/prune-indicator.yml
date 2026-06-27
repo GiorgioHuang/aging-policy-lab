@@ -1,0 +1,60 @@
+name: Prune retired indicator
+
+# One-off maintenance: retire an indicator (and the datasources it exclusively
+# fed) from the managed Postgres so it no longer clutters the Data Hub. The
+# observation store is otherwise append-only — this is the deliberate, audited
+# escape hatch for an indicator removed from the methodology entirely.
+#
+# Defaults to a DRY RUN (reports what would be deleted). Set `apply=true` to
+# execute. Recomputes HAPI scores afterwards. Requires the DATABASE_URL secret.
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Indicator code to prune"
+        required: true
+        default: "care_access.home_care_clients_65plus"
+      apply:
+        description: "Execute the deletion (otherwise dry-run only)"
+        type: boolean
+        required: true
+        default: false
+
+concurrency:
+  group: data-hub-ingest # share the ingest lock so they never overlap
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Guard on DATABASE_URL
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret not set — see RUNBOOK.md §C."
+            exit 1
+          fi
+      - run: pip install -r pipeline/requirements.txt
+      - name: Prune (dry-run unless apply=true)
+        run: |
+          if [ "${{ inputs.apply }}" = "true" ]; then
+            python -m hapi_pipeline.cli prune-indicator "${{ inputs.code }}" --apply
+          else
+            python -m hapi_pipeline.cli prune-indicator "${{ inputs.code }}"
+          fi
+        working-directory: pipeline
+      - name: Recompute HAPI scores
+        if: ${{ inputs.apply }}
+        run: python -m hapi_pipeline.cli score
+        working-directory: pipeline
+      - name: Show remaining observations
+        run: python -m hapi_pipeline.cli observations --limit 500
+        working-directory: pipeline
