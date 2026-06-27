@@ -21,6 +21,7 @@ pipeline/hapi_pipeline/
 │   ├── _statcan.py   shared WDS full-table CSV fetch/filter/inspect helpers
 │   ├── statcan_wds.py · ns_open_data.py
 │   ├── ns_ltc_waitlist.py          care_access (NS LTC Waitlist, Socrata c39g-gsdd)
+│   ├── ns_ltc_facilities.py        care_access (NS LTC/residential-care facilities + beds, Socrata x76a-axw2)
 │   ├── cihi_caregiver_distress.py  independence (CIHI Caregiver Distress, manual)
 │   ├── statcan_low_income.py       financial_security (StatCan 11-10-0135)
 │   ├── statcan_internet_use.py     digital_inclusion  (StatCan 22-10-0135)

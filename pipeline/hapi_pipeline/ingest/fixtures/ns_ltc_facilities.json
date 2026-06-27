@@ -1,0 +1,14 @@
+[
+  {"facility_name": "Representative Nursing Home A", "facility_type": "Nursing Home", "beds": "120", "health_zone": "Central", "community": "Halifax"},
+  {"facility_name": "Representative Nursing Home B", "facility_type": "Nursing Home", "beds": "98", "health_zone": "Central", "community": "Dartmouth"},
+  {"facility_name": "Representative Nursing Home C", "facility_type": "Nursing Home", "beds": "150", "health_zone": "Western", "community": "Yarmouth"},
+  {"facility_name": "Representative Nursing Home D", "facility_type": "Nursing Home", "beds": "64", "health_zone": "Northern", "community": "Truro"},
+  {"facility_name": "Representative Nursing Home E", "facility_type": "Nursing Home", "beds": "82", "health_zone": "Eastern", "community": "Sydney"},
+  {"facility_name": "Representative Nursing Home F", "facility_type": "Nursing Home", "beds": "110", "health_zone": "Western", "community": "Kentville"},
+  {"facility_name": "Representative Nursing Home G", "facility_type": "Nursing Home", "beds": "48", "health_zone": "Northern", "community": "Amherst"},
+  {"facility_name": "Representative Residential Care H", "facility_type": "Residential Care Facility", "beds": "30", "health_zone": "Central", "community": "Halifax"},
+  {"facility_name": "Representative Residential Care I", "facility_type": "Residential Care Facility", "beds": "24", "health_zone": "Eastern", "community": "New Glasgow"},
+  {"facility_name": "Representative Residential Care J", "facility_type": "Residential Care Facility", "beds": "36", "health_zone": "Western", "community": "Bridgewater"},
+  {"facility_name": "Representative Nursing Home K", "facility_type": "Nursing Home", "beds": "90", "health_zone": "Central", "community": "Bedford"},
+  {"facility_name": "Representative Nursing Home L", "facility_type": "Nursing Home", "beds": "75", "health_zone": "Eastern", "community": "Antigonish"}
+]

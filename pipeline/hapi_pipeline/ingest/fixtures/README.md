@@ -18,6 +18,14 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   JSON shape `ns_ltc_waitlist` returns. Replaced by the live `--live` pull (NS Open
   Data resource `c39g-gsdd`). This **replaces** the retired CIHI home-care client
   count, which had no Nova Scotia data (NS does not submit to CIHI's HCRS/IRRS).
+- **`ns_ltc_facilities.json` — representative sample, NOT official.** A small,
+  plausible set of NS long-term-care / residential-care facility rows (name, type,
+  beds, health zone) in the Socrata JSON shape `ns_ltc_facilities` returns. The
+  connector aggregates to provincial **total beds** (→ `care_access.ltc_beds_per_1k_65plus`)
+  and **facility count** (→ `care_access.ltc_facilities_ns`, a Data-Hub-only series).
+  Replaced by the live `--live` pull of NS Open Data resource `x76a-axw2`; the bed
+  column, type and zone labels are confirmed on a networked runner via `hapi inspect`
+  before the beds indicator is scored.
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -150,6 +158,7 @@ captured values, so offline runs reproduce the production numbers.
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_ltc_employment.csv` | StatCan full-table CSV (slim, filtered) | `statcan_ltc_employment` | `care_access.ltc_workforce_per_1k_65plus` |
+| `ns_ltc_facilities.json` | NS Open Data Socrata JSON (`x76a-axw2`) | `ns_ltc_facilities` | `care_access.ltc_beds_per_1k_65plus`, `care_access.ltc_facilities_ns` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
 | `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_cchs` | `social_participation.community_belonging_65plus`, `care_access.regular_provider_65plus` |
 | `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_functional_health` | `independence.functional_health_65_74`, `independence.functional_health_75plus` |

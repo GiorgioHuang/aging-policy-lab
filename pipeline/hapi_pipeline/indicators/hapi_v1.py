@@ -120,9 +120,10 @@ INDICATORS: list[dict] = [
             "scale": 1000,
             "unit": "workers per 1,000 pop 65+",
         },
-        # PROVISIONAL range — tighten after the first --live run reveals the real
-        # 623-employee magnitudes (representative fixture for now).
-        "normalization": {"method": "min_max", "min": 20.0, "max": 100.0},
+        # Range set from the live 2001-2025 series (Table 14-10-0202): NAICS-623
+        # workers per 1,000 pop 65+ run ~60 (CA) to ~87 (NS); 40..100 brackets it
+        # with margin and no floor/ceiling.
+        "normalization": {"method": "min_max", "min": 40.0, "max": 100.0},
         "weight": 1.0,
     },
     {
