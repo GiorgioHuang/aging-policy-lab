@@ -5,6 +5,7 @@ from .base import Connector
 from .cihi_irrs import CIHIIRRSConnector
 from .ns_open_data import NSOpenDataConnector
 from .statcan_internet_use import StatCanInternetUseConnector
+from .statcan_life_expectancy import StatCanLifeExpectancyConnector
 from .statcan_low_income import StatCanLowIncomeConnector
 from .statcan_wds import StatCanWDSConnector
 
@@ -14,6 +15,7 @@ CONNECTORS: list[Connector] = [
     CIHIIRRSConnector(),
     StatCanLowIncomeConnector(),
     StatCanInternetUseConnector(),
+    StatCanLifeExpectancyConnector(),
 ]
 
 

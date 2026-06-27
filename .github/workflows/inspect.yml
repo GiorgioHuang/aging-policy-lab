@@ -25,4 +25,5 @@ jobs:
           python -m hapi_pipeline.cli inspect --source ns_open_data
           python -m hapi_pipeline.cli inspect --source statcan_low_income
           python -m hapi_pipeline.cli inspect --source statcan_internet_use
+          python -m hapi_pipeline.cli inspect --source statcan_life_expectancy
         working-directory: pipeline
