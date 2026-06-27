@@ -33,12 +33,12 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   Participation), CA + NS, in the slim format `statcan_cchs._filter_csv()` emits.
   Product id (13-10-0096) + schema confirmed via `hapi inspect`; bootstrap values
   are illustrative until the first `--live` run.
-- **`statcan_functional_health_65plus.csv` — representative sample, NOT official.**
-  Plausible functional-health (very good to perfect) values for ages 65–74 (→
-  Independence; the table has no 65+ aggregate), CA + NS, in the slim format
-  `statcan_functional_health._filter_csv()` emits. Product id (13-10-0966) +
-  schema confirmed via `hapi inspect`; bootstrap values illustrative until the
-  first `--live` run.
+- **`statcan_functional_health_65plus.csv` — mixed (65–74 real, 75+ representative).**
+  Functional-health (very good to perfect) values for both senior bands (→
+  Independence; the table has no 65+ aggregate), CA + NS, in the slim
+  `INDICATOR`-tagged format `statcan_functional_health._filter_csv()` emits. The
+  65–74 rows are real captured values; the 75+ rows are representative until the
+  next `--live` run. Product id (13-10-0966) + schema confirmed via `hapi inspect`.
 
 Provenance is always explicit: anything loaded from a fixture gets
 `dataset_version.source_version = 'fixture:<filename>'`, so even real-but-vendored
@@ -106,8 +106,9 @@ downloading the latest table from
   sense of community belonging (strong).
 - **StatCan (Independence):** Table **13-10-0966** → productId **`13100966`**
   ("Functional health", CCHS 2015/2019/2024…; dims Age group / Sex / 'Domains' /
-  'Characteristics'); no 65+ aggregate, so filtered to **age 65–74**, both sexes,
-  percentage, domain "Very good to perfect functional health" (HUI Mark 3).
+  'Characteristics'); no 65+ aggregate, so filtered to **both senior bands
+  (65–74 and 75+)**, both sexes, percentage, domain "Very good to perfect
+  functional health" (HUI Mark 3). HAPI averages the two bands within the domain.
 
 All four shapes (population, NS primary care, low income, internet use) were
 verified end-to-end via `hapi inspect` + a live `--live` run on a networked
@@ -125,4 +126,4 @@ captured values, so offline runs reproduce the production numbers.
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
 | `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_cchs` | `social_participation.community_belonging_65plus` |
-| `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_functional_health` | `independence.functional_health_65_74` |
+| `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_functional_health` | `independence.functional_health_65_74`, `independence.functional_health_75plus` |

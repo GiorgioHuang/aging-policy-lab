@@ -72,7 +72,10 @@ python -m hapi_pipeline.cli score               # compute HAPI v1 domain + compo
   seniors' low-income rate), Care Access (CIHI home care), and Digital Inclusion
   (StatCan 22-10-0135 seniors' internet use) — so `overall` is a real six-domain
   composite that blends whichever domains have data per jurisdiction × year
-  (recorded in each `overall` row's `inputs`).
+  (recorded in each `overall` row's `inputs`). The composite is **weighted**:
+  Health + Care Access at 2×, the other four domains at 1× (renormalized over the
+  domains present). Within Independence, the 65–74 and 75+ functional-health bands
+  are averaged. See `indicators/hapi_v1.py` for the documented method.
 
 ## Analytics & AI assistant (Phase 4)
 

@@ -11,12 +11,12 @@ Canadian adults, 2015 to 2024"):
     'Age group', 'Sex', 'Domains' (the functional-health category), 'Characteristics'
     (the statistic), …, VALUE, STATUS. National GEO is "Canada (excluding territories)".
   * The table has NO 65+ aggregate — age bands are "65 to 74 years" and "75 years
-    and over". v1 uses the **65–74** band (younger seniors) as the Independence
-    indicator; a 75+ companion can be added later. Filtered to GEO ∈
-    {Canada(excl. terr.), Nova Scotia}, age "65 to 74 years", both sexes,
-    statistic "Percentage", domain "Very good to perfect functional health".
+    and over". Both are ingested as companion Independence indicators (younger and
+    older seniors); HAPI averages them within the domain. Filtered to GEO ∈
+    {Canada(excl. terr.), Nova Scotia}, both senior bands, both sexes, statistic
+    "Percentage", domain "Very good to perfect functional health".
 
-HAPI Independence indicator for younger seniors: the share of those aged 65–74
+HAPI Independence indicators: the share of seniors (65–74 and 75+, separately)
 with very-good-to-perfect functional health — a summary of independent
 functioning. higher_is_better.
 """
@@ -30,7 +30,8 @@ from .base import Connector, DataSourceSpec, IndicatorSpec, ObservationRecord, R
 
 PRODUCT_ID = "13100966"
 MIN_YEAR = 2015
-INDICATOR = "independence.functional_health_65_74"
+IND_65_74 = "independence.functional_health_65_74"
+IND_75PLUS = "independence.functional_health_75plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -40,10 +41,15 @@ _DIM_HINTS = {
 }
 
 
-def _is_age_65_74(member: str) -> bool:
-    """The '65 to 74 years' band (the table has no 65+ aggregate)."""
+def _age_band(member: str) -> str | None:
+    """Map an age member to one of our two senior-band indicator codes (the table
+    has no 65+ aggregate — only '65 to 74 years' and '75 years and over')."""
     m = member.strip().lower()
-    return "65" in m and "74" in m
+    if "65" in m and "74" in m:
+        return IND_65_74
+    if "75" in m and ("over" in m or "older" in m):
+        return IND_75PLUS
+    return None
 
 
 def _is_very_good(member: str) -> bool:
@@ -73,23 +79,35 @@ class StatCanFunctionalHealthConnector(Connector):
         licence="Statistics Canada Open Licence",
         update_frequency="periodic",
         notes="WDS getFullTableDownloadCSV(13100966), CCHS (2015/2019/2024…); "
-              "filtered to 65+, both sexes, percent, very good to perfect "
-              "functional health (HUI Mark 3).",
+              "filtered to both senior bands (65–74, 75+), both sexes, percent, "
+              "very good to perfect functional health (HUI Mark 3).",
     )
 
     indicators = [
         IndicatorSpec(
-            code=INDICATOR,
+            code=IND_65_74,
             domain="independence",
             name="Functional health (very good to perfect), ages 65–74",
             definition="Share of persons aged 65–74 with very-good-to-perfect functional "
-                       "health (Health Utilities Index Mark 3, 0.89–1.00). The source "
-                       "table has no 65+ aggregate; v1 uses the 65–74 band.",
+                       "health (Health Utilities Index Mark 3, 0.89–1.00).",
             formula="StatCan Table 13-10-0966: age '65 to 74 years', both sexes, "
                     "percentage, domain 'Very good to perfect functional health'.",
             unit="% of persons 65–74",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 20.0, "max": 65.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_75PLUS,
+            domain="independence",
+            name="Functional health (very good to perfect), ages 75+",
+            definition="Share of persons aged 75 and over with very-good-to-perfect "
+                       "functional health (Health Utilities Index Mark 3, 0.89–1.00).",
+            formula="StatCan Table 13-10-0966: age '75 years and over', both sexes, "
+                    "percentage, domain 'Very good to perfect functional health'.",
+            unit="% of persons 75+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 15.0, "max": 55.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
@@ -115,11 +133,12 @@ class StatCanFunctionalHealthConnector(Connector):
             f_stat = sc.find_field(fields, "statistic")
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
+        writer.writerow(["INDICATOR", "REF_DATE", "GEO", "VALUE", "STATUS"])
         for row in reader:
             if sc.map_geo(sc.col(row, "GEO")) is None:
                 continue
-            if f_age and not _is_age_65_74(row.get(f_age, "")):
+            code = _age_band(row.get(f_age, "")) if f_age else None
+            if code is None:
                 continue
             if f_sex and not sc.is_total_gender(row.get(f_sex, "")):
                 continue
@@ -127,7 +146,7 @@ class StatCanFunctionalHealthConnector(Connector):
                 continue
             if f_dom and not _is_very_good(row.get(f_dom, "")):
                 continue
-            writer.writerow([sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
+            writer.writerow([code, sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])
         return out.getvalue()
 
@@ -139,8 +158,9 @@ class StatCanFunctionalHealthConnector(Connector):
         reader = csv.DictReader(io.StringIO(payload.content.decode("utf-8-sig")))
         records: list[ObservationRecord] = []
         for row in reader:
+            code = (row.get("INDICATOR") or "").strip()
             jcode = sc.map_geo(sc.col(row, "GEO"))
-            if jcode is None:
+            if not code or jcode is None:
                 continue
             year = sc.col(row, "REF_DATE")[:4]
             if not year or int(year) < MIN_YEAR:
@@ -150,7 +170,7 @@ class StatCanFunctionalHealthConnector(Connector):
             suppressed = raw == "" or status in ("F", "X", "..", "...")
             records.append(
                 ObservationRecord(
-                    indicator_code=INDICATOR,
+                    indicator_code=code,
                     jurisdiction_code=jcode,
                     period_start=f"{year}-01-01",
                     period_end=f"{year}-12-31",

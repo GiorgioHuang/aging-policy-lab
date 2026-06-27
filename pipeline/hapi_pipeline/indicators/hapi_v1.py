@@ -11,17 +11,28 @@ rate), Care Access (CIHI home care), and Digital Inclusion (StatCan seniors'
 internet use). The composite blends whichever of these has data for a given
 jurisdiction × year, so `overall` is a genuine six-domain index. Indicators are
 added per domain without changing the model or this method's outputs.
+
+Weighting (v1). The composite is a weighted mean across available domains. v1
+weights the two most direct, policy-actionable, data-robust pillars of healthy
+aging — Health and Care Access — at 2×, and the other four domains at 1× (the
+ratio is what matters; the engine renormalizes by the sum of present domains, so
+a jurisdiction × year missing a domain is scored fairly on the rest). Within a
+domain, indicators are averaged by their per-indicator `weight` (e.g. Independence
+averages the 65–74 and 75+ functional-health bands). The scheme is intentionally
+simple and transparent; a future method version can revise it (and bump
+METHOD_VERSION) once an empirical/expert weighting is established.
 """
 from __future__ import annotations
 
 METHOD_VERSION = "v1"
 
-# Domain weights for the composite HAPI (equal across available domains in v1).
+# Domain weights for the composite HAPI. Health + Care Access (the core,
+# policy-actionable, data-robust pillars) are weighted 2×; the rest 1×.
 DOMAIN_WEIGHTS: dict[str, float] = {
-    "health": 1.0,
+    "health": 2.0,
+    "care_access": 2.0,
     "independence": 1.0,
     "social_participation": 1.0,
-    "care_access": 1.0,
     "financial_security": 1.0,
     "digital_inclusion": 1.0,
 }
@@ -46,6 +57,16 @@ INDICATORS: list[dict] = [
         # % of 65-74 with very-good-to-perfect functional health (HUI-3). Range
         # brackets the observed senior span (lower than the all-ages rate).
         "normalization": {"method": "min_max", "min": 20.0, "max": 65.0},
+        "weight": 1.0,
+    },
+    {
+        "code": "independence.functional_health_75plus",
+        "domain": "independence",
+        "direction": "higher_is_better",
+        # % of 75+ with very-good-to-perfect functional health (HUI-3). Lower than
+        # the 65-74 band, so a lower reference range. Averaged with 65-74 within
+        # the Independence domain.
+        "normalization": {"method": "min_max", "min": 15.0, "max": 55.0},
         "weight": 1.0,
     },
     {
