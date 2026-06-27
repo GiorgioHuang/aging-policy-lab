@@ -11,21 +11,43 @@ from __future__ import annotations
 import csv
 import io
 import json
+import time
+import urllib.error
 import urllib.request
 import zipfile
+
+# Transient upstream statuses worth retrying (StatCan WDS occasionally 503s under
+# load, especially when several full tables are pulled back-to-back).
+_RETRY_STATUS = {429, 500, 502, 503, 504}
 
 
 def wds_full_csv_url(product_id: str) -> str:
     return f"https://www150.statcan.gc.ca/t1/wds/rest/getFullTableDownloadCSV/{product_id}/en"
 
 
+def _urlopen_retry(url: str, timeout: int, retries: int = 4, backoff: float = 2.0) -> bytes:
+    """Open `url` and return its bytes, retrying transient errors with backoff."""
+    last: Exception | None = None
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as resp:  # noqa: S310
+                return resp.read()
+        except urllib.error.HTTPError as e:  # noqa: PERF203
+            last = e
+            if e.code not in _RETRY_STATUS:
+                raise
+        except (urllib.error.URLError, TimeoutError) as e:
+            last = e
+        if attempt < retries - 1:
+            time.sleep(backoff * (2 ** attempt))
+    assert last is not None
+    raise last
+
+
 def fetch_full_table_csv(product_id: str) -> str:
     """Return the full cube as CSV text (the real upstream; used only with --live)."""
-    with urllib.request.urlopen(wds_full_csv_url(product_id), timeout=60) as resp:  # noqa: S310
-        meta = json.loads(resp.read().decode("utf-8"))
-    zip_url = meta["object"]
-    with urllib.request.urlopen(zip_url, timeout=180) as resp:  # noqa: S310
-        zbytes = resp.read()
+    meta = json.loads(_urlopen_retry(wds_full_csv_url(product_id), timeout=60).decode("utf-8"))
+    zbytes = _urlopen_retry(meta["object"], timeout=180)
     with zipfile.ZipFile(io.BytesIO(zbytes)) as zf:
         data_name = next(
             n for n in zf.namelist()

@@ -144,15 +144,23 @@ def ingest(conn, connector: Connector, *, live: bool = False) -> IngestResult:
     """Run one connector end-to-end: extract -> validate -> load (idempotent).
 
     A connector with no live path (e.g. CIHI, a manual portal download) falls
-    back to its vendored fixture even when live=True, so a `--live` run still
-    loads every source.
+    back to its vendored fixture even when live=True. A connector whose live
+    fetch fails transiently (e.g. a StatCan 5xx/timeout, after retries) also
+    degrades to its vendored fixture, so a `--live` run still loads every source
+    with last-known-good data instead of failing the whole pipeline.
     """
+    fallback_issue: str | None = None
     try:
         payload = connector.extract(live=live)
     except NotImplementedError:
         payload = connector.extract(live=False)
+    except OSError as e:  # URLError/HTTPError/timeout all subclass OSError
+        payload = connector.extract(live=False)
+        fallback_issue = f"live fetch failed ({e}); fell back to vendored fixture"
     records = connector.parse(payload)
     kept, issues = run_quality_checks(connector.indicators, records)
+    if fallback_issue:
+        issues.insert(0, fallback_issue)
 
     with conn.cursor() as cur:
         ds_id = _upsert_datasource(cur, connector.source)
