@@ -6,16 +6,15 @@ Source confirmed 2026-06 (WebSearch; direct fetch blocked in this sandbox):
     https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2210013501
   * CIUS is a biennial survey (2018, 2020, 2022 …), so this series is biennial,
     not annual — the composite blends it only in survey years.
-  * Pulled as the WDS full-table CSV and filtered to age = 65 years and over and,
-    where present, the "used the Internet" characteristic (the headline rate).
+
+Schema CONFIRMED 2026-06 via `hapi inspect statcan_internet_use` on a networked
+runner. Columns: REF_DATE, GEO, 'Internet use from any location' (single member
+"Internet use"), 'Age group' (members include "65 years and over"), …, VALUE,
+STATUS. We filter to GEO ∈ {Canada, Nova Scotia}, age = "65 years and over",
+characteristic = "Internet use" (the headline % who used the Internet).
 
 HAPI Digital Inclusion indicator for older adults: the share of seniors who used
 the Internet. Direction is higher_is_better.
-
-TO CONFIRM on first --live run via `hapi inspect statcan_internet_use`: the exact
-age-group label and whether a separate "Internet use" characteristic column
-exists / its member wording. The filter matches case-insensitively by substring
-and is tolerant; tighten here if inspection differs.
 """
 from __future__ import annotations
 

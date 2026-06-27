@@ -4,19 +4,18 @@ Source confirmed 2026-06 (WebSearch; direct fetch blocked in this sandbox):
   * Table 11-10-0135 "Low income statistics by age, gender and economic family
     type" (productId 11100135), Canada + provinces/territories, annual.
     https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1110013501
-  * Pulled as the WDS full-table CSV (see _statcan.fetch_full_table_csv) and
-    filtered to: age = 65 years and over, total gender, low-income line =
-    Low income measure after tax (LIM-AT), statistic = percentage of persons in
-    low income (the *rate*), economic-family type = all persons.
+
+Schema CONFIRMED 2026-06 via `hapi inspect statcan_low_income` on a networked
+runner. The cube has NO separate age/gender column; the age cut is folded into
+the `Persons in low income` dimension. We filter to:
+  * Persons in low income = "Persons 65 years and over" (the both-gender 65+
+    aggregate; gendered / economic-family variants are excluded),
+  * Low income lines     = "Low income measure after tax" (LIM-AT),
+  * Statistics           = "Percentage of persons in low income" (the *rate*).
 
 This is the headline HAPI Financial Security indicator for older adults:
 the share of seniors living below the LIM-AT line. Direction is lower_is_better
 (a lower senior poverty rate scores higher).
-
-TO CONFIRM on first --live run via `hapi inspect statcan_low_income`: the exact
-member labels for the low-income-line / statistic / economic-family dimensions
-(StatCan wording varies by vintage). The filter matches them case-insensitively
-by substring and is intentionally tolerant; tighten here if inspection differs.
 """
 from __future__ import annotations
 
@@ -31,21 +30,33 @@ GEO_TO_JURISDICTION = {"Canada": "CA", "Nova Scotia": "CA-NS"}
 MIN_YEAR = 2019
 
 _DIM_HINTS = {
-    "age": ("age",),
-    "gender": ("gender", "sex"),
+    "persons": ("persons in low", "age"),
     "low_income_line": ("low income line", "low-income line", "low income lines"),
     "statistic": ("statistic",),
-    "family": ("economic family", "persons in low"),
 }
 
 
-def _wanted(line: str, stat: str, fam: str) -> bool:
-    """Keep LIM-AT × percentage-rate × all-persons rows (tolerant matching)."""
-    ll, st, fm = line.lower(), stat.lower(), fam.lower()
-    line_ok = ("low income measure" in ll and "after" in ll) or ll == "" or "lim" in ll
-    stat_ok = ("percentage" in st and "low income" in st) or "rate" in st or st == ""
-    fam_ok = ("all persons" in fm) or fm == ""
-    return line_ok and stat_ok and fam_ok
+def _is_persons_65plus(member: str) -> bool:
+    """The both-gender 65+ aggregate of the 'Persons in low income' dimension —
+    not the gendered ('Men+/Women+ … 65 years and over') or economic-family rows."""
+    p = member.strip().lower()
+    return (
+        p.startswith("persons")
+        and "65 years and over" in p
+        and "men" not in p
+        and "women" not in p
+        and "economic" not in p
+    )
+
+
+def _wanted_line(line: str) -> bool:
+    ll = line.lower()
+    return ("low income measure" in ll and "after" in ll) or "lim-at" in ll or ll == ""
+
+
+def _wanted_stat(stat: str) -> bool:
+    st = stat.lower()
+    return ("percentage" in st and "low income" in st) or "rate" in st or st == ""
 
 
 class StatCanLowIncomeConnector(Connector):
@@ -70,8 +81,8 @@ class StatCanLowIncomeConnector(Connector):
             name="Low-income rate, population 65+ (LIM-AT)",
             definition="Share of persons aged 65+ living below the Low Income Measure, "
                        "after tax (LIM-AT).",
-            formula="StatCan Table 11-10-0135: age='65 years and over', total gender, "
-                    "LIM-AT, percentage of persons in low income.",
+            formula="StatCan Table 11-10-0135: persons in low income='Persons 65 years "
+                    "and over', LIM-AT, percentage of persons in low income.",
             unit="% of persons 65+",
             direction="lower_is_better",
             normalization={"method": "min_max", "min": 2.0, "max": 20.0},
@@ -89,11 +100,9 @@ class StatCanLowIncomeConnector(Connector):
     def _filter_csv(text: str) -> str:
         reader = csv.DictReader(io.StringIO(text))
         fields = reader.fieldnames or []
-        f_age = sc.find_field(fields, "age")
-        f_gender = sc.find_field(fields, "gender", "sex")
+        f_persons = sc.find_field(fields, "persons in low", "age")
         f_line = sc.find_field(fields, "low income line", "low-income line", "low income lines")
         f_stat = sc.find_field(fields, "statistic")
-        f_fam = sc.find_field(fields, "economic family", "persons in low")
         out = io.StringIO()
         writer = csv.writer(out)
         writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
@@ -101,11 +110,11 @@ class StatCanLowIncomeConnector(Connector):
             geo = sc.col(row, "GEO")
             if geo not in GEO_TO_JURISDICTION:
                 continue
-            if f_age and not sc.is_age_65plus(row.get(f_age, "")):
+            if f_persons and not _is_persons_65plus(row.get(f_persons, "")):
                 continue
-            if f_gender and not sc.is_total_gender(row.get(f_gender, "")):
+            if f_line and not _wanted_line(row.get(f_line, "")):
                 continue
-            if not _wanted(row.get(f_line, ""), row.get(f_stat, ""), row.get(f_fam, "")):
+            if f_stat and not _wanted_stat(row.get(f_stat, "")):
                 continue
             writer.writerow([sc.col(row, "REF_DATE"), geo,
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])
