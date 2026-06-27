@@ -143,3 +143,33 @@ first (and grant the deploy service account `run.admin`, `iam.serviceAccountUser
 - The app binds `0.0.0.0:$PORT` (Cloud Run sets `PORT=8080`); the image already
   handles this.
 - The container ships no secrets; `DATABASE_URL` is injected at runtime only.
+
+## E — Refresh the CIHI home-care complement (manual)
+
+CIHI has **no open API**: home-care data (now the Integrated interRAI Reporting
+System, IRRS, after HCRS/HCRS-CA retired 2025-03) is published as **manual data
+tables** (Excel/CSV portal downloads); record-level data is controlled access.
+So `hapi ingest --live` cannot auto-fetch CIHI — the loader degrades to the
+vendored fixture and logs `live fetch failed; fell back to vendored fixture`.
+
+This source is a **complement**, not the backbone, of Care Access: the live,
+auto-refreshing Care-Access indicator is CCHS "has a regular healthcare provider"
+(`statcan_cchs`, StatCan 13-10-0096). The CIHI series adds a home-care
+*utilization* view on a manual cadence. To refresh it with official figures:
+
+1. Open CIHI's home-care data tables: <https://www.cihi.ca/en/topics/home-care/data-tables>
+   (or the IRRS/Quick Stats releases). Pick the table with **home care clients by
+   province and age group** (65+).
+2. Download the Excel/CSV and read off the count of home-care clients aged 65+
+   for **Canada** and **Nova Scotia**, by year.
+3. Replace `pipeline/hapi_pipeline/ingest/fixtures/cihi_home_care_clients_65plus.csv`
+   with those values, keeping the header `jurisdiction_code,year,value` (use the
+   real suppression marker, e.g. `x`, where CIHI suppresses a cell). Record the
+   table edition/date in the commit message.
+4. Re-run scoring (locally `hapi score`, or dispatch the ingest workflow): the new
+   checksum creates a fresh immutable `DatasetVersion` and the Care Access domain
+   picks up the official numbers; the old version is retained for lineage.
+
+Until step 3 is done, the fixture holds clearly-labelled **representative** values
+(see `ingest/fixtures/README.md`); they do not affect the live CCHS-based
+Care-Access backbone.

@@ -23,7 +23,7 @@ pipeline/hapi_pipeline/
 │   ├── statcan_low_income.py       financial_security (StatCan 11-10-0135)
 │   ├── statcan_internet_use.py     digital_inclusion  (StatCan 22-10-0135)
 │   ├── statcan_life_expectancy.py  health             (StatCan 13-10-0389)
-│   ├── statcan_cchs.py             social_participation (StatCan 13-10-0096)
+│   ├── statcan_cchs.py             social_participation + care_access (StatCan 13-10-0096)
 │   ├── statcan_functional_health.py independence       (StatCan 13-10-0966)
 │   └── fixtures/     vendored sample payloads (see fixtures/README.md)
 ├── transform/      cleaning, normalization, quality checks                       (Phase 2)
@@ -93,6 +93,12 @@ python -m hapi_pipeline.cli assistant "NS dementia policy"   # evidence pack (+ 
   (interrupted time series via statsmodels + Newey-West HAC SEs; **causal** tier
   with assumptions/limitations). `runner.py` stores `analysis_finding` rows; the
   Association/Causal tag is explicit on every finding (docs/07 §3).
+- **Care Access data sourcing.** CIHI has no open API (manual portal downloads /
+  controlled access), so the live, auto-refreshing Care-Access indicator is CCHS
+  "has a regular healthcare provider" (`statcan_cchs`, 13-10-0096). The CIHI
+  home-care-clients series is a manually-refreshed *complement* (RUNBOOK.md §E);
+  the connector falls back to its fixture on `--live` and the domain averages
+  both. So the top-weighted domain is anchored by live official data.
 - `literature/` — starter literature KB seed + loader.
 - `ai/assistant.py` — topic → grounded **evidence pack** (policies + literature +
   findings + indicators, each with a citation id) → Claude **cited draft** where

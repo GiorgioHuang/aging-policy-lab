@@ -1,4 +1,10 @@
-"""StatCan connector — CCHS community belonging (Table 13-10-0096), Social Participation.
+"""StatCan connector — CCHS health characteristics (Table 13-10-0096).
+
+Feeds two HAPI domains from one already-live CCHS table:
+  * Social Participation — sense of belonging to local community (strong)
+  * Care Access          — has a regular healthcare provider (the API-accessible,
+                           auto-refreshing Care-Access backbone; CIHI home-care
+                           remains a manually-refreshed complement)
 
 Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_cchs` on a
 networked runner:
@@ -7,13 +13,11 @@ networked runner:
     https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310009601
   * Real dimensions: REF_DATE, GEO, 'Age group', 'Sex', 'Indicators',
     'Characteristics' (the statistic), …, VALUE, STATUS. The national GEO member
-    is "Canada (excluding territories)".
-  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age "65 years and
-    over", both sexes, statistic "Percent", indicator = sense of belonging to
-    local community (strong).
-
-HAPI Social Participation indicator for older adults: the share of seniors
-reporting a strong sense of community belonging. higher_is_better.
+    is "Canada (excluding territories)". Both target members ('Sense of belonging
+    to local community…' and 'Has a regular healthcare provider') are confirmed
+    present in the 'Indicators' dimension.
+  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age 65+, both sexes,
+    statistic "Percent". Both indicators are higher_is_better.
 """
 from __future__ import annotations
 
@@ -25,7 +29,8 @@ from .base import Connector, DataSourceSpec, IndicatorSpec, ObservationRecord, R
 
 PRODUCT_ID = "13100096"
 MIN_YEAR = 2015
-INDICATOR = "social_participation.community_belonging_65plus"
+IND_BELONGING = "social_participation.community_belonging_65plus"
+IND_PROVIDER = "care_access.regular_provider_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -35,9 +40,14 @@ _DIM_HINTS = {
 }
 
 
-def _is_belonging(indicator: str) -> bool:
+def _classify(indicator: str) -> str | None:
+    """Map a 13-10-0096 'Indicators' member to one of our HAPI indicator codes."""
     h = indicator.strip().lower()
-    return "belonging" in h and "community" in h and "strong" in h
+    if "belonging" in h and "community" in h and "strong" in h:
+        return IND_BELONGING
+    if "regular" in h and ("provider" in h or "health care" in h or "healthcare" in h):
+        return IND_PROVIDER
+    return None
 
 
 def _is_percent(stat: str) -> bool:
@@ -57,12 +67,13 @@ class StatCanCCHSConnector(Connector):
         licence="Statistics Canada Open Licence",
         update_frequency="annual",
         notes="WDS getFullTableDownloadCSV(13100096), CCHS; filtered to 65+, both "
-              "sexes, percent, sense of community belonging (strong).",
+              "sexes, percent. Community belonging -> Social Participation; "
+              "regular healthcare provider -> Care Access.",
     )
 
     indicators = [
         IndicatorSpec(
-            code=INDICATOR,
+            code=IND_BELONGING,
             domain="social_participation",
             name="Sense of community belonging (strong), population 65+",
             definition="Share of persons aged 65+ reporting a somewhat or very strong "
@@ -72,6 +83,19 @@ class StatCanCCHSConnector(Connector):
             unit="% of persons 65+",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 50.0, "max": 90.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_PROVIDER,
+            domain="care_access",
+            name="Has a regular healthcare provider, population 65+",
+            definition="Share of persons aged 65+ who report having a regular healthcare "
+                       "provider — a core measure of primary-care access.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Has a regular healthcare provider'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 80.0, "max": 100.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
@@ -93,7 +117,7 @@ class StatCanCCHSConnector(Connector):
                        if "characteristic" in f.lower() and f != f_ind), "")
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
+        writer.writerow(["INDICATOR", "REF_DATE", "GEO", "VALUE", "STATUS"])
         for row in reader:
             if sc.map_geo(sc.col(row, "GEO")) is None:
                 continue
@@ -103,9 +127,10 @@ class StatCanCCHSConnector(Connector):
                 continue
             if f_stat and not _is_percent(row.get(f_stat, "")):
                 continue
-            if f_ind and not _is_belonging(row.get(f_ind, "")):
+            code = _classify(row.get(f_ind, "")) if f_ind else None
+            if code is None:
                 continue
-            writer.writerow([sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
+            writer.writerow([code, sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])
         return out.getvalue()
 
@@ -117,8 +142,9 @@ class StatCanCCHSConnector(Connector):
         reader = csv.DictReader(io.StringIO(payload.content.decode("utf-8-sig")))
         records: list[ObservationRecord] = []
         for row in reader:
+            code = (row.get("INDICATOR") or "").strip()
             jcode = sc.map_geo(sc.col(row, "GEO"))
-            if jcode is None:
+            if not code or jcode is None:
                 continue
             year = sc.col(row, "REF_DATE")[:4]
             if not year or int(year) < MIN_YEAR:
@@ -128,7 +154,7 @@ class StatCanCCHSConnector(Connector):
             suppressed = raw == "" or status in ("F", "X", "..", "...")
             records.append(
                 ObservationRecord(
-                    indicator_code=INDICATOR,
+                    indicator_code=code,
                     jurisdiction_code=jcode,
                     period_start=f"{year}-01-01",
                     period_end=f"{year}-12-31",

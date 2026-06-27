@@ -73,6 +73,16 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Live, API-accessible Care-Access backbone (CCHS 13-10-0096).
+        "code": "care_access.regular_provider_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",
+        # already a rate (% of 65+ with a regular healthcare provider); high band.
+        "normalization": {"method": "min_max", "min": 80.0, "max": 100.0},
+        "weight": 1.0,
+    },
+    {
+        # Complementary CIHI home-care signal (manual refresh — no open API).
         "code": "care_access.home_care_clients_65plus",
         "domain": "care_access",
         "direction": "higher_is_better",

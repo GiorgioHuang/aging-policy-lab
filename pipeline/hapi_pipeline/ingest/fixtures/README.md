@@ -15,7 +15,9 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   same totals.
 - **`cihi_home_care_clients_65plus.csv` — representative sample, NOT official.**
   CIHI has no open API (manual portal download / controlled access), so these
-  numbers are illustrative pending a manual refresh. Treat as sample data.
+  numbers are illustrative pending a manual refresh (RUNBOOK.md §E). This series is
+  now a **complement** to Care Access — the live backbone is CCHS "has a regular
+  healthcare provider" (below) — so it no longer gates live/official coverage.
 - **`statcan_low_income_65plus.csv` — real data.** Official Table 11-10-0135
   seniors' (65+) LIM-AT low-income rates for CA + NS, captured from a live
   `--live` run on 2026-06 (slim filtered format). NS runs notably higher than the
@@ -28,11 +30,12 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   CA + NS in the slim format `statcan_life_expectancy._filter_csv()` emits. The
   product id (13-10-0389) and access path are confirmed; these bootstrap values
   are illustrative until the first `--live` run replaces them with official data.
-- **`statcan_cchs_65plus.csv` — representative sample, NOT official.**
-  Plausible CCHS community-belonging-strong values for 65+ (→ Social
-  Participation), CA + NS, in the slim format `statcan_cchs._filter_csv()` emits.
-  Product id (13-10-0096) + schema confirmed via `hapi inspect`; bootstrap values
-  are illustrative until the first `--live` run.
+- **`statcan_cchs_65plus.csv` — mixed (belonging real, provider representative).**
+  CCHS values for 65+ from Table 13-10-0096, in the slim `INDICATOR`-tagged format
+  `statcan_cchs._filter_csv()` emits — two indicators: community belonging
+  (→ Social Participation) and **has a regular healthcare provider** (→ the live
+  Care Access backbone). Belonging rows are real captured values; provider rows
+  are representative until the next `--live` run. Schema confirmed via `hapi inspect`.
 - **`statcan_functional_health_65plus.csv` — mixed (65–74 real, 75+ representative).**
   Functional-health (very good to perfect) values for both senior bands (→
   Independence; the table has no 65+ aggregate), CA + NS, in the slim
@@ -100,10 +103,11 @@ downloading the latest table from
 - **StatCan (Health):** Table **13-10-0389** → productId **`13100389`**
   ("Life expectancy, at birth and at age 65, by sex, three-year average");
   filtered to "at age 65", both sexes, the life-expectancy estimate.
-- **StatCan (Social Participation):** Table **13-10-0096** → productId
+- **StatCan (Social Participation + Care Access):** Table **13-10-0096** → productId
   **`13100096`** ("Health characteristics, annual estimates", CCHS; national GEO
-  is "Canada (excluding territories)"); filtered to 65+, both sexes, percent,
-  sense of community belonging (strong).
+  is "Canada (excluding territories)"); filtered to 65+, both sexes, percent —
+  sense of community belonging (strong) → Social Participation, and **has a regular
+  healthcare provider** → the live Care Access backbone (CIHI being API-less).
 - **StatCan (Independence):** Table **13-10-0966** → productId **`13100966`**
   ("Functional health", CCHS 2015/2019/2024…; dims Age group / Sex / 'Domains' /
   'Characteristics'); no 65+ aggregate, so filtered to **both senior bands
@@ -121,9 +125,9 @@ captured values, so offline runs reproduce the production numbers.
 |------|---------------|-----------|-----------|
 | `statcan_population_65plus.csv` | StatCan full-table CSV (filtered) | `statcan_wds` | `demography.population_65plus` |
 | `ns_accessing_primary_care.json` | Socrata SODA JSON (zone/type/date/measure/actual) | `ns_open_data` | `care_access.pharmacy_primary_care_visits` |
-| `cihi_home_care_clients_65plus.csv` | CIHI data-table CSV (incl. an `x` suppression) | `cihi_irrs` | `care_access.home_care_clients_65plus` |
+| `cihi_home_care_clients_65plus.csv` | CIHI data-table CSV (manual; incl. an `x` suppression) | `cihi_irrs` | `care_access.home_care_clients_65plus` (complement) |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
-| `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_cchs` | `social_participation.community_belonging_65plus` |
+| `statcan_cchs_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_cchs` | `social_participation.community_belonging_65plus`, `care_access.regular_provider_65plus` |
 | `statcan_functional_health_65plus.csv` | StatCan full-table CSV (slim, `INDICATOR`-tagged) | `statcan_functional_health` | `independence.functional_health_65_74`, `independence.functional_health_75plus` |

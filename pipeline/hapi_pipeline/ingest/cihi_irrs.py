@@ -3,7 +3,15 @@
 CIHI public *data tables* are portal downloads (Excel/CSV), not an open API, and
 record-level data is controlled access — so this connector ingests a CSV captured
 from a CIHI public data table (access_method='portal_download'). `--live` cannot
-auto-fetch; refreshing means downloading the latest table from CIHI by hand.
+auto-fetch; refreshing means downloading the latest table from CIHI by hand (see
+RUNBOOK.md §E for the exact steps).
+
+Role in HAPI: this is now a **complement**, not the backbone, of the Care Access
+domain. The live, API-accessible Care-Access indicator is CCHS "has a regular
+healthcare provider" (statcan_cchs, Table 13-10-0096), which auto-refreshes; this
+CIHI home-care-clients series adds a service-utilization view but is on a manual
+cadence. Until the next manual capture, its fixture holds illustrative values
+(clearly labelled) — the domain no longer depends on it for live, official data.
 
 System transition: CIHI decommissioned HCRS/HCRS-CA (home care) in March 2025 and
 CCRS (LTC) by March 2026, consolidating onto the Integrated interRAI Reporting
