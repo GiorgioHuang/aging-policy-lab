@@ -65,6 +65,15 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # CIHI caregiver distress — sustainability of aging in place (manual source).
+        "code": "independence.caregiver_distress",
+        "domain": "independence",
+        "direction": "lower_is_better",  # less caregiver distress scores higher
+        # already a rate (% of long-stay home-care clients with caregiver distress)
+        "normalization": {"method": "min_max", "min": 15.0, "max": 50.0},
+        "weight": 1.0,
+    },
+    {
         "code": "social_participation.community_belonging_65plus",
         "domain": "social_participation",
         "direction": "higher_is_better",

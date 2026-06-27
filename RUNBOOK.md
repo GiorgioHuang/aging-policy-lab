@@ -173,3 +173,27 @@ auto-refreshing Care-Access indicator is CCHS "has a regular healthcare provider
 Until step 3 is done, the fixture holds clearly-labelled **representative** values
 (see `ingest/fixtures/README.md`); they do not affect the live CCHS-based
 Care-Access backbone.
+
+### Refreshing the CIHI Caregiver Distress indicator (Independence)
+
+`cihi_caregiver_distress` holds **real** captured CIHI values. To update them with a
+newer export (CIHI's "Your Health System" / interRAI indicator library, Excel — no API):
+
+1. Export **Caregiver Distress** from <https://www.cihi.ca/en/indicators/caregiver-distress>
+   (or the interRAI indicator library) as `.xlsx`. The export has columns
+   `Province/territory · Reporting level · … · Indicator · Risk-adjusted rate ·
+   Unit of measure · … · Time frame`.
+2. Slim it to `jurisdiction_code,year,value`, keeping only:
+   - **Reporting level = National**, `Place or organization = Canada` → `CA`
+   - **Reporting level = Province/territory**, `Province = Nova Scotia` → `CA-NS`
+   Use the **`Risk-adjusted rate`** as `value`, and the **start year** of the fiscal
+   `Time frame` (e.g. `2024–2025` → `2024`) as `year`. (`pip install openpyxl`; a
+   ~15-line script does this — see the commit that added the connector.)
+3. Replace `pipeline/hapi_pipeline/ingest/fixtures/cihi_caregiver_distress.csv`,
+   record the export's Refresh date in the commit, and re-run `hapi score` (or
+   dispatch the ingest workflow).
+
+Other provinces / health regions are present in the CIHI export but out of v1 scope
+(the jurisdiction tree is NS + Federal); add them when the tree expands. Note: CIHI
+indicators vary in whether NS reports them — e.g. **Wait Times for Home Care** has
+NS = "Not available" for every year, so it can't feed NS/Federal HAPI.

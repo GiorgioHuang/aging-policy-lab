@@ -36,6 +36,12 @@ runs end-to-end offline and the lineage/idempotency behaviour is verifiable.
   (→ Social Participation) and **has a regular healthcare provider** (→ the live
   Care Access backbone). Belonging rows are real captured values; provider rows
   are representative until the next `--live` run. Schema confirmed via `hapi inspect`.
+- **`cihi_caregiver_distress.csv` — real data.** Official CIHI "Caregiver Distress"
+  indicator (risk-adjusted % of long-stay home-care clients with caregiver
+  distress → Independence), captured from a manual CIHI Excel export: the National
+  row → CA and the Nova Scotia province row → CA-NS, by fiscal year (anchored to
+  its start year), 2018–2024. NS (29→36%) runs **below** the national rate
+  (35→45%). Manual refresh via RUNBOOK.md §E (no CIHI API).
 - **`statcan_functional_health_65plus.csv` — mixed (65–74 real, 75+ representative).**
   Functional-health (very good to perfect) values for both senior bands (→
   Independence; the table has no 65+ aggregate), CA + NS, in the slim
@@ -126,6 +132,7 @@ captured values, so offline runs reproduce the production numbers.
 | `statcan_population_65plus.csv` | StatCan full-table CSV (filtered) | `statcan_wds` | `demography.population_65plus` |
 | `ns_accessing_primary_care.json` | Socrata SODA JSON (zone/type/date/measure/actual) | `ns_open_data` | `care_access.pharmacy_primary_care_visits` |
 | `cihi_home_care_clients_65plus.csv` | CIHI data-table CSV (manual; incl. an `x` suppression) | `cihi_irrs` | `care_access.home_care_clients_65plus` (complement) |
+| `cihi_caregiver_distress.csv` | CIHI indicator export, slimmed (manual) | `cihi_caregiver_distress` | `independence.caregiver_distress` |
 | `statcan_low_income_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_low_income` | `financial_security.low_income_rate_65plus` |
 | `statcan_internet_use_65plus.csv` | StatCan full-table CSV (slim, filtered) | `statcan_internet_use` | `digital_inclusion.internet_use_65plus` |
 | `statcan_life_expectancy_65.csv` | StatCan full-table CSV (slim, filtered) | `statcan_life_expectancy` | `health.life_expectancy_65` |
