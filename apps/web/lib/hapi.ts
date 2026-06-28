@@ -27,6 +27,30 @@ export type DomainScores = {
   byJurisdiction: { code: string; rows: HapiScoreRow[] }[];
 };
 
+export type PolicyEvent = { year: number; month: number; title: string };
+
+/** Policy events that target an indicator in each domain, keyed domain → chart
+ * jurisdiction (federal policies map to the national 'CA' series). */
+export async function getPolicyEventsByDomain(): Promise<Record<string, Record<string, PolicyEvent[]>>> {
+  const { rows } = await pool.query<{ domain: string; jur: string; title: string; released: string }>(
+    `SELECT DISTINCT i.domain, j.code AS jur, p.title, p.released_at::text AS released
+       FROM policy_indicator pi
+       JOIN indicator i      ON i.id = pi.indicator_id
+       JOIN policy p         ON p.id = pi.policy_id
+       JOIN jurisdiction j   ON j.id = p.jurisdiction_id
+      WHERE p.released_at IS NOT NULL`,
+  );
+  const out: Record<string, Record<string, PolicyEvent[]>> = {};
+  for (const r of rows) {
+    const chartJur = r.jur === "CA-FED" ? "CA" : r.jur; // national series for federal policy
+    const y = Number(r.released.slice(0, 4));
+    const m = Number(r.released.slice(5, 7)) || 1;
+    if (!Number.isFinite(y)) continue;
+    ((out[r.domain] ??= {})[chartJur] ??= []).push({ year: y, month: m, title: r.title });
+  }
+  return out;
+}
+
 /** HAPI scores grouped by domain, then jurisdiction (ordered by period). */
 export async function getHapiScores(): Promise<DomainScores[]> {
   const { rows } = await pool.query<{

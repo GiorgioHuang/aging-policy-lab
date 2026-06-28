@@ -1,6 +1,12 @@
 import Link from "next/link";
-import { getHapiScores, type DomainScores, type HapiScoreRow } from "@/lib/hapi";
-import { TrendChart, type ChartPoint } from "@/components/TrendChart";
+import {
+  getHapiScores,
+  getPolicyEventsByDomain,
+  type DomainScores,
+  type HapiScoreRow,
+  type PolicyEvent,
+} from "@/lib/hapi";
+import { TrendChart, type ChartPoint, type ChartEvent } from "@/components/TrendChart";
 import { type RadarAxis } from "@/components/DomainRadar";
 import { DomainRadarOverTime, type RadarTemporalSeries } from "@/components/DomainRadarOverTime";
 
@@ -92,8 +98,17 @@ function AuditRow({ r }: { r: HapiScoreRow }) {
   );
 }
 
-function DomainPanel({ d }: { d: DomainScores }) {
+function toEvents(evs: PolicyEvent[] | undefined): ChartEvent[] {
+  return (evs ?? []).map((e) => ({
+    t: e.year + (e.month - 1) / 12,
+    label: String(e.year),
+    title: e.title,
+  }));
+}
+
+function DomainPanel({ d, events }: { d: DomainScores; events?: Record<string, PolicyEvent[]> }) {
   const method = d.byJurisdiction[0]?.rows[0]?.methodVersion ?? "v1";
+  const hasEvents = events && Object.values(events).some((a) => a.length > 0);
   return (
     <section className="panel">
       <h2>
@@ -101,6 +116,12 @@ function DomainPanel({ d }: { d: DomainScores }) {
         <span className="badge">method {method}</span>
         <span className="code"> 0–100</span>
       </h2>
+      {hasEvents && (
+        <p className="meta">
+          <span className="event-key" /> dashed lines mark policies targeting this domain — compare
+          policy timing against the outcome trend.
+        </p>
+      )}
       <div className="charts">
         {d.byJurisdiction.map((s) => (
           <figure className="series" key={s.code}>
@@ -111,6 +132,7 @@ function DomainPanel({ d }: { d: DomainScores }) {
               unit="/100"
               yMin={0}
               yMax={100}
+              events={toEvents(events?.[s.code])}
             />
           </figure>
         ))}
@@ -137,9 +159,10 @@ function DomainPanel({ d }: { d: DomainScores }) {
 
 export default async function Hapi() {
   let domains: DomainScores[] | null = null;
+  let policyEvents: Record<string, Record<string, PolicyEvent[]>> = {};
   let error: string | null = null;
   try {
-    domains = await getHapiScores();
+    [domains, policyEvents] = await Promise.all([getHapiScores(), getPolicyEventsByDomain()]);
   } catch (e) {
     error = e instanceof Error ? e.message : String(e);
   }
@@ -191,7 +214,7 @@ export default async function Hapi() {
               </section>
             ) : null;
           })()}
-          {domains.map((d) => <DomainPanel key={d.domain} d={d} />)}
+          {domains.map((d) => <DomainPanel key={d.domain} d={d} events={policyEvents[d.domain]} />)}
         </>
       ) : (
         <p style={{ color: "var(--muted)" }}>

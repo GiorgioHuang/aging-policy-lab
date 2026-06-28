@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getFindings, getSeries, type Finding } from "@/lib/analytics";
-import { TrendChart, type ChartPoint } from "@/components/TrendChart";
+import { TrendChart, type ChartPoint, type ChartEvent } from "@/components/TrendChart";
 import { ItsChart, type ItsModel } from "@/components/ItsChart";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +71,19 @@ function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
   const r = f.result ?? {};
   const intervention = (f.windowSpec?.intervention as string) ?? null;
   const isIts = f.method === "its";
+  // Overlay the linked policy's event on the trend chart (policy ↔ outcome).
+  const eventIso = (f.windowSpec?.intervention as string) ?? (r.policy_event as string) ?? null;
+  const trendEvents: ChartEvent[] = [];
+  if (!isIts && eventIso) {
+    const d = new Date(eventIso);
+    if (!Number.isNaN(d.getTime())) {
+      trendEvents.push({
+        t: d.getUTCFullYear() + d.getUTCMonth() / 12,
+        label: eventIso.slice(0, 7),
+        title: f.policyTitle ?? "policy event",
+      });
+    }
+  }
   // Use the segmented-regression chart for an estimable ITS that carries an
   // intercept (needed to reconstruct the fitted lines); otherwise the plain trend.
   const itsModel =
@@ -93,7 +106,7 @@ function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
       {itsModel && series.length > 1 ? (
         <ItsChart points={series} model={itsModel} interventionLabel={interventionLabel} />
       ) : series.length > 1 ? (
-        <TrendChart points={series} direction="higher_is_better" />
+        <TrendChart points={series} direction="higher_is_better" events={trendEvents} />
       ) : null}
 
       {isIts ? <ItsResult r={r} /> : <TrendResult r={r} />}

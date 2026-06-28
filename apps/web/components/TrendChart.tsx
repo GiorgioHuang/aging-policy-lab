@@ -9,6 +9,17 @@ import { useState, type MouseEvent } from "react";
 import { useTip, TipLayer } from "./chart-ui";
 
 export type ChartPoint = { label: string; value: number };
+// A dated policy event to overlay as a vertical marker. `t` is a numeric year
+// (fractional allowed, e.g. 2022.5 for mid-year); `title` shows on hover.
+export type ChartEvent = { t: number; label: string; title?: string };
+
+const EVENT_COLOR = "#a78bfa";
+
+function labelToTime(label: string): number {
+  const m = label.match(/^(\d{4})(?:-(\d{2}))?/);
+  if (!m) return NaN;
+  return Number(m[1]) + (m[2] ? (Number(m[2]) - 1) / 12 : 0);
+}
 
 const COLORS: Record<string, string> = {
   higher_is_better: "#3ecf8e",
@@ -25,12 +36,14 @@ export function TrendChart({
   unit,
   yMin,
   yMax,
+  events,
 }: {
   points: ChartPoint[];
   direction?: string | null;
   unit?: string | null;
   yMin?: number;
   yMax?: number;
+  events?: ChartEvent[];
 }) {
   const { ref, tip, move, clear } = useTip();
   const [active, setActive] = useState<number | null>(null);
@@ -72,6 +85,22 @@ export function TrendChart({
   const labelIdx: number[] = [];
   for (let i = 0; i < n; i += step) labelIdx.push(i);
   if (labelIdx[labelIdx.length - 1] !== n - 1) labelIdx.push(n - 1);
+
+  // Position policy events by interpolating their year against the series times,
+  // so a marker lands where the data says it should even on irregular cadences.
+  const times = points.map((p) => labelToTime(p.label));
+  function eventX(t: number): number | null {
+    if (n === 0 || Number.isNaN(t) || t < times[0] || t > times[n - 1]) return null;
+    for (let i = 0; i < n - 1; i++) {
+      const a = times[i];
+      const b = times[i + 1];
+      if (t >= a && t <= b) return x(b === a ? i : i + (t - a) / (b - a));
+    }
+    return x(n - 1);
+  }
+  const evs = (events ?? [])
+    .map((e) => ({ ...e, ex: eventX(e.t) }))
+    .filter((e): e is ChartEvent & { ex: number } => e.ex != null);
 
   // Map a pointer x (in viewBox units via ratio) to the nearest data index.
   function onMove(e: MouseEvent<SVGRectElement>) {
@@ -123,6 +152,22 @@ export function TrendChart({
         <path d={areaPath} fill={`url(#${gradId})`} />
         <path d={linePath} fill="none" stroke={color} strokeWidth="2" />
 
+        {/* policy-event markers (dashed vertical lines) */}
+        {evs.map((e, i) => (
+          <line
+            key={`ev-${i}`}
+            x1={e.ex}
+            y1={y0}
+            x2={e.ex}
+            y2={y0 + plotH}
+            stroke={EVENT_COLOR}
+            strokeWidth="1.25"
+            strokeDasharray="3 3"
+            opacity="0.7"
+            pointerEvents="none"
+          />
+        ))}
+
         {/* crosshair + highlighted point */}
         {active != null && (
           <g pointerEvents="none">
@@ -154,6 +199,27 @@ export function TrendChart({
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         />
+
+        {/* event flags on top of the hit area, so they stay hoverable */}
+        {evs.map((e, i) => (
+          <path
+            key={`evflag-${i}`}
+            className="hit"
+            d={`M${(e.ex - 4).toFixed(1)},${y0} L${(e.ex + 4).toFixed(1)},${y0} L${e.ex.toFixed(1)},${y0 + 6} Z`}
+            fill={EVENT_COLOR}
+            onMouseMove={(ev) => {
+              setActive(null);
+              move(
+                ev,
+                <>
+                  <div className="tip-title">{e.title ?? e.label}</div>
+                  <div className="tip-muted">policy · {e.label}</div>
+                </>,
+              );
+            }}
+            onMouseLeave={onLeave}
+          />
+        ))}
       </svg>
       <TipLayer tip={tip} />
     </div>
