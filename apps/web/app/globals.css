@@ -384,6 +384,30 @@ svg.chart {
 svg.chart .hit {
   cursor: pointer;
 }
+.radar-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.2rem auto 0.2rem;
+  max-width: 360px;
+}
+.radar-slider input[type="range"] {
+  flex: 1;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.radar-slider-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.radar-slider-year {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 3ch;
+  text-align: right;
+  color: var(--text);
+}
 
 .timeline {
   list-style: none;

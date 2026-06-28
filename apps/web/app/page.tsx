@@ -3,7 +3,8 @@ import { getJurisdictionTree, type JurisdictionNode } from "@/lib/jurisdictions"
 import { getAccessContext } from "@/lib/access";
 import { getOverview, type Overview } from "@/lib/overview";
 import { TrendChart } from "@/components/TrendChart";
-import { DomainRadar, type RadarAxis, type RadarSeries } from "@/components/DomainRadar";
+import { type RadarAxis } from "@/components/DomainRadar";
+import { DomainRadarOverTime, type RadarTemporalSeries } from "@/components/DomainRadarOverTime";
 import { PolicyTimeline } from "@/components/PolicyTimeline";
 
 // Always read live from the database (no static caching of the dashboard).
@@ -20,20 +21,18 @@ const RADAR_LABELS: Record<string, string> = {
 };
 const JUR_COLOR = (code: string) => (code === "CA-NS" ? "#3ecf8e" : "#4f9dff");
 
-function buildRadar(profile: Overview["domainProfile"]): { axes: RadarAxis[]; series: RadarSeries[] } | null {
+function buildRadar(
+  evo: Overview["domainEvolution"],
+): { axes: RadarAxis[]; years: string[]; series: RadarTemporalSeries[] } | null {
   const keys = new Set<string>();
-  for (const p of profile) for (const k of Object.keys(p.scores)) keys.add(k);
+  for (const s of evo.series) for (const yr of Object.values(s.byYear)) for (const k of Object.keys(yr)) keys.add(k);
   const axes: RadarAxis[] = [...keys].sort().map((key) => ({ key, label: RADAR_LABELS[key] ?? key }));
-  if (axes.length < 3 || profile.length === 0) return null;
-  const series: RadarSeries[] = profile
+  if (axes.length < 3 || evo.series.length === 0 || evo.years.length === 0) return null;
+  const series: RadarTemporalSeries[] = evo.series
     .slice()
     .sort((a, b) => a.code.localeCompare(b.code))
-    .map((p) => ({
-      code: p.code,
-      color: JUR_COLOR(p.code),
-      scores: Object.fromEntries(axes.map((a) => [a.key, p.scores[a.key] ?? null])),
-    }));
-  return { axes, series };
+    .map((s) => ({ code: s.code, color: JUR_COLOR(s.code), byYear: s.byYear }));
+  return { axes, years: evo.years, series };
 }
 
 const MODULES: Array<{ n: string; name: string; desc: string; href: string }> = [
@@ -157,7 +156,7 @@ export default async function Home() {
           )}
 
           {overview && (() => {
-            const radar = buildRadar(overview.domainProfile);
+            const radar = buildRadar(overview.domainEvolution);
             const trends = overview.hapiTrend.filter((t) => t.points.length > 1);
             if (!radar && trends.length === 0) return null;
             return (
@@ -166,10 +165,11 @@ export default async function Home() {
                   <section className="panel">
                     <h2>HAPI domain profile</h2>
                     <p className="meta">
-                      Latest score on every scored domain, 0–100 — hover a vertex, click a
-                      jurisdiction to toggle. <Link href="/hapi">HAPI →</Link>
+                      Each domain&apos;s score as of the selected year, 0–100 — drag the slider to
+                      see the profile evolve; hover a vertex, click a jurisdiction to toggle.{" "}
+                      <Link href="/hapi">HAPI →</Link>
                     </p>
-                    <DomainRadar axes={radar.axes} series={radar.series} />
+                    <DomainRadarOverTime axes={radar.axes} years={radar.years} series={radar.series} />
                   </section>
                 )}
                 {trends.length > 0 && (

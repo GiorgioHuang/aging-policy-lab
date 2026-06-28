@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getHapiScores, type DomainScores, type HapiScoreRow } from "@/lib/hapi";
 import { TrendChart, type ChartPoint } from "@/components/TrendChart";
-import { DomainRadar, type RadarAxis, type RadarSeries } from "@/components/DomainRadar";
+import { type RadarAxis } from "@/components/DomainRadar";
+import { DomainRadarOverTime, type RadarTemporalSeries } from "@/components/DomainRadarOverTime";
 
 export const dynamic = "force-dynamic";
 
@@ -26,29 +27,33 @@ const RADAR_LABELS: Record<string, string> = {
 };
 const JUR_COLORS: Record<string, string> = { "CA-FED": "#4f9dff", "CA": "#4f9dff", "CA-NS": "#3ecf8e" };
 
-/** Latest non-null score per (domain, jurisdiction) for the radar profile. */
-function buildRadar(domains: DomainScores[]): { axes: RadarAxis[]; series: RadarSeries[] } | null {
-  const jurs = new Set<string>();
-  const scores: Record<string, Record<string, number>> = {}; // domain -> jur -> latest score
+/** Per-year score per (domain, jurisdiction) for the temporal radar profile. */
+function buildRadar(
+  domains: DomainScores[],
+): { axes: RadarAxis[]; years: string[]; series: RadarTemporalSeries[] } | null {
+  const domainKeys = new Set<string>();
+  const yearSet = new Set<string>();
+  const byJur = new Map<string, Record<string, Record<string, number>>>(); // code -> year -> domain -> score
   for (const d of domains) {
     if (d.domain === "overall") continue;
     for (const s of d.byJurisdiction) {
-      const latest = [...s.rows].reverse().find((r) => r.score !== null);
-      if (!latest) continue;
-      jurs.add(s.code);
-      (scores[d.domain] ??= {})[s.code] = Number(latest.score);
+      for (const r of s.rows) {
+        if (r.score === null) continue;
+        const yr = r.period.slice(0, 4);
+        domainKeys.add(d.domain);
+        yearSet.add(yr);
+        const m = byJur.get(s.code) ?? {};
+        (m[yr] ??= {})[d.domain] = Number(r.score); // rows period-ascending → latest within year wins
+        byJur.set(s.code, m);
+      }
     }
   }
-  const axes: RadarAxis[] = Object.keys(scores)
-    .sort()
-    .map((key) => ({ key, label: RADAR_LABELS[key] ?? key }));
-  if (axes.length < 3) return null;
-  const series: RadarSeries[] = [...jurs].sort().map((code) => ({
-    code,
-    color: JUR_COLORS[code] ?? "#e0a23b",
-    scores: Object.fromEntries(axes.map((a) => [a.key, scores[a.key]?.[code] ?? null])),
-  }));
-  return { axes, series };
+  const axes: RadarAxis[] = [...domainKeys].sort().map((key) => ({ key, label: RADAR_LABELS[key] ?? key }));
+  if (axes.length < 3 || byJur.size === 0) return null;
+  const series: RadarTemporalSeries[] = [...byJur.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([code, byYear]) => ({ code, color: JUR_COLORS[code] ?? "#e0a23b", byYear }));
+  return { axes, years: [...yearSet].sort(), series };
 }
 
 function points(rows: HapiScoreRow[]): ChartPoint[] {
@@ -174,15 +179,15 @@ export default async function Hapi() {
             return radar ? (
               <section className="panel">
                 <h2>
-                  Domain profile <span className="badge">latest period</span>
+                  Domain profile <span className="badge">over time</span>
                   <span className="code"> 0–100</span>
                 </h2>
                 <p className="meta">
-                  Each jurisdiction&apos;s most recent score on every scored HAPI domain — a
-                  one-glance read of relative strengths and gaps. Per-domain trends and the
+                  Each jurisdiction&apos;s score on every scored HAPI domain, as of the selected
+                  year — drag the slider to watch the profile evolve. Per-domain trends and the
                   full audit trail are below.
                 </p>
-                <DomainRadar axes={radar.axes} series={radar.series} />
+                <DomainRadarOverTime axes={radar.axes} years={radar.years} series={radar.series} />
               </section>
             ) : null;
           })()}

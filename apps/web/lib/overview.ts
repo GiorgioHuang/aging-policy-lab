@@ -13,6 +13,10 @@ export type Overview = {
   hapi: { code: string; overall: number | null; careAccess: number | null; period: string | null }[];
   hapiTrend: { code: string; points: { label: string; value: number }[] }[];
   domainProfile: { code: string; scores: Record<string, number> }[];
+  domainEvolution: {
+    years: string[];
+    series: { code: string; byYear: Record<string, Record<string, number>> }[];
+  };
   policyTimeline: { id: string; year: number; jurisdiction: string; title: string }[];
   recentPolicies: { title: string; code: string; releasedAt: string | null; lifecycle: string | null }[];
   recentFindings: { title: string; tier: string; method: string }[];
@@ -57,6 +61,8 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
   );
   const trendMap = new Map<string, { label: string; value: number }[]>();
   const profileMap = new Map<string, Record<string, number>>(); // code -> domain -> latest score
+  const evoMap = new Map<string, Record<string, Record<string, number>>>(); // code -> year -> domain -> score
+  const yearSet = new Set<string>();
   for (const r of scoreRows.rows) {
     if (r.domain === "overall") {
       const arr = trendMap.get(r.code) ?? [];
@@ -66,6 +72,12 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
       const e = profileMap.get(r.code) ?? {};
       e[r.domain] = Number(r.score); // rows ordered by period asc → last write wins = latest
       profileMap.set(r.code, e);
+      // bucket per year (latest within a year wins, since rows are period-ascending)
+      const yr = r.period.slice(0, 4);
+      yearSet.add(yr);
+      const byYear = evoMap.get(r.code) ?? {};
+      (byYear[yr] ??= {})[r.domain] = Number(r.score);
+      evoMap.set(r.code, byYear);
     }
   }
 
@@ -105,6 +117,10 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
     hapi: [...hapiMap.values()],
     hapiTrend: [...trendMap.entries()].map(([code, points]) => ({ code, points })),
     domainProfile: [...profileMap.entries()].map(([code, scores]) => ({ code, scores })),
+    domainEvolution: {
+      years: [...yearSet].sort(),
+      series: [...evoMap.entries()].map(([code, byYear]) => ({ code, byYear })),
+    },
     policyTimeline: policyTl.rows
       .map((r) => ({ id: r.id, year: Number(r.released_at.slice(0, 4)), jurisdiction: r.code, title: r.title }))
       .filter((d) => Number.isFinite(d.year)),
