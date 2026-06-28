@@ -5,19 +5,19 @@ activities — a direct measure of functional (in)dependence in later life. Sour
 is the Canadian Survey on Disability (CSD); Statistics Canada reported the senior
 rate rising 38% (2017) → 40% (2022). lower_is_better.
 
-Source (WebSearch 2026-06; direct gov fetch blocked in this sandbox — confirm on a
-networked runner with `hapi inspect statcan_disability`):
-  * Table 13-10-0374 "Persons with and without disabilities aged 15 years and
-    over, by age group and gender, Canada, provinces and territories"
-    (productId 13100374). https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310037401
-  * Pulled as the WDS full-table CSV, filtered to GEO ∈ {Canada, Nova Scotia},
-    the 65+ age member, both genders, the "with disabilities" status, and the
-    percentage statistic (the prevalence rate, not the count).
-
-Filters match case-insensitively by substring and are deliberately tolerant;
-`hapi inspect statcan_disability` dumps the real dimension members — tighten the
-status / statistic / age wording here if inspection differs, or repoint
-PRODUCT_ID if a more complete table is available.
+Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_disability`:
+  * Table 13-10-0374 (productId 13100374).
+    https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310037401
+  * Real columns: REF_DATE, GEO, 'Age group', 'Gender', 'Disability',
+    'Estimates', VALUE, STATUS. GEO includes Canada and Nova Scotia. Members:
+    Age group has '65 years and over' (plus 65-74 / 75+ bands); Gender ∈ {'Total,
+    gender', 'Men+', 'Women+'}; Disability ∈ {'Persons with disabilities',
+    'Persons without disabilities', 'Total population, with and without
+    disabilities'}; the statistic column is 'Estimates' (number vs percentage of
+    persons, plus their 95% CI bounds).
+  * Filtered to GEO ∈ {Canada, Nova Scotia}, age '65 years and over', 'Total,
+    gender', 'Persons with disabilities', and the percentage estimate (excludes
+    the person counts and the CI bounds).
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ _DIM_HINTS = {
     "age": ("age",),
     "sex": ("gender", "sex"),
     "status": ("disabilit", "persons with"),
-    "statistic": ("statistic", "characteristic"),
+    "statistic": ("estimate", "statistic", "characteristic"),
 }
 
 
@@ -46,9 +46,14 @@ def _is_with_disability(member: str) -> bool:
 
 
 def _is_percent_stat(member: str) -> bool:
-    """The prevalence rate (percentage/proportion), not the person count."""
+    """The prevalence rate (the 'Percentage of persons' estimate) — not the person
+    count ('Number of persons') and not any confidence-interval bound."""
     m = member.strip().lower()
-    return m == "" or "percent" in m or "proportion" in m or "%" in m or "rate" in m
+    if m == "":
+        return True
+    if any(w in m for w in ("confidence", "interval", "low", "high", "margin")):
+        return False
+    return "percent" in m or "proportion" in m or "%" in m
 
 
 class StatCanDisabilityConnector(Connector):
