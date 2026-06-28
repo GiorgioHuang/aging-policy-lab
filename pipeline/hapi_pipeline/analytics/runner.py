@@ -90,16 +90,20 @@ def run_analyses(conn) -> int:
         # ── Tier 1: ONE descriptive trend per (indicator, jurisdiction),
         #    overlaying every policy that targets it (no per-policy duplicates) ──
         cur.execute(
-            """SELECT pi.policy_id, p.title, p.released_at, j.code AS jur, i.code AS ind
+            """SELECT pi.policy_id, p.title, p.released_at, j.code AS jur,
+                      i.code AS ind, i.name AS iname
                  FROM policy_indicator pi
                  JOIN policy p ON p.id = pi.policy_id
                  JOIN jurisdiction j ON j.id = p.jurisdiction_id
                  JOIN indicator i ON i.id = pi.indicator_id"""
         )
         groups: dict[tuple[str, str], list] = {}
-        for policy_id, ptitle, released_at, pjur, ind in cur.fetchall():
+        inames: dict[str, str] = {}
+        for policy_id, ptitle, released_at, pjur, ind, iname in cur.fetchall():
             geo = "CA-NS" if pjur == "CA-NS" else "CA"  # national series for federal policies
             groups.setdefault((ind, geo), []).append((policy_id, ptitle, released_at))
+            inames[ind] = iname
+        geo_label = {"CA-NS": "Nova Scotia", "CA": "Canada"}
         for (ind, geo), members in groups.items():
             series = descriptive.load_series(cur, ind, geo)
             if len(series) < 2:
@@ -112,7 +116,7 @@ def run_analyses(conn) -> int:
             _upsert(
                 cur,
                 slug=f"trend:{ind}:{geo}",
-                title=f"Trend: {ind} in {geo}",
+                title=f"{inames.get(ind) or ind} · {geo_label.get(geo, geo)}",
                 tier="association",
                 method="trend",
                 policy_id=members[0][0],  # primary (earliest-dated) linked policy
