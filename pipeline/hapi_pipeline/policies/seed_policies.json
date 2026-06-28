@@ -9,11 +9,23 @@
     "full_text": "Canada's first national dementia strategy sets three national objectives: prevent dementia, advance therapies and find a cure, and improve the quality of life of people living with dementia and caregivers. Budget 2019 committed funding to support implementation, including a Dementia Strategic Fund and dementia awareness and surveillance investments.",
     "budget_amount": 50000000,
     "budget_currency": "CAD",
-    "target_population": {"age": "65+", "group": "dementia"},
-    "kpis": ["increase dementia awareness", "expand surveillance data", "support caregivers"],
+    "target_population": {
+      "age": "65+",
+      "group": "dementia"
+    },
+    "kpis": [
+      "increase dementia awareness",
+      "expand surveillance data",
+      "support caregivers"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["dementia", "health"],
-    "indicators": ["care_access.regular_provider_65plus"]
+    "theme": [
+      "dementia",
+      "health"
+    ],
+    "indicators": [
+      "care_access.regular_provider_65plus"
+    ]
   },
   {
     "slug": "ca-fed-new-horizons-seniors",
@@ -25,10 +37,18 @@
     "full_text": "A federal grants and contributions program funding community-based projects that help seniors stay active, engaged, and socially connected, reducing isolation. Annual community and pan-Canadian funding streams support volunteerism, mentorship, and social participation for older adults.",
     "budget_amount": 70000000,
     "budget_currency": "CAD",
-    "target_population": {"age": "65+", "group": "community seniors"},
-    "kpis": ["reduce social isolation", "fund community projects annually"],
+    "target_population": {
+      "age": "65+",
+      "group": "community seniors"
+    },
+    "kpis": [
+      "reduce social isolation",
+      "fund community projects annually"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["social participation"],
+    "theme": [
+      "social participation"
+    ],
     "indicators": []
   },
   {
@@ -41,10 +61,17 @@
     "full_text": "Enhancements to the Guaranteed Income Supplement increased benefits for low-income single seniors and expanded the earnings exemption, improving the financial security of the most vulnerable older adults receiving Old Age Security.",
     "budget_amount": 670000000,
     "budget_currency": "CAD",
-    "target_population": {"age": "65+", "group": "low-income seniors"},
-    "kpis": ["reduce seniors low-income rate"],
+    "target_population": {
+      "age": "65+",
+      "group": "low-income seniors"
+    },
+    "kpis": [
+      "reduce seniors low-income rate"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["financial security"],
+    "theme": [
+      "financial security"
+    ],
     "indicators": []
   },
   {
@@ -57,10 +84,19 @@
     "full_text": "A whole-of-government action plan to help Nova Scotians age well, framed around financial security, healthy and active living, age-friendly communities, and supporting older adults to live independently. It coordinates programs across departments to support aging in place.",
     "budget_amount": null,
     "budget_currency": "CAD",
-    "target_population": {"age": "55+", "group": "aging population"},
-    "kpis": ["expand age-friendly communities", "support aging in place"],
+    "target_population": {
+      "age": "55+",
+      "group": "aging population"
+    },
+    "kpis": [
+      "expand age-friendly communities",
+      "support aging in place"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["independence", "social participation"],
+    "theme": [
+      "independence",
+      "social participation"
+    ],
     "indicators": []
   },
   {
@@ -73,11 +109,23 @@
     "full_text": "A multi-year strategic plan to improve access, quality, and sustainability of Nova Scotia's health system. Solutions include expanding primary care access (community pharmacy clinics, urgent care), improving home care and long-term care, and public reporting of measures through an open dashboard.",
     "budget_amount": 6500000000,
     "budget_currency": "CAD",
-    "target_population": {"group": "all Nova Scotians", "age": "all"},
-    "kpis": ["improve primary care attachment", "reduce ER wait times", "expand pharmacy primary care clinics"],
+    "target_population": {
+      "group": "all Nova Scotians",
+      "age": "all"
+    },
+    "kpis": [
+      "improve primary care attachment",
+      "reduce ER wait times",
+      "expand pharmacy primary care clinics"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["care access", "health"],
-    "indicators": ["care_access.pharmacy_primary_care_visits"]
+    "theme": [
+      "care access",
+      "health"
+    ],
+    "indicators": [
+      "care_access.pharmacy_primary_care_visits"
+    ]
   },
   {
     "slug": "ns-home-care-expansion-2023",
@@ -89,11 +137,22 @@
     "full_text": "Investments to expand home support and home care services so more older Nova Scotians can remain in their homes longer, including increased service hours, recruitment of continuing care assistants, and self-managed care options.",
     "budget_amount": 16700000,
     "budget_currency": "CAD",
-    "target_population": {"age": "65+", "group": "home care recipients"},
-    "kpis": ["increase home care clients", "reduce home care wait times"],
+    "target_population": {
+      "age": "65+",
+      "group": "home care recipients"
+    },
+    "kpis": [
+      "increase home care clients",
+      "reduce home care wait times"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["home care", "care access"],
-    "indicators": ["care_access.ltc_waitlist_ns"]
+    "theme": [
+      "home care",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.ltc_waitlist_ns"
+    ]
   },
   {
     "slug": "ns-ltc-build-renovate-replace",
@@ -105,11 +164,23 @@
     "full_text": "A capital plan to add new long-term care beds and replace or renovate existing facilities, prioritizing single rooms to improve resident quality of life and infection control, alongside increased direct-care hours per resident day.",
     "budget_amount": 96000000,
     "budget_currency": "CAD",
-    "target_population": {"age": "65+", "group": "long-term care residents"},
-    "kpis": ["add long-term care beds", "increase single rooms", "increase direct care hours"],
+    "target_population": {
+      "age": "65+",
+      "group": "long-term care residents"
+    },
+    "kpis": [
+      "add long-term care beds",
+      "increase single rooms",
+      "increase direct care hours"
+    ],
     "lifecycle_status": "funded",
-    "theme": ["LTC", "care access"],
-    "indicators": ["care_access.ltc_waitlist_ns"]
+    "theme": [
+      "LTC",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.ltc_waitlist_ns"
+    ]
   },
   {
     "slug": "ns-cca-workforce-2022",
@@ -121,10 +192,530 @@
     "full_text": "A workforce strategy to recruit and retain Continuing Care Assistants through free tuition bursaries, wage increases, and accelerated training, addressing staffing shortages in home care and long-term care.",
     "budget_amount": 65900000,
     "budget_currency": "CAD",
-    "target_population": {"group": "continuing care workforce"},
-    "kpis": ["graduate more CCAs", "reduce care staff vacancy rate"],
+    "target_population": {
+      "group": "continuing care workforce"
+    },
+    "kpis": [
+      "graduate more CCAs",
+      "reduce care staff vacancy rate"
+    ],
     "lifecycle_status": "in_effect",
-    "theme": ["LTC", "home care", "care access"],
-    "indicators": ["care_access.ltc_waitlist_ns"]
+    "theme": [
+      "LTC",
+      "home care",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.ltc_waitlist_ns"
+    ]
+  },
+  {
+    "slug": "ca-fed-old-age-security-1952",
+    "jurisdiction_code": "CA-FED",
+    "title": "Old Age Security Act",
+    "department": "Employment and Social Development Canada",
+    "released_at": "1952-01-01",
+    "source_url": "https://laws-lois.justice.gc.ca/eng/acts/O-9/index.html",
+    "full_text": "The Old Age Security Act established Canada's federal Old Age Security (OAS) pension, with payments beginning in 1952 as a universal, taxable monthly benefit administered by the federal government. Originally payable at age 70, the eligibility age was lowered to 65 by 1970. OAS is a cornerstone of Canada's public retirement income system, administered by Service Canada on behalf of Employment and Social Development Canada.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "seniors"
+    },
+    "kpis": [
+      "seniors receiving a basic pension",
+      "old-age income adequacy",
+      "reduced senior poverty"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "income security",
+      "pensions"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-canada-pension-plan-1965",
+    "jurisdiction_code": "CA-FED",
+    "title": "Canada Pension Plan",
+    "department": "Employment and Social Development Canada",
+    "released_at": "1965-01-01",
+    "source_url": "https://laws-lois.justice.gc.ca/eng/acts/C-8/index.html",
+    "full_text": "The Canada Pension Plan (CPP) was legislated in 1965 and began operating on January 1, 1966, creating Canada's first contributory, earnings-related social insurance program for retirement, disability, and survivor benefits. Funded by mandatory contributions from employees, employers, and the self-employed, it provides partial replacement of earnings in retirement. The CPP operates in all provinces and territories except Quebec, which runs the comparable Quebec Pension Plan.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "60+",
+      "group": "contributors and their families"
+    },
+    "kpis": [
+      "earnings replacement in retirement",
+      "contributors receiving benefits",
+      "retirement income adequacy"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "income security",
+      "pensions"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-guaranteed-income-supplement-1967",
+    "jurisdiction_code": "CA-FED",
+    "title": "Guaranteed Income Supplement",
+    "department": "Employment and Social Development Canada",
+    "released_at": "1967-01-01",
+    "source_url": "https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/guaranteed-income-supplement.html",
+    "full_text": "The Guaranteed Income Supplement (GIS) was introduced in 1967 through an amendment to the Old Age Security Act as a tax-free, income-tested monthly benefit for low-income OAS pensioners. Originally intended as a temporary measure while the Canada Pension Plan matured, it became a permanent and central anti-poverty program for seniors. It is administered by Service Canada on behalf of Employment and Social Development Canada.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "low-income seniors"
+    },
+    "kpis": [
+      "reduced low-income rate among seniors",
+      "income support for poorest pensioners",
+      "GIS take-up"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "income security",
+      "poverty reduction"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus",
+      "financial_security.low_income_gap_65plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-oas-increase-75plus-2021",
+    "jurisdiction_code": "CA-FED",
+    "title": "Old Age Security pension increase for seniors aged 75 and over",
+    "department": "Employment and Social Development Canada",
+    "released_at": "2022-07-01",
+    "source_url": "https://www.canada.ca/en/employment-social-development/news/2022/07/increase-to-the-old-age-security-pension-for-seniors-aged-75-years-and-older-begins-this-month.html",
+    "full_text": "Announced in Budget 2021, the Government of Canada permanently increased the Old Age Security pension by 10% for seniors aged 75 and over, effective July 2022. This was the first permanent increase to the OAS pension since 1973 apart from inflation indexation, providing roughly $766 in additional benefits over the first year to a full pensioner. The measure strengthened the financial security of approximately 3.3 million seniors.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "75+",
+      "group": "older seniors"
+    },
+    "kpis": [
+      "higher benefit for seniors 75+",
+      "improved income adequacy for oldest seniors",
+      "reduced senior poverty"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "income security",
+      "pensions"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-canada-caregiver-credit-2017",
+    "jurisdiction_code": "CA-FED",
+    "title": "Canada Caregiver Credit",
+    "department": "Canada Revenue Agency",
+    "released_at": "2017-01-01",
+    "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/canada-caregiver-amount.html",
+    "full_text": "Introduced in Budget 2017 and effective for the 2017 and subsequent tax years, the Canada Caregiver Credit is a non-refundable federal tax credit that consolidated and replaced the former caregiver credit, infirm dependant credit, and family caregiver tax credit. It provides tax relief to individuals supporting a spouse, common-law partner, or dependant with a physical or mental impairment, including dependants who do not live with the caregiver. It is administered by the Canada Revenue Agency.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "all",
+      "group": "caregivers of infirm dependants"
+    },
+    "kpis": [
+      "tax relief for caregivers",
+      "support for families caring for infirm seniors",
+      "reduced caregiver financial burden"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "caregiving",
+      "income security",
+      "taxation"
+    ],
+    "indicators": [
+      "independence.caregiver_distress"
+    ]
+  },
+  {
+    "slug": "ca-fed-age-friendly-communities-2007",
+    "jurisdiction_code": "CA-FED",
+    "title": "Age-Friendly Communities (Public Health Agency of Canada)",
+    "department": "Public Health Agency of Canada",
+    "released_at": "2007-01-01",
+    "source_url": "https://www.canada.ca/en/public-health/services/health-promotion/aging-seniors/friendly-communities.html",
+    "full_text": "The Public Health Agency of Canada promotes the Age-Friendly Communities (AFC) model across Canada, based on the World Health Organization's age-friendly framework and its eight domains. PHAC funded the original WHO Global Age-Friendly Cities consultation, in which Canadian cities participated, and in 2007 launched the Federal/Provincial/Territorial Age-Friendly Rural and Remote Communities Initiative. PHAC developed the Pan-Canadian Age-Friendly Communities Milestones and works with provinces, territories and community partners.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "older adults in communities"
+    },
+    "kpis": [
+      "communities adopting age-friendly model",
+      "improved social participation and inclusion",
+      "age-friendly milestones achieved"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "age-friendly",
+      "social participation",
+      "healthy aging"
+    ],
+    "indicators": [
+      "social_participation.community_belonging_65plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-national-seniors-council-2007",
+    "jurisdiction_code": "CA-FED",
+    "title": "National Seniors Council",
+    "department": "Employment and Social Development Canada",
+    "released_at": "2007-01-01",
+    "source_url": "https://www.canada.ca/en/national-seniors-council/corporate/about-us.html",
+    "full_text": "Established by the Government of Canada in 2007, the National Seniors Council advises the federal government on matters related to the health, well-being and quality of life of seniors. The Council reports to the Minister responsible for seniors and the Minister of Health, advising on current and emerging issues affecting seniors. Its work includes commissioning research, convening expert panels and roundtables, and holding consultative meetings.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "seniors"
+    },
+    "kpis": [
+      "advisory reports delivered to ministers",
+      "emerging seniors issues identified",
+      "expert consultations conducted"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "seniors policy",
+      "advisory council",
+      "healthy aging"
+    ],
+    "indicators": []
+  },
+  {
+    "slug": "ca-fed-age-well-at-home-2022",
+    "jurisdiction_code": "CA-FED",
+    "title": "Age Well at Home initiative",
+    "department": "Employment and Social Development Canada",
+    "released_at": "2022-06-08",
+    "source_url": "https://www.canada.ca/en/employment-social-development/news/2022/06/minister-khera-announces-launch-of-age-well-at-home-initiative.html",
+    "full_text": "The Age Well at Home initiative helps seniors stay in their homes as long as possible by funding community organizations that provide practical, volunteer-based assistance with everyday tasks. Announced in Budget 2021 with $90 million over four years starting in 2022-23 and launched on June 8, 2022, it operates through two streams: In-Home Support Pilot Projects and Scaling Up for Seniors. It is delivered by Employment and Social Development Canada and targets low-income and otherwise vulnerable seniors aging in place.",
+    "budget_amount": 90000000,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "low-income seniors aging at home"
+    },
+    "kpis": [
+      "seniors supported to age in place",
+      "community organizations funded",
+      "practical in-home support services delivered"
+    ],
+    "lifecycle_status": "funded",
+    "theme": [
+      "home care",
+      "aging in place",
+      "community support"
+    ],
+    "indicators": [
+      "independence.functional_health_75plus"
+    ]
+  },
+  {
+    "slug": "ca-fed-safe-long-term-care-standards-2023",
+    "jurisdiction_code": "CA-FED",
+    "title": "Safe Long-Term Care Act and National Long-Term Care Standards",
+    "department": "Health Canada",
+    "released_at": "2023-01-01",
+    "source_url": "https://www.canada.ca/en/health-canada/programs/consultation-safe-long-term-care/document.html",
+    "full_text": "Health Canada, with the Minister of Seniors, was mandated to develop national long-term care standards and a federal Safe Long-Term Care Act to support safer, higher-quality long-term care while respecting provincial and territorial jurisdiction. In January 2023, the Health Standards Organization and CSA Group published two complementary national standards: CAN/HSO 21001:2023 (Long-Term Care Services) and CSA Z8004:22 (Long-Term Care Home Operations and Infection Prevention and Control). The planned legislation is intended to set out guiding principles rather than regulate LTC delivery.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "long-term care residents"
+    },
+    "kpis": [
+      "national LTC standards adopted",
+      "improved care quality and safety",
+      "strengthened infection prevention and control"
+    ],
+    "lifecycle_status": "announced",
+    "theme": [
+      "long-term care",
+      "care standards",
+      "patient safety"
+    ],
+    "indicators": [
+      "care_access.ltc_residents_cihi"
+    ]
+  },
+  {
+    "slug": "ns-continuing-care-strategy-2006",
+    "jurisdiction_code": "CA-NS",
+    "title": "Shaping the Future of Continuing Care (Nova Scotia Continuing Care Strategy)",
+    "department": "Nova Scotia Department of Health (now Department of Seniors and Long-Term Care)",
+    "released_at": "2006-01-01",
+    "source_url": "https://novascotia.ca/dhw/ccs/",
+    "full_text": "Announced in 2006 by the Nova Scotia Department of Health, \"Shaping the Future of Continuing Care\" was a 10-year strategy to redesign the province's continuing care system around client-centred care, choice, independence and aging in place. It guided expansion of home care and the construction of new and replacement long-term care homes built on a small self-contained household model, supported by program and design requirements released in 2007.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "continuing care clients"
+    },
+    "kpis": [
+      "aging in place",
+      "increased single-room long-term care",
+      "expanded home care capacity"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "long-term care",
+      "home care",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.ltc_beds_per_1k_65plus"
+    ]
+  },
+  {
+    "slug": "ns-caregiver-benefit-2009",
+    "jurisdiction_code": "CA-NS",
+    "title": "Caregiver Benefit Program",
+    "department": "Nova Scotia Department of Health and Wellness, Continuing Care (now Department of Seniors and Long-Term Care)",
+    "released_at": "2009-08-11",
+    "source_url": "https://novascotia.ca/dhw/ccs/caregiver-benefit.asp",
+    "full_text": "Launched in 2009, the Caregiver Benefit provides a monthly payment of $400 to eligible unpaid caregivers who support low-income adults assessed as having a high level of disability or impairment. Both the caregiver and the care recipient must meet criteria; caregivers must be Nova Scotia residents aged 19 or older providing 20 or more hours of care per week, and the care recipient's household income must fall within the program's low-income threshold.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "19+",
+      "group": "low-income caregivers"
+    },
+    "kpis": [
+      "financial support for unpaid caregivers",
+      "reduced caregiver burden",
+      "support for aging in place"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "caregivers",
+      "financial security"
+    ],
+    "indicators": [
+      "independence.caregiver_distress"
+    ]
+  },
+  {
+    "slug": "ns-seniors-care-grant-2021",
+    "jurisdiction_code": "CA-NS",
+    "title": "Seniors Care Grant",
+    "department": "Nova Scotia Department of Seniors and Long-Term Care",
+    "released_at": "2021-01-01",
+    "source_url": "https://www.novascotia.ca/apply-help-household-healthcare-and-home-heating-costs-seniors-care-grant",
+    "full_text": "Introduced in 2021, the Seniors Care Grant is an annual reimbursement of up to $750 that helps low- and modest-income seniors aged 65 and over pay for household services (such as snow removal, lawn care, grocery delivery, transportation and small home repairs), healthcare services (such as physiotherapy and mental health support) and home heating. Applicants must meet a household income threshold and have their name on a property title or residential lease.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "low- and modest-income seniors"
+    },
+    "kpis": [
+      "reduced out-of-pocket household costs",
+      "support for aging in place",
+      "grant uptake among low-income seniors"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "home care",
+      "financial security"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus"
+    ]
+  },
+  {
+    "slug": "ns-home-care-continuing-care",
+    "jurisdiction_code": "CA-NS",
+    "title": "Home Care (Continuing Care)",
+    "department": "Nova Scotia Department of Seniors and Long-Term Care / Nova Scotia Health Continuing Care",
+    "released_at": "2006-01-01",
+    "source_url": "https://novascotia.ca/dhw/ccs/home-care.asp",
+    "full_text": "Nova Scotia's Home Care program, delivered through Continuing Care, provides eligible residents with care in their own homes and communities on a short- or long-term basis. Services include home support (meal preparation, light housekeeping, personal care), home nursing care, respite care for caregivers, and palliative home care. Eligibility and service levels are determined through a Care Coordinator assessment; client fees for home support are income-based while nursing care is free.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "all ages (predominantly 65+)",
+      "group": "people needing care at home"
+    },
+    "kpis": [
+      "aging in place",
+      "avoided or delayed institutionalization",
+      "access to home nursing and support"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "home care",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.regular_provider_65plus"
+    ]
+  },
+  {
+    "slug": "ns-seniors-pharmacare-1974",
+    "jurisdiction_code": "CA-NS",
+    "title": "Nova Scotia Seniors' Pharmacare Program",
+    "department": "Department of Health and Wellness",
+    "released_at": "1974-01-01",
+    "source_url": "https://novascotia.ca/dhw/pharmacare/seniors-pharmacare.asp",
+    "full_text": "The Seniors' Pharmacare Program is a provincial drug insurance plan that helps Nova Scotia residents aged 65 and older with the cost of prescription drugs listed in the Nova Scotia Formulary. Members must hold a valid Nova Scotia Health Card and not have prescription drug coverage under another plan. Members pay an income-based annual premium (with reductions or exemptions for lower-income seniors and those receiving the federal GIS) plus a copayment, each subject to annual maximums. The program was established in 1974.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "seniors without other drug coverage"
+    },
+    "kpis": [
+      "prescription drug cost coverage for seniors",
+      "affordable income-based premiums",
+      "reduced out-of-pocket drug costs"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "pharmacare",
+      "income security"
+    ],
+    "indicators": [
+      "financial_security.low_income_rate_65plus"
+    ]
+  },
+  {
+    "slug": "ns-age-friendly-communities-grant-2017",
+    "jurisdiction_code": "CA-NS",
+    "title": "Age-Friendly Communities Grant Program",
+    "department": "Department of Seniors and Long-Term Care",
+    "released_at": "2017-01-01",
+    "source_url": "https://novascotia.ca/age-friendly-grant/",
+    "full_text": "The Age-Friendly Communities Grant Program provides funding for projects and planning that help older Nova Scotians stay active, healthy and engaged in their communities. Project grants are typically up to $10,000 (up to $20,000 for large-scale or provincial initiatives) and planning grants are available up to $25,000. Eligible applicants include registered not-for-profit community organizations, municipalities, Mi'kmaq Band Councils, and post-secondary institutions in Nova Scotia.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "older adults and their communities"
+    },
+    "kpis": [
+      "seniors social participation",
+      "community-led age-friendly projects",
+      "active and healthy aging"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "age-friendly",
+      "social participation"
+    ],
+    "indicators": [
+      "social_participation.community_belonging_65plus"
+    ]
+  },
+  {
+    "slug": "ns-collaborative-practice-teams-2023",
+    "jurisdiction_code": "CA-NS",
+    "title": "Collaborative Family Practice Teams",
+    "department": "Department of Health and Wellness",
+    "released_at": "2023-05-10",
+    "source_url": "https://novascotia.ca/dhw/collaborative-practice-teams/",
+    "full_text": "Nova Scotia is expanding collaborative family practice teams as part of primary care reform, shifting from a single patient-doctor relationship to interdisciplinary team-based care. Teams may include doctors, nurse practitioners, family practice nurses, pharmacists, dietitians, social workers, paramedics and others, allowing patients to see the right provider at the right time. The province has invested in new and expanded teams, particularly in communities where access to primary health care is a challenge.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "all ages",
+      "group": "residents needing primary care access"
+    },
+    "kpis": [
+      "improved primary care access",
+      "team-based comprehensive care",
+      "reduced unattached patients"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "primary care",
+      "care access"
+    ],
+    "indicators": [
+      "care_access.regular_provider_65plus"
+    ]
+  },
+  {
+    "slug": "ns-nursing-strategy-2021",
+    "jurisdiction_code": "CA-NS",
+    "title": "Nova Scotia Nursing Strategy",
+    "department": "Department of Health and Wellness",
+    "released_at": "2021-11-18",
+    "source_url": "https://novascotia.ca/dhw/nurses/",
+    "full_text": "The Nova Scotia Nursing Strategy is a provincial health workforce initiative focused on attracting and retaining nurses, including support for new graduates, professional development, mentorship, and integration of internationally educated nurses. It is paired with recruitment and retention measures led by the Office of Healthcare Professionals Recruitment, including faster licensing pathways and retention incentives. The strategy aims to stabilize the nursing workforce and improve nurses' quality of work life.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "all ages",
+      "group": "nurses and the health workforce"
+    },
+    "kpis": [
+      "nurse recruitment",
+      "nurse retention",
+      "internationally educated nurse integration"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "workforce"
+    ],
+    "indicators": [
+      "care_access.ltc_workforce_per_1k_65plus"
+    ]
+  },
+  {
+    "slug": "ns-virtualcarens-2021",
+    "jurisdiction_code": "CA-NS",
+    "title": "VirtualCareNS",
+    "department": "Nova Scotia Health / Department of Health and Wellness",
+    "released_at": "2021-05-17",
+    "source_url": "https://novascotia.ca/news/release/?id=20210923004",
+    "full_text": "VirtualCareNS is a free provincial virtual care program that gives Nova Scotians on the Need a Family Practice Registry online access to a primary care provider, delivered through the Maple platform. Providers can prescribe medications, order tests, and make referrals during virtual appointments, helping people without a family doctor or nurse practitioner access care. Launched as a pilot in May 2021, it expanded provincewide, with an initial $1.3 million investment to extend it to the Central and Eastern zones beginning December 2021.",
+    "budget_amount": 1300000,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "all ages",
+      "group": "residents on the Need a Family Practice Registry without a family doctor"
+    },
+    "kpis": [
+      "virtual primary care access",
+      "reduced ED reliance",
+      "care for unattached patients"
+    ],
+    "lifecycle_status": "in_effect",
+    "theme": [
+      "digital",
+      "virtual care"
+    ],
+    "indicators": [
+      "digital_inclusion.virtual_care_visits_ns",
+      "care_access.regular_provider_65plus"
+    ]
   }
 ]
