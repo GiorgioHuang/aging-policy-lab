@@ -87,6 +87,39 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Anxiety-disorder prevalence, 65+ (CCHS 13-10-0096) — mental-health morbidity.
+        "code": "health.anxiety_disorder_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 3.0, "max": 18.0},
+        "weight": 1.0,
+    },
+    {
+        # Obesity (self-reported), 65+ (CCHS 13-10-0096) — metabolic risk factor.
+        "code": "health.obesity_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 15.0, "max": 40.0},
+        "weight": 1.0,
+    },
+    {
+        # Current smoker (daily or occasional), 65+ (CCHS 13-10-0096) — modifiable risk.
+        "code": "health.smoker_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 4.0, "max": 20.0},
+        "weight": 1.0,
+    },
+    {
+        # Perceived mental health (very good/excellent), 65+ (CCHS 13-10-0096) —
+        # positive subjective mental-wellbeing.
+        "code": "health.perceived_mental_health_65plus",
+        "domain": "health",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 50.0, "max": 85.0},
+        "weight": 1.0,
+    },
+    {
         # Influenza immunization in the past 12 months, 65+ (CCHS 13-10-0096) —
         # preventive-care access for the recommended/publicly-funded senior group.
         "code": "care_access.flu_immunization_65plus",
