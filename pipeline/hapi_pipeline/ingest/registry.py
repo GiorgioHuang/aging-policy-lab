@@ -10,6 +10,7 @@ from .ns_ltc_waitlist import NSLTCWaitlistConnector
 from .ns_open_data import NSOpenDataConnector
 from .ns_virtual_care import NSVirtualCareConnector
 from .statcan_cchs import StatCanCCHSConnector
+from .statcan_disability import StatCanDisabilityConnector
 from .statcan_functional_health import StatCanFunctionalHealthConnector
 from .statcan_hale import StatCanHALEConnector
 from .statcan_internet_use import StatCanInternetUseConnector
@@ -34,6 +35,7 @@ CONNECTORS: list[Connector] = [
     StatCanInternetUseConnector(),
     StatCanLifeExpectancyConnector(),
     StatCanHALEConnector(),
+    StatCanDisabilityConnector(),
     StatCanCCHSConnector(),
     StatCanFunctionalHealthConnector(),
     StatCanLTCEmploymentConnector(),

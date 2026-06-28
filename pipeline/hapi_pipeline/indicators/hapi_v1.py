@@ -114,6 +114,15 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Disability rate, 65+ (StatCan 13-10-0374, Canadian Survey on Disability) —
+        # share of seniors living with a limiting disability; functional independence.
+        "code": "independence.disability_rate_65plus",
+        "domain": "independence",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 25.0, "max": 50.0},
+        "weight": 1.0,
+    },
+    {
         "code": "independence.functional_health_65_74",
         "domain": "independence",
         "direction": "higher_is_better",
