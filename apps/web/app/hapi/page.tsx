@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getHapiScores, type DomainScores, type HapiScoreRow } from "@/lib/hapi";
 import { TrendChart, type ChartPoint } from "@/components/TrendChart";
+import { DomainRadar, type RadarAxis, type RadarSeries } from "@/components/DomainRadar";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,42 @@ const DOMAIN_LABELS: Record<string, string> = {
   financial_security: "Financial Security",
   digital_inclusion: "Digital Inclusion",
 };
+
+// Short labels keep the radar rim readable.
+const RADAR_LABELS: Record<string, string> = {
+  care_access: "Care Access",
+  health: "Health",
+  independence: "Independence",
+  social_participation: "Social",
+  financial_security: "Financial",
+  digital_inclusion: "Digital",
+};
+const JUR_COLORS: Record<string, string> = { "CA-FED": "#4f9dff", "CA": "#4f9dff", "CA-NS": "#3ecf8e" };
+
+/** Latest non-null score per (domain, jurisdiction) for the radar profile. */
+function buildRadar(domains: DomainScores[]): { axes: RadarAxis[]; series: RadarSeries[] } | null {
+  const jurs = new Set<string>();
+  const scores: Record<string, Record<string, number>> = {}; // domain -> jur -> latest score
+  for (const d of domains) {
+    if (d.domain === "overall") continue;
+    for (const s of d.byJurisdiction) {
+      const latest = [...s.rows].reverse().find((r) => r.score !== null);
+      if (!latest) continue;
+      jurs.add(s.code);
+      (scores[d.domain] ??= {})[s.code] = Number(latest.score);
+    }
+  }
+  const axes: RadarAxis[] = Object.keys(scores)
+    .sort()
+    .map((key) => ({ key, label: RADAR_LABELS[key] ?? key }));
+  if (axes.length < 3) return null;
+  const series: RadarSeries[] = [...jurs].sort().map((code) => ({
+    code,
+    color: JUR_COLORS[code] ?? "#e0a23b",
+    scores: Object.fromEntries(axes.map((a) => [a.key, scores[a.key]?.[code] ?? null])),
+  }));
+  return { axes, series };
+}
 
 function points(rows: HapiScoreRow[]): ChartPoint[] {
   return rows
@@ -131,7 +168,26 @@ export default async function Hapi() {
           </p>
         </div>
       ) : domains && domains.length > 0 ? (
-        domains.map((d) => <DomainPanel key={d.domain} d={d} />)
+        <>
+          {(() => {
+            const radar = buildRadar(domains);
+            return radar ? (
+              <section className="panel">
+                <h2>
+                  Domain profile <span className="badge">latest period</span>
+                  <span className="code"> 0–100</span>
+                </h2>
+                <p className="meta">
+                  Each jurisdiction&apos;s most recent score on every scored HAPI domain — a
+                  one-glance read of relative strengths and gaps. Per-domain trends and the
+                  full audit trail are below.
+                </p>
+                <DomainRadar axes={radar.axes} series={radar.series} />
+              </section>
+            ) : null;
+          })()}
+          {domains.map((d) => <DomainPanel key={d.domain} d={d} />)}
+        </>
       ) : (
         <p style={{ color: "var(--muted)" }}>
           No scores yet — run{" "}

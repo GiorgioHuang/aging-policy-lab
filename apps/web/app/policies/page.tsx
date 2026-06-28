@@ -1,7 +1,21 @@
 import Link from "next/link";
 import { getPolicies, type JurisdictionPolicies, type Policy } from "@/lib/policies";
+import { PolicyTimeline, type TimelineItem } from "@/components/PolicyTimeline";
 
 export const dynamic = "force-dynamic";
+
+function timelineItems(groups: JurisdictionPolicies[]): TimelineItem[] {
+  return groups.flatMap((g) =>
+    g.policies
+      .map((p) => ({
+        id: p.id,
+        year: Number(p.releasedAt?.slice(0, 4)),
+        title: p.title,
+        jurisdiction: g.code,
+      }))
+      .filter((d) => Number.isFinite(d.year)),
+  );
+}
 
 function money(amount: string | null, currency: string | null): string | null {
   if (!amount) return null;
@@ -81,7 +95,21 @@ export default async function Policies() {
           </p>
         </div>
       ) : groups && groups.length > 0 ? (
-        groups.map((g) => (
+        <>
+          {(() => {
+            const items = timelineItems(groups);
+            return items.length > 1 ? (
+              <section className="panel">
+                <h2>Timeline</h2>
+                <p className="meta">
+                  Every catalogued policy on a shared year axis, coloured by jurisdiction —
+                  when aging policy clustered, and where the quiet stretches are.
+                </p>
+                <PolicyTimeline items={items} />
+              </section>
+            ) : null;
+          })()}
+          {groups.map((g) => (
           <section className="panel" key={g.code}>
             <h2>{g.code}</h2>
             <ul className="timeline">
@@ -90,7 +118,8 @@ export default async function Policies() {
               ))}
             </ul>
           </section>
-        ))
+          ))}
+        </>
       ) : (
         <p style={{ color: "var(--muted)" }}>
           No policies yet — run{" "}
