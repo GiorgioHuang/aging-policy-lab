@@ -1,0 +1,42 @@
+name: Show analysis findings
+
+# Read-only: print the stored analytic findings from the managed Postgres,
+# including the ITS coefficients (level/slope change, CIs, p-values) for the
+# real policy-dated interrupted-time-series. Does not write anything.
+# Requires the DATABASE_URL secret. See RUNBOOK.md §F.
+
+on:
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Also print Tier-1 trend findings (not just ITS)"
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  findings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Guard on DATABASE_URL
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret not set — see RUNBOOK.md §C."
+            exit 1
+          fi
+      - run: pip install -r pipeline/requirements.txt
+      - name: Print findings
+        run: |
+          if [ "${{ inputs.all }}" = "true" ]; then
+            python -m hapi_pipeline.cli findings --all
+          else
+            python -m hapi_pipeline.cli findings
+          fi
+        working-directory: pipeline

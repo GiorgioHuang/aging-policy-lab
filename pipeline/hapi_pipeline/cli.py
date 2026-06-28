@@ -278,6 +278,45 @@ def _cmd_analyze(_args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_findings(args: argparse.Namespace) -> int:
+    """Print stored analysis findings (with the ITS coefficients) and their tier."""
+    from .db import connect
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            """SELECT f.slug, f.title, f.tier, f.method, f.indicator_code,
+                      f.jurisdiction_code, f.window_spec, f.result, p.title
+                 FROM analysis_finding f LEFT JOIN policy p ON p.id = f.policy_id
+                ORDER BY f.method DESC, f.slug""")
+        rows = cur.fetchall()
+    if not rows:
+        print("no findings yet — run `hapi analyze`")
+        return 0
+    for slug, title, tier, method, ind, jur, win, res, ptitle in rows:
+        tag = "Causal(ITS)" if (tier == "causal" and method == "its") else (
+            "Causal" if tier == "causal" else "Association")
+        if method == "its" and not args.all:
+            print(f"\n[{tag}] {title}")
+            if ptitle:
+                print(f"   policy: {ptitle}")
+            iv = (win or {}).get("intervention")
+            print(f"   {ind} @ {jur} | intervention {iv} | "
+                  f"n_pre/post {res.get('n_pre')}/{res.get('n_post')} | status {res.get('status')}")
+            if res.get("status") == "ok":
+                for k in ("pre_trend", "level_change", "slope_change"):
+                    t = res[k]
+                    star = "*" if t["p"] < 0.05 else " "
+                    print(f"     {star}{k:<13} coef={t['coef']:>10}  (95% CI "
+                          f"{t['ci_low']}..{t['ci_high']}, p={t['p']})")
+                print(f"      R^2 {res.get('r_squared')}")
+        elif args.all and method != "its":
+            tr = res or {}
+            print(f"[{tag}] {ind} @ {jur}: {tr.get('start_value')} -> {tr.get('end_value')} "
+                  f"({tr.get('direction')}, {tr.get('pct_change')}% over {tr.get('n')} pts)")
+    n_its = sum(1 for r in rows if r[3] == "its")
+    print(f"\n{len(rows)} finding(s): {n_its} ITS (causal), {len(rows)-n_its} trend (association).")
+    return 0
+
+
 def _cmd_literature_seed(_args: argparse.Namespace) -> int:
     from .db import connect
     from .literature.loader import load_literature
@@ -370,6 +409,10 @@ def main(argv: list[str] | None = None) -> int:
         func=_cmd_weights)
     sub.add_parser("analyze", help="compute analytic findings (Tier-1 + ITS)").set_defaults(
         func=_cmd_analyze)
+    p_find = sub.add_parser("findings", help="print stored findings (ITS coefficients + tier)")
+    p_find.add_argument("--all", action="store_true",
+                        help="also print Tier-1 trend findings (not just ITS)")
+    p_find.set_defaults(func=_cmd_findings)
 
     p_lit = sub.add_parser("literature", help="literature KB")
     lit_sub = p_lit.add_subparsers(dest="lit_cmd", required=True)
