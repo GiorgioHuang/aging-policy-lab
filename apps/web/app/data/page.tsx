@@ -78,23 +78,36 @@ function GroupPanel({ g }: { g: IndicatorGroup }) {
               <th>Period</th>
               <th style={{ textAlign: "right" }}>Value</th>
               <th>Quality</th>
+              <th>Source</th>
             </tr>
           </thead>
           <tbody>
-            {g.rows.map((r, i) => (
-              <tr key={`${r.jurisdictionCode}-${r.periodStart}-${i}`}>
-                <td>{r.jurisdictionCode}</td>
-                <td>{periodLabel(r.periodStart, r.periodEnd)}</td>
-                <td style={{ textAlign: "right" }}>{fmt(r.value)}</td>
-                <td>
-                  {r.qualityFlag === "ok" ? (
-                    <span style={{ color: "var(--muted)" }}>ok</span>
-                  ) : (
-                    <span className="badge">{r.qualityFlag}</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {g.rows.map((r, i) => {
+              const isFix = (r.sourceVersion ?? "").startsWith("fixture:");
+              const title = [r.datasourceName, r.sourceVersion].filter(Boolean).join(" · ");
+              return (
+                <tr key={`${r.jurisdictionCode}-${r.periodStart}-${i}`}>
+                  <td>{r.jurisdictionCode}</td>
+                  <td>{periodLabel(r.periodStart, r.periodEnd)}</td>
+                  <td style={{ textAlign: "right" }}>{fmt(r.value)}</td>
+                  <td>
+                    {r.qualityFlag === "ok" ? (
+                      <span style={{ color: "var(--muted)" }}>ok</span>
+                    ) : (
+                      <span className="badge">{r.qualityFlag}</span>
+                    )}
+                  </td>
+                  <td title={title || undefined}>
+                    <span className={isFix ? "badge" : ""} style={isFix ? undefined : { color: "var(--good)" }}>
+                      {isFix ? "fixture" : "live"}
+                    </span>
+                    {r.checksum ? (
+                      <code className="code" style={{ marginLeft: "0.4rem" }}>{r.checksum.slice(0, 8)}</code>
+                    ) : null}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </details>
