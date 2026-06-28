@@ -255,3 +255,55 @@ snapshot. To add a new fiscal-year edition (Excel — no API):
    Quebec), not all of Canada. The richer per-resident profile + quality-indicator
    tabs (age/sex, diagnoses, ADL/CPS/CHESS, pain, restraints, pressure ulcers, …)
    also carry NS from 2024–2025 and can be wired as further indicators when needed.
+
+## F — Web visualizations & UI behaviour
+
+The web tier (`apps/web`) renders every page **live from Postgres** — each route
+is `export const dynamic = "force-dynamic"`, so there is **no build-time data
+snapshot**. This has a practical consequence for operations:
+
+- **Data/finding changes show up without a redeploy.** Re-running `hapi analyze`
+  or `hapi ingest` against the managed Postgres updates `/analytics`, `/hapi`,
+  `/data`, and the homepage on the next request. A **Cloud Build deploy is only
+  needed for code changes** (chart components, queries, copy).
+- **Findings are derived state, recomputed each run.** `run_analyses` does
+  `DELETE FROM analysis_finding` then rebuilds, so a retired indicator or a
+  superseded slug never lingers as an orphan card. If a stale card appears on
+  `/analytics`, the fix is to re-run `analyze` (the ingest workflow does this),
+  not to hand-delete rows.
+- **One trend per (indicator, jurisdiction).** Tier-1 trends are grouped, so an
+  indicator targeted by several policies yields a single card that overlays every
+  targeting policy's event — not one duplicate card per policy. Policy→indicator
+  links are reconciled on `hapi policies seed` (links dropped from the seed are
+  deleted), so repointing a policy's indicators cleans up automatically.
+
+### Chart components (dependency-free server-rendered SVG)
+
+All live in `apps/web/components`; interactivity hydrates on the client via the
+shared `chart-ui.tsx` (cursor tooltip + click-to-toggle legend). No chart library.
+
+| Component | Used on | What it shows / interactions |
+| --- | --- | --- |
+| `TrendChart` | `/hapi`, `/analytics`, `/data`, home | line + hover crosshair snapping to the nearest point; optional **policy-event markers** (violet dashed verticals, ▽ flags hoverable for the policy) positioned by interpolating the event year against the series |
+| `ItsChart` | `/analytics` | segmented-regression ITS: observed series, intervention marker, fitted pre/post segments, dashed **counterfactual** (pre-trend projected); per-point tooltip compares observed vs fitted vs counterfactual; legend toggles the fitted/counterfactual overlays. Needs the regression `intercept` stored in the finding result (added by `its.py`) |
+| `DomainRadar` / `DomainRadarOverTime` | `/hapi`, home | one polygon per jurisdiction across the scored HAPI domains (0–100); **year slider + ▶ play** scrubs the profile over time using last-observation-carried-forward; vertex tooltips; legend toggles a jurisdiction |
+| `PolicyTimeline` | `/policies`, home | every policy as a dot on a shared year axis, coloured by jurisdiction, stacked within a year; hover previews the title, **click pins a detail card** with an explicit *open source ↗* link; legend filters a jurisdiction |
+
+### Data Hub lineage table (`/data`)
+
+The observation store is append-only, so a period can have several
+`dataset_version`s (a fixture and a live load, or successive live runs). The
+lineage table **dedupes to the authoritative version** — live over fixture, then
+newest `dataset_version` — so identical rows don't appear twice; full version
+history remains queryable in the store. Each row's **Source** column shows a
+`live`/`fixture` tag + the dataset checksum (full datasource + `source_version` on
+hover). The `fixture` tag links to the anchored **"Why fixture?"** note (CIHI has
+no open API — see §E).
+
+### Titles
+
+Tier-1 trend cards are titled with the indicator's human name + a friendly
+jurisdiction label (`CA-NS → Nova Scotia`, `CA → Canada`), e.g. *"Sense of
+community belonging (strong), population 65+ · Nova Scotia"*; the raw indicator
+code stays in the card meta as a technical reference. ITS titles are curated
+per `REAL_ITS` / the illustrative example in `runner.py`.

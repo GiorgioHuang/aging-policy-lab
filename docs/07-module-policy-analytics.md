@@ -92,3 +92,25 @@ The AI Research Assistant ([`08-module-ai-research-assistant.md`](08-module-ai-r
 - The `Association` / `Causal` tagging convention implemented end-to-end.
 
 Out of v1: a large library of causal studies. v1 establishes the *framework and guardrails*; individual rigorous studies are the substance of Paper 4 (see [`09-research-roadmap.md`](09-research-roadmap.md)).
+
+## 8. Visualization (web)
+
+`/analytics` renders each finding as a card tagged **Association** or
+**Causal (ITS)**.
+
+- **Trend (association)** cards show a `TrendChart` overlaid with **policy-event
+  markers** — a violet dashed vertical for every policy targeting the indicator,
+  positioned by interpolating the policy's date against the series — so policy
+  timing can be read against the outcome trend. There is **one card per
+  (indicator, jurisdiction)**: findings are derived state, recomputed each run
+  (`DELETE` + rebuild in `run_analyses`), so retired indicators and per-policy
+  duplicates never linger (RUNBOOK §F).
+- **ITS (causal)** cards show an `ItsChart` segmented-regression picture: the
+  observed series, the intervention marker, the fitted pre/post segments, and the
+  dashed **counterfactual** (pre-trend projected forward) — the gap between the
+  post-segment and the counterfactual is the estimated effect. The coefficient
+  table carries pre-trend / level-change / slope-change with 95% CIs, p-values,
+  n_pre/post and R².
+
+The same `association ≠ causation` guardrail (§3) governs every label, and
+titles use the indicator's human name + jurisdiction (RUNBOOK §F).

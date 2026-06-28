@@ -97,3 +97,14 @@ Holding this line is what makes HAPI academically credible rather than a vanity 
 - Documented `method_version` v1.
 
 Out of v1: an exhaustive indicator set for all six domains. v1 establishes the *method* on a focused indicator set; breadth is added incrementally without changing the model.
+
+## 7. Visualization (web)
+
+`/hapi` (and the homepage) render a **domain-profile radar**
+(`DomainRadarOverTime`): one polygon per jurisdiction across the scored domains,
+0–100. A **year slider + ▶ play** scrubs the profile over time using
+last-observation-carried-forward, so it fills in smoothly as each domain's
+indicators come online rather than blinking on irregular cadences. Per-domain
+`TrendChart`s sit below, optionally overlaid with **policy-event markers** for the
+policies targeting that domain. Every score stays auditable to its raw inputs in
+an expandable table. See RUNBOOK §F.

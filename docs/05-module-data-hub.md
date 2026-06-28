@@ -81,3 +81,15 @@ Each `DataSource` declares an `update_frequency`. The pipeline runs as scheduled
 - Quality checks + quarantine.
 
 Out of v1: a large connector zoo for every source at once. v1 proves the lineage/versioning pattern on a focused set; new sources are additive (one connector each).
+
+## 8. Visualization & lineage display (web)
+
+The `/data` page lists every indicator with a per-jurisdiction `TrendChart` and an
+expandable **Data & lineage** table. Because the observation store is append-only,
+a period may carry several `dataset_version`s (a fixture and a live load, or
+successive live runs); the table **dedupes to the authoritative version** — live
+over fixture, then newest version — so identical rows never repeat, while the full
+version history stays queryable in the store. A **Source** column shows a
+`live`/`fixture` tag + the dataset checksum (datasource + `source_version` on
+hover), and the `fixture` tag links to a "Why fixture?" note (CIHI has no open
+API — §6). See RUNBOOK §F.

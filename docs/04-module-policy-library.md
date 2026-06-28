@@ -110,3 +110,12 @@ The `policy_indicator` join (see [`03-data-model.md`](03-data-model.md) §3) rec
 - Lifecycle status on every record.
 
 Out of v1: automated continuous policy *discovery* (crawling). v1 curates a high-quality seed set; automated discovery is a later enhancement (see [`11-implementation-roadmap.md`](11-implementation-roadmap.md)).
+
+## 8. Visualization (web)
+
+The `/policies` page renders a **timeline strip** (`PolicyTimeline`): every
+catalogued policy as a dot on a shared year axis, coloured by jurisdiction, with
+dots stacked within a year. Hovering previews the title; **clicking a dot pins a
+detail card** with an explicit *open source ↗* link; the legend filters a
+jurisdiction. The same strip appears on the homepage ("Aging-policy cadence").
+See RUNBOOK §F for the component inventory and interaction details.
