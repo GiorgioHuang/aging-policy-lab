@@ -4,7 +4,7 @@
 // axis, coloured by jurisdiction. Hover a dot for its full title; click a
 // jurisdiction in the legend to toggle it.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type MouseEvent } from "react";
 import { useTip, TipLayer, LegendChip } from "./chart-ui";
 
 export type TimelineItem = {
@@ -12,6 +12,7 @@ export type TimelineItem = {
   year: number;
   title: string;
   jurisdiction: string;
+  url?: string | null;
 };
 
 const JUR_COLORS: Record<string, string> = {
@@ -80,28 +81,30 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
         {placed.map((d) => {
           const cyDot = axisY - 10 - d.stack * 12;
           const c = colorFor(d.jurisdiction);
+          const onMove = (e: MouseEvent) =>
+            move(
+              e,
+              <>
+                <div className="tip-title">{d.title}</div>
+                <div className="tip-muted">
+                  {d.year} · {d.jurisdiction}
+                  {d.url ? " · click to open source ↗" : ""}
+                </div>
+              </>,
+            );
+          const dot = (
+            <circle className="hit" cx={x(d.year)} cy={cyDot} r="5" fill={c} fillOpacity="0.9" onMouseMove={onMove} />
+          );
           return (
             <g key={d.id}>
               <line x1={x(d.year)} y1={axisY} x2={x(d.year)} y2={cyDot} stroke={c} strokeWidth="1" opacity="0.35" />
-              <circle
-                className="hit"
-                cx={x(d.year)}
-                cy={cyDot}
-                r="5"
-                fill={c}
-                fillOpacity="0.9"
-                onMouseMove={(e) =>
-                  move(
-                    e,
-                    <>
-                      <div className="tip-title">{d.title}</div>
-                      <div className="tip-muted">
-                        {d.year} · {d.jurisdiction}
-                      </div>
-                    </>,
-                  )
-                }
-              />
+              {d.url ? (
+                <a href={d.url} target="_blank" rel="noreferrer">
+                  {dot}
+                </a>
+              ) : (
+                dot
+              )}
             </g>
           );
         })}

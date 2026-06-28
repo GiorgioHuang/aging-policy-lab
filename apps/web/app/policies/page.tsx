@@ -12,6 +12,7 @@ function timelineItems(groups: JurisdictionPolicies[]): TimelineItem[] {
         year: Number(p.releasedAt?.slice(0, 4)),
         title: p.title,
         jurisdiction: g.code,
+        url: p.sourceUrl,
       }))
       .filter((d) => Number.isFinite(d.year)),
   );

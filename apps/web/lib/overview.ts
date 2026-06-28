@@ -17,7 +17,7 @@ export type Overview = {
     years: string[];
     series: { code: string; byYear: Record<string, Record<string, number>> }[];
   };
-  policyTimeline: { id: string; year: number; jurisdiction: string; title: string }[];
+  policyTimeline: { id: string; year: number; jurisdiction: string; title: string; url: string | null }[];
   recentPolicies: { title: string; code: string; releasedAt: string | null; lifecycle: string | null }[];
   recentFindings: { title: string; tier: string; method: string }[];
 };
@@ -81,8 +81,8 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
     }
   }
 
-  const policyTl = await pool.query<{ id: string; code: string; released_at: string; title: string }>(
-    `SELECT p.id::text, j.code, p.released_at::text, p.title
+  const policyTl = await pool.query<{ id: string; code: string; released_at: string; title: string; source_url: string | null }>(
+    `SELECT p.id::text, j.code, p.released_at::text, p.title, p.source_url
        FROM policy p JOIN jurisdiction j ON j.id = p.jurisdiction_id
       WHERE p.released_at IS NOT NULL`,
   );
@@ -122,7 +122,13 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
       series: [...evoMap.entries()].map(([code, byYear]) => ({ code, byYear })),
     },
     policyTimeline: policyTl.rows
-      .map((r) => ({ id: r.id, year: Number(r.released_at.slice(0, 4)), jurisdiction: r.code, title: r.title }))
+      .map((r) => ({
+        id: r.id,
+        year: Number(r.released_at.slice(0, 4)),
+        jurisdiction: r.code,
+        title: r.title,
+        url: r.source_url,
+      }))
       .filter((d) => Number.isFinite(d.year)),
     recentPolicies: pol.rows.map((r) => ({
       title: r.title, code: r.code, releasedAt: r.released_at, lifecycle: r.lifecycle_status,
