@@ -6,8 +6,10 @@
 // year (last-observation-carried-forward), so the polygon fills in and shifts
 // smoothly as you slide rather than blinking in and out on irregular cadences.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DomainRadar, type RadarAxis, type RadarSeries } from "./DomainRadar";
+
+const STEP_MS = 850; // dwell per year while playing
 
 export type RadarTemporalSeries = {
   code: string;
@@ -25,7 +27,25 @@ export function DomainRadarOverTime({
   series: RadarTemporalSeries[];
 }) {
   const [idx, setIdx] = useState(Math.max(0, years.length - 1));
+  const [playing, setPlaying] = useState(false);
   const year = years[idx];
+
+  // Auto-advance one year per tick while playing; stop at the last year.
+  useEffect(() => {
+    if (!playing) return;
+    if (idx >= years.length - 1) {
+      setPlaying(false);
+      return;
+    }
+    const t = setTimeout(() => setIdx((i) => Math.min(years.length - 1, i + 1)), STEP_MS);
+    return () => clearTimeout(t);
+  }, [playing, idx, years.length]);
+
+  // Play from the start if we're already at the end; otherwise resume.
+  const togglePlay = () => {
+    if (!playing && idx >= years.length - 1) setIdx(0);
+    setPlaying((p) => !p);
+  };
 
   // LOCF: latest score per domain at or before the selected year.
   const snapshot: RadarSeries[] = useMemo(
@@ -52,6 +72,15 @@ export function DomainRadarOverTime({
       <DomainRadar axes={axes} series={snapshot} />
       {years.length > 1 && (
         <div className="radar-slider">
+          <button
+            type="button"
+            className="radar-play"
+            onClick={togglePlay}
+            aria-label={playing ? "Pause" : "Play year animation"}
+            aria-pressed={playing}
+          >
+            {playing ? "❚❚" : "▶"}
+          </button>
           <span className="radar-slider-label">as of</span>
           <input
             type="range"
@@ -59,9 +88,11 @@ export function DomainRadarOverTime({
             max={years.length - 1}
             value={idx}
             step={1}
-            onChange={(e) => setIdx(Number(e.target.value))}
+            onChange={(e) => {
+              setPlaying(false);
+              setIdx(Number(e.target.value));
+            }}
             aria-label="Select year"
-            list="radar-years"
           />
           <output className="radar-slider-year">{year}</output>
         </div>
