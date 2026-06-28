@@ -76,6 +76,7 @@ def interrupted_time_series(
     return {
         **base,
         "status": "ok",
+        "intercept": term(0),      # pre-intervention level at t=0 (for plotting the fit)
         "pre_trend": term(1),
         "level_change": term(2),   # immediate change at the intervention
         "slope_change": term(3),   # change in trend after the intervention

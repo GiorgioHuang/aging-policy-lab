@@ -51,19 +51,27 @@ export async function getFindings(): Promise<Finding[]> {
   }));
 }
 
-/** Latest value per period for an indicator series, as chart points. */
+/** Latest value per period for an indicator series, as chart points.
+ * Prefers a live dataset version over a fixture for the same period — matching
+ * the pipeline's `descriptive.load_series`, so the chart shows exactly the
+ * series the ITS / trend was computed on. */
 export async function getSeries(code: string, jur: string): Promise<ChartPoint[]> {
   const { rows } = await pool.query<{ ps: string; value: string }>(
-    `SELECT lower(o.period)::text AS ps, o.value::text AS value
-       FROM observation o
-       JOIN indicator i ON i.id = o.indicator_id
-       JOIN jurisdiction j ON j.id = o.jurisdiction_id
-       JOIN (SELECT indicator_id, jurisdiction_id, period, max(dataset_version_id) AS mdv
-               FROM observation GROUP BY indicator_id, jurisdiction_id, period) latest
-         ON latest.indicator_id = o.indicator_id AND latest.jurisdiction_id = o.jurisdiction_id
-        AND latest.period = o.period AND latest.mdv = o.dataset_version_id
-      WHERE i.code = $1 AND j.code = $2 AND o.value IS NOT NULL
-   ORDER BY ps`,
+    `SELECT ps, value FROM (
+        SELECT lower(o.period)::text AS ps, o.value::text AS value,
+               row_number() OVER (
+                   PARTITION BY o.indicator_id, o.jurisdiction_id, o.period
+                   ORDER BY (dv.source_version LIKE 'fixture:%') ASC,
+                            o.dataset_version_id DESC
+               ) AS rn
+          FROM observation o
+          JOIN indicator i ON i.id = o.indicator_id
+          JOIN jurisdiction j ON j.id = o.jurisdiction_id
+          JOIN dataset_version dv ON dv.id = o.dataset_version_id
+         WHERE i.code = $1 AND j.code = $2 AND o.value IS NOT NULL
+      ) ranked
+      WHERE rn = 1
+      ORDER BY ps`,
     [code, jur],
   );
   return rows.map((r) => {

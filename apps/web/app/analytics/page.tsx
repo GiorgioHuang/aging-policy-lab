@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFindings, getSeries, type Finding } from "@/lib/analytics";
 import { TrendChart, type ChartPoint } from "@/components/TrendChart";
+import { ItsChart, type ItsModel } from "@/components/ItsChart";
 
 export const dynamic = "force-dynamic";
 
@@ -26,38 +27,57 @@ function TrendResult({ r }: { r: Record<string, unknown> }) {
   );
 }
 
+function CoefRow({ label, t }: { label: string; t: Term | undefined }) {
+  if (!t) return null;
+  const sig = t.p < 0.05;
+  return (
+    <tr>
+      <td>
+        {label} {sig ? <span title="significant at p < 0.05" style={{ color: "#3ecf8e" }}>✱</span> : null}
+      </td>
+      <td style={{ textAlign: "right" }}>{num(t.coef)}</td>
+      <td>[{num(t.ci_low)}, {num(t.ci_high)}]</td>
+      <td>{t.p}</td>
+    </tr>
+  );
+}
+
 function ItsResult({ r }: { r: Record<string, unknown> }) {
   if (r.status !== "ok") {
     return <p className="meta">{String(r.note ?? "insufficient data")}</p>;
   }
-  const lc = r.level_change as Term;
-  const sc = r.slope_change as Term;
+  const rsq = r.r_squared == null ? null : num(r.r_squared);
   return (
-    <table className="data" style={{ maxWidth: 520 }}>
-      <thead>
-        <tr><th>Effect</th><th style={{ textAlign: "right" }}>Coef</th><th>95% CI</th><th>p</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Level change</td>
-          <td style={{ textAlign: "right" }}>{num(lc.coef)}</td>
-          <td>[{num(lc.ci_low)}, {num(lc.ci_high)}]</td>
-          <td>{lc.p}</td>
-        </tr>
-        <tr>
-          <td>Slope change</td>
-          <td style={{ textAlign: "right" }}>{num(sc.coef)}</td>
-          <td>[{num(sc.ci_low)}, {num(sc.ci_high)}]</td>
-          <td>{sc.p}</td>
-        </tr>
-      </tbody>
-    </table>
+    <>
+      <table className="data" style={{ maxWidth: 540 }}>
+        <thead>
+          <tr><th>Effect</th><th style={{ textAlign: "right" }}>Coef</th><th>95% CI</th><th>p</th></tr>
+        </thead>
+        <tbody>
+          <CoefRow label="Pre-trend (per step)" t={r.pre_trend as Term} />
+          <CoefRow label="Level change" t={r.level_change as Term} />
+          <CoefRow label="Slope change" t={r.slope_change as Term} />
+        </tbody>
+      </table>
+      <p className="meta">
+        {`n = ${r.n_pre} pre / ${r.n_post} post`}
+        {rsq ? ` · R² ${rsq}` : ""} · Newey–West (HAC) standard errors
+      </p>
+    </>
   );
 }
 
 function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
   const r = f.result ?? {};
   const intervention = (f.windowSpec?.intervention as string) ?? null;
+  const isIts = f.method === "its";
+  // Use the segmented-regression chart for an estimable ITS that carries an
+  // intercept (needed to reconstruct the fitted lines); otherwise the plain trend.
+  const itsModel =
+    isIts && r.status === "ok" && (r as Record<string, unknown>).intercept != null
+      ? (r as unknown as ItsModel)
+      : null;
+  const interventionLabel = intervention ? intervention.slice(0, 7) : null;
   return (
     <section className="panel">
       <h2>
@@ -70,11 +90,13 @@ function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
         {intervention ? <> · event {intervention}</> : null}
       </p>
 
-      {series.length > 1 && (
+      {itsModel && series.length > 1 ? (
+        <ItsChart points={series} model={itsModel} interventionLabel={interventionLabel} />
+      ) : series.length > 1 ? (
         <TrendChart points={series} direction="higher_is_better" />
-      )}
+      ) : null}
 
-      {f.method === "its" ? <ItsResult r={r} /> : <TrendResult r={r} />}
+      {isIts ? <ItsResult r={r} /> : <TrendResult r={r} />}
 
       <p className="meta"><strong>Assumptions.</strong> {f.assumptions}</p>
       <p className="meta"><strong>Limitations.</strong> {f.limitations}</p>
