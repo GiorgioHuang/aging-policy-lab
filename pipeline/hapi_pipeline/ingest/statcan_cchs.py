@@ -41,7 +41,6 @@ IND_ARTHRITIS = "independence.arthritis_65plus"
 IND_BP = "health.high_blood_pressure_65plus"
 IND_DIABETES = "health.diabetes_65plus"
 IND_FRUITVEG = "health.fruit_veg_65plus"
-IND_DOCTOR = "care_access.doctor_contact_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -74,8 +73,6 @@ def _classify(indicator: str) -> str | None:
         return IND_DIABETES
     if "fruit" in h and "vegetable" in h:
         return IND_FRUITVEG
-    if "medical doctor" in h and "contact" in h:
-        return IND_DOCTOR
     return None
 
 
@@ -235,20 +232,6 @@ class StatCanCCHSConnector(Connector):
             unit="% of persons 65+",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 20.0, "max": 55.0},
-            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        ),
-        IndicatorSpec(
-            code=IND_DOCTOR,
-            domain="care_access",
-            name="Contact with a medical doctor (past 12 months), population 65+",
-            definition="Share of persons aged 65+ who consulted a medical doctor in the "
-                       "past year — a care-utilization/access measure complementing the "
-                       "regular-provider indicator.",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Contact with a medical doctor in the past 12 months'.",
-            unit="% of persons 65+",
-            direction="higher_is_better",
-            normalization={"method": "min_max", "min": 80.0, "max": 98.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]

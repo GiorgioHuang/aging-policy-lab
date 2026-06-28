@@ -96,15 +96,6 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
-        # Contact with a medical doctor in past 12 months, 65+ (CCHS 13-10-0096) —
-        # care utilization/access complement to the regular-provider indicator.
-        "code": "care_access.doctor_contact_65plus",
-        "domain": "care_access",
-        "direction": "higher_is_better",
-        "normalization": {"method": "min_max", "min": 80.0, "max": 98.0},
-        "weight": 1.0,
-    },
-    {
         # Arthritis prevalence, 65+ (CCHS 13-10-0096) — leading chronic cause of
         # activity limitation in later life.
         "code": "independence.arthritis_65plus",
