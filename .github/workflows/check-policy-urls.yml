@@ -1,0 +1,44 @@
+name: Check policy source URLs
+
+# One-off diagnostic: hard-check (HTTP status) every source_url in the Policy
+# Library seed from a GitHub runner (unrestricted internet — the dev sandbox
+# proxy blocks gov domains). No DB / secret needed. Safe to delete afterwards.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Curl each policy source_url
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          seed = json.load(open("pipeline/hapi_pipeline/policies/seed_policies.json"))
+          print(f"checking {len(seed)} policy URLs\n")
+          ok = warn = bad = 0
+          for p in seed:
+              url = p.get("source_url") or ""
+              slug = p.get("slug")
+              # follow redirects; browser-like UA (some gov sites 403 default agents)
+              r = subprocess.run(
+                  ["curl", "-sS", "-o", "/dev/null", "-L", "--max-time", "25",
+                   "-A", "Mozilla/5.0 (compatible; policy-url-check/1.0)",
+                   "-w", "%{http_code} %{url_effective}", url],
+                  capture_output=True, text=True)
+              out = (r.stdout or r.stderr or "").strip()
+              code = out.split(" ", 1)[0]
+              try:
+                  n = int(code)
+              except ValueError:
+                  n = 0
+              tag = "OK  " if 200 <= n < 400 else ("WARN" if n in (401, 403, 429) else "BAD ")
+              if tag == "OK  ": ok += 1
+              elif tag == "WARN": warn += 1
+              else: bad += 1
+              print(f"{tag} {code:>3}  {slug:<42} {out.split(' ',1)[1] if ' ' in out else url}")
+          print(f"\nsummary: {ok} ok, {warn} warn(401/403/429), {bad} bad/unreachable")
+          PY
