@@ -22,19 +22,17 @@ export function useTip() {
   return { ref, tip, move, clear };
 }
 
-/** Absolutely-positioned tooltip; flips to the left near the right edge. */
+/** Absolutely-positioned tooltip; flips to the left near the right edge.
+ * Anchors with `right` when flipped so the tooltip's width isn't squeezed by
+ * the space remaining to the cursor's right. */
 export function TipLayer({ tip }: { tip: Tip }) {
   if (!tip) return null;
   const flip = tip.x > tip.w * 0.62;
+  const style = flip
+    ? { right: tip.w - tip.x + 12, top: tip.y, transform: "translateY(-50%)" }
+    : { left: tip.x + 12, top: tip.y, transform: "translateY(-50%)" };
   return (
-    <div
-      className="chart-tip"
-      style={{
-        left: tip.x,
-        top: tip.y,
-        transform: `translate(${flip ? "calc(-100% - 12px)" : "12px"}, -50%)`,
-      }}
-    >
+    <div className="chart-tip" style={style}>
       {tip.content}
     </div>
   );

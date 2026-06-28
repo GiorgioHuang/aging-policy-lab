@@ -1,11 +1,14 @@
 "use client";
 
 // Interactive SVG timeline strip. Plots every policy as a dot on a shared year
-// axis, coloured by jurisdiction. Hover a dot for its full title; click a
-// jurisdiction in the legend to toggle it.
+// axis, coloured by jurisdiction. Hover a dot to preview its title; click a dot
+// to pin a detail card with a source link; click a jurisdiction in the legend
+// to toggle it.
 
 import { useMemo, useState, type MouseEvent } from "react";
 import { useTip, TipLayer, LegendChip } from "./chart-ui";
+
+type Pinned = { x: number; y: number; w: number; item: TimelineItem };
 
 export type TimelineItem = {
   id: string;
@@ -25,6 +28,7 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
   const all = items.filter((d) => Number.isFinite(d.year));
   const jurs = useMemo(() => [...new Set(all.map((d) => d.jurisdiction))], [all]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [pinned, setPinned] = useState<Pinned | null>(null);
   const { ref, tip, move, clear } = useTip();
 
   const pts = all.filter((d) => !hidden.has(d.jurisdiction));
@@ -81,30 +85,39 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
         {placed.map((d) => {
           const cyDot = axisY - 10 - d.stack * 12;
           const c = colorFor(d.jurisdiction);
+          const isPinned = pinned?.item.id === d.id;
           const onMove = (e: MouseEvent) =>
             move(
               e,
               <>
                 <div className="tip-title">{d.title}</div>
                 <div className="tip-muted">
-                  {d.year} · {d.jurisdiction}
-                  {d.url ? " · click to open source ↗" : ""}
+                  {d.year} · {d.jurisdiction} · click for details
                 </div>
               </>,
             );
-          const dot = (
-            <circle className="hit" cx={x(d.year)} cy={cyDot} r="5" fill={c} fillOpacity="0.9" onMouseMove={onMove} />
-          );
+          const onClick = (e: MouseEvent) => {
+            const r = ref.current?.getBoundingClientRect();
+            if (!r) return;
+            clear();
+            setPinned((p) =>
+              p?.item.id === d.id ? null : { x: e.clientX - r.left, y: e.clientY - r.top, w: r.width, item: d },
+            );
+          };
           return (
             <g key={d.id}>
               <line x1={x(d.year)} y1={axisY} x2={x(d.year)} y2={cyDot} stroke={c} strokeWidth="1" opacity="0.35" />
-              {d.url ? (
-                <a href={d.url} target="_blank" rel="noreferrer">
-                  {dot}
-                </a>
-              ) : (
-                dot
-              )}
+              {isPinned && <circle cx={x(d.year)} cy={cyDot} r="8" fill="none" stroke={c} strokeWidth="1.5" opacity="0.7" />}
+              <circle
+                className="hit"
+                cx={x(d.year)}
+                cy={cyDot}
+                r="5"
+                fill={c}
+                fillOpacity="0.9"
+                onMouseMove={onMove}
+                onClick={onClick}
+              />
             </g>
           );
         })}
@@ -115,6 +128,32 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
           <LegendChip key={j} color={colorFor(j)} label={j} on={!hidden.has(j)} onClick={() => toggle(j)} />
         ))}
       </div>
+
+      {pinned && (
+        <div
+          className="chart-card"
+          style={
+            pinned.x > pinned.w * 0.62
+              ? { right: pinned.w - pinned.x + 12, top: pinned.y, transform: "translateY(-50%)" }
+              : { left: pinned.x + 12, top: pinned.y, transform: "translateY(-50%)" }
+          }
+        >
+          <button type="button" className="chart-card-close" aria-label="Close" onClick={() => setPinned(null)}>
+            ×
+          </button>
+          <div className="tip-title">{pinned.item.title}</div>
+          <div className="tip-muted">
+            {pinned.item.year} · {pinned.item.jurisdiction}
+          </div>
+          {pinned.item.url ? (
+            <a className="chart-card-link" href={pinned.item.url} target="_blank" rel="noreferrer">
+              open source ↗
+            </a>
+          ) : (
+            <span className="tip-muted">no source link</span>
+          )}
+        </div>
+      )}
 
       <TipLayer tip={tip} />
     </div>

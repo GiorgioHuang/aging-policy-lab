@@ -348,6 +348,54 @@ svg.chart {
 .chart-tip .tip-muted {
   color: var(--muted);
 }
+/* pinned, interactive detail card (click a timeline dot) */
+.chart-card {
+  position: absolute;
+  z-index: 6;
+  max-width: 300px;
+  padding: 0.55rem 1.5rem 0.6rem 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+.chart-card .tip-title {
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+}
+.chart-card .tip-muted {
+  color: var(--muted);
+}
+.chart-card-link {
+  display: inline-block;
+  margin-top: 0.4rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+.chart-card-link:hover {
+  text-decoration: underline;
+}
+.chart-card-close {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.35rem;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  font-size: 1rem;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.chart-card-close:hover {
+  color: var(--text);
+}
 .chart-legend {
   display: flex;
   flex-wrap: wrap;
