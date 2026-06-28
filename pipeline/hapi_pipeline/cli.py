@@ -294,7 +294,7 @@ def _cmd_findings(args: argparse.Namespace) -> int:
     for slug, title, tier, method, ind, jur, win, res, ptitle in rows:
         tag = "Causal(ITS)" if (tier == "causal" and method == "its") else (
             "Causal" if tier == "causal" else "Association")
-        if method == "its" and not args.all:
+        if method == "its":
             print(f"\n[{tag}] {title}")
             if ptitle:
                 print(f"   policy: {ptitle}")
@@ -308,7 +308,7 @@ def _cmd_findings(args: argparse.Namespace) -> int:
                     print(f"     {star}{k:<13} coef={t['coef']:>10}  (95% CI "
                           f"{t['ci_low']}..{t['ci_high']}, p={t['p']})")
                 print(f"      R^2 {res.get('r_squared')}")
-        elif args.all and method != "its":
+        elif args.all:
             tr = res or {}
             print(f"[{tag}] {ind} @ {jur}: {tr.get('start_value')} -> {tr.get('end_value')} "
                   f"({tr.get('direction')}, {tr.get('pct_change')}% over {tr.get('n')} pts)")
