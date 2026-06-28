@@ -2,9 +2,39 @@ import Link from "next/link";
 import { getJurisdictionTree, type JurisdictionNode } from "@/lib/jurisdictions";
 import { getAccessContext } from "@/lib/access";
 import { getOverview, type Overview } from "@/lib/overview";
+import { TrendChart } from "@/components/TrendChart";
+import { DomainRadar, type RadarAxis, type RadarSeries } from "@/components/DomainRadar";
+import { PolicyTimeline } from "@/components/PolicyTimeline";
 
 // Always read live from the database (no static caching of the dashboard).
 export const dynamic = "force-dynamic";
+
+// Short radar labels + a stable domain order; colours per jurisdiction.
+const RADAR_LABELS: Record<string, string> = {
+  care_access: "Care Access",
+  health: "Health",
+  independence: "Independence",
+  social_participation: "Social",
+  financial_security: "Financial",
+  digital_inclusion: "Digital",
+};
+const JUR_COLOR = (code: string) => (code === "CA-NS" ? "#3ecf8e" : "#4f9dff");
+
+function buildRadar(profile: Overview["domainProfile"]): { axes: RadarAxis[]; series: RadarSeries[] } | null {
+  const keys = new Set<string>();
+  for (const p of profile) for (const k of Object.keys(p.scores)) keys.add(k);
+  const axes: RadarAxis[] = [...keys].sort().map((key) => ({ key, label: RADAR_LABELS[key] ?? key }));
+  if (axes.length < 3 || profile.length === 0) return null;
+  const series: RadarSeries[] = profile
+    .slice()
+    .sort((a, b) => a.code.localeCompare(b.code))
+    .map((p) => ({
+      code: p.code,
+      color: JUR_COLOR(p.code),
+      scores: Object.fromEntries(axes.map((a) => [a.key, p.scores[a.key] ?? null])),
+    }));
+  return { axes, series };
+}
 
 const MODULES: Array<{ n: string; name: string; desc: string; href: string }> = [
   { n: "①", name: "Policy Library", desc: "Timeline of federal & provincial aging policy", href: "/policies" },
@@ -123,6 +153,53 @@ export default async function Home() {
               <p className="meta" style={{ marginBottom: 0 }}>
                 Composite index, 0–100 (higher is better). Methodology: <Link href="/hapi">HAPI →</Link>
               </p>
+            </section>
+          )}
+
+          {overview && (() => {
+            const radar = buildRadar(overview.domainProfile);
+            const trends = overview.hapiTrend.filter((t) => t.points.length > 1);
+            if (!radar && trends.length === 0) return null;
+            return (
+              <div className="dash-grid">
+                {radar && (
+                  <section className="panel">
+                    <h2>HAPI domain profile</h2>
+                    <p className="meta">
+                      Latest score on every scored domain, 0–100 — hover a vertex, click a
+                      jurisdiction to toggle. <Link href="/hapi">HAPI →</Link>
+                    </p>
+                    <DomainRadar axes={radar.axes} series={radar.series} />
+                  </section>
+                )}
+                {trends.length > 0 && (
+                  <section className="panel">
+                    <h2>Composite HAPI trend</h2>
+                    <div className="charts">
+                      {trends.map((t) => (
+                        <figure className="series" key={t.code}>
+                          <figcaption className="series-head">{t.code}</figcaption>
+                          <TrendChart points={t.points} direction="higher_is_better" unit="/100" yMin={0} yMax={100} />
+                        </figure>
+                      ))}
+                    </div>
+                    <p className="meta" style={{ marginBottom: 0 }}>
+                      Composite index over time, 0–100. <Link href="/hapi">All domains →</Link>
+                    </p>
+                  </section>
+                )}
+              </div>
+            );
+          })()}
+
+          {overview && overview.policyTimeline.length > 1 && (
+            <section className="panel">
+              <h2>Aging-policy cadence</h2>
+              <p className="meta">
+                Every catalogued policy on a shared year axis, coloured by jurisdiction — hover a
+                dot for its title, click the legend to filter. <Link href="/policies">Policy Library →</Link>
+              </p>
+              <PolicyTimeline items={overview.policyTimeline} />
             </section>
           )}
 
