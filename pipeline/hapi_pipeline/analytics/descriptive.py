@@ -13,20 +13,21 @@ def load_series(cur, indicator_code: str, jurisdiction_code: str) -> list[tuple[
     """Return ordered (period_start, value) using the latest dataset version per period."""
     cur.execute(
         """
-        SELECT lower(o.period) AS ps, o.value
-          FROM observation o
-          JOIN indicator i    ON i.id = o.indicator_id
-          JOIN jurisdiction j ON j.id = o.jurisdiction_id
-          JOIN (
-              SELECT indicator_id, jurisdiction_id, period, max(dataset_version_id) AS mdv
-                FROM observation GROUP BY indicator_id, jurisdiction_id, period
-          ) latest
-            ON latest.indicator_id = o.indicator_id
-           AND latest.jurisdiction_id = o.jurisdiction_id
-           AND latest.period = o.period
-           AND latest.mdv = o.dataset_version_id
-         WHERE i.code = %s AND j.code = %s AND o.value IS NOT NULL
-         ORDER BY ps
+        SELECT ps, value FROM (
+            SELECT lower(o.period) AS ps, o.value AS value,
+                   row_number() OVER (
+                       PARTITION BY o.indicator_id, o.jurisdiction_id, o.period
+                       ORDER BY (dv.source_version LIKE 'fixture:%%') ASC,
+                                o.dataset_version_id DESC
+                   ) AS rn
+              FROM observation o
+              JOIN indicator i        ON i.id = o.indicator_id
+              JOIN jurisdiction j     ON j.id = o.jurisdiction_id
+              JOIN dataset_version dv ON dv.id = o.dataset_version_id
+             WHERE i.code = %s AND j.code = %s AND o.value IS NOT NULL
+        ) ranked
+        WHERE rn = 1
+        ORDER BY ps
         """,
         (indicator_code, jurisdiction_code),
     )

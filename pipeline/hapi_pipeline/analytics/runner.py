@@ -29,6 +29,37 @@ ITS_LIMITS = (
     "possible seasonality/ramp-up, single treated unit, no control series."
 )
 
+# Real, dated policy-event ITS on the long annual NS series. These tie a specific
+# continuing-care policy to a plausibly-affected indicator. Still strongly
+# caveated (annual data, single treated unit, no control), but — unlike the
+# illustrative example above — the intervention is an actual dated policy.
+REAL_ITS_LIMITS = (
+    "Quasi-experimental ITS on a SINGLE annual series with no control group: the "
+    "estimate assumes the pre-intervention trend would have continued absent the "
+    "policy, and cannot separate the policy from coincident events (pandemic "
+    "recovery, demographic ageing, other concurrent policies). Annual cadence "
+    "means few post-intervention points and wide confidence intervals; a policy's "
+    "effect on capacity/utilization also typically lags. Interpret as a structured, "
+    "auditable starting point for evaluation, not a definitive causal estimate."
+)
+
+REAL_ITS = [
+    {
+        "indicator": "care_access.ltc_waitlist_ns",
+        "jurisdiction": "CA-NS",
+        "policy_title": "Long-Term Care: Build, Renovate, Replace",
+        "intervention": date(2022, 9, 1),
+        "title": "ITS: NS long-term-care waitlist around the 2022 LTC capital plan",
+    },
+    {
+        "indicator": "care_access.ltc_workforce_per_1k_65plus",
+        "jurisdiction": "CA-NS",
+        "policy_title": "Continuing Care Assistant Workforce Strategy",
+        "intervention": date(2022, 10, 1),
+        "title": "ITS: NS nursing & residential-care workforce around the 2022 CCA strategy",
+    },
+]
+
 
 def _upsert(cur, *, slug, title, tier, method, policy_id, indicator_code,
             jurisdiction_code, window_spec, result, assumptions, limitations):
@@ -110,6 +141,35 @@ def run_analyses(conn) -> int:
                 result=res,
                 assumptions=its.ASSUMPTIONS,
                 limitations=ITS_LIMITS,
+            )
+            written += 1
+
+        # ── Tier 2: real, dated policy-event ITS on the long annual NS series ──
+        for spec in REAL_ITS:
+            series = descriptive.load_series(cur, spec["indicator"], spec["jurisdiction"])
+            if not series:
+                continue
+            cur.execute("SELECT id FROM policy WHERE title = %s", (spec["policy_title"],))
+            row = cur.fetchone()
+            policy_id = row[0] if row else None
+            res = its.interrupted_time_series(series, spec["intervention"])
+            _upsert(
+                cur,
+                slug=f"its:{spec['indicator']}:{spec['jurisdiction']}",
+                title=spec["title"],
+                tier="causal",
+                method="its",
+                policy_id=policy_id,
+                indicator_code=spec["indicator"],
+                jurisdiction_code=spec["jurisdiction"],
+                window_spec={"from": series[0][0].isoformat(),
+                             "to": series[-1][0].isoformat(),
+                             "intervention": spec["intervention"].isoformat(),
+                             "policy": spec["policy_title"],
+                             "n_pre": res.get("n_pre"), "n_post": res.get("n_post")},
+                result=res,
+                assumptions=its.ASSUMPTIONS,
+                limitations=REAL_ITS_LIMITS,
             )
             written += 1
 
