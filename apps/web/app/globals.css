@@ -432,6 +432,22 @@ svg.chart {
 svg.chart .hit {
   cursor: pointer;
 }
+.badge-link {
+  cursor: pointer;
+  text-decoration: none;
+  border-style: dashed;
+}
+.badge-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.why-fixture {
+  scroll-margin-top: 80px;
+}
+.why-fixture:target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
 .event-key {
   display: inline-block;
   width: 14px;

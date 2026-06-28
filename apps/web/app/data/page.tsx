@@ -14,6 +14,15 @@ function fmt(value: string | null): string {
   return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 1 }) : value;
 }
 
+// The fixture tag links to the "why fixture?" note so it's self-explanatory.
+function FixtureBadge() {
+  return (
+    <a href="#why-fixture" className="badge badge-link" title="Why fixture? CIHI has no open API — click to read">
+      fixture
+    </a>
+  );
+}
+
 // Postgres stores daterange canonically as [lower, upper) — the upper bound is
 // exclusive, so a full calendar year is [YYYY-01-01, (YYYY+1)-01-01). Show such a
 // range as "YYYY"; anything shorter (e.g. a month) shows as "YYYY-MM".
@@ -55,7 +64,7 @@ function GroupPanel({ g }: { g: IndicatorGroup }) {
             {" "}· dataset <code className="code">{sample.checksum.slice(0, 10)}</code>
           </>
         ) : null}{" "}
-        <span className="badge">{g.isFixture ? "fixture" : "live"}</span>
+        {g.isFixture ? <FixtureBadge /> : <span className="badge" style={{ color: "var(--good)" }}>live</span>}
       </p>
 
       {series.length > 0 && (
@@ -98,9 +107,11 @@ function GroupPanel({ g }: { g: IndicatorGroup }) {
                     )}
                   </td>
                   <td title={title || undefined}>
-                    <span className={isFix ? "badge" : ""} style={isFix ? undefined : { color: "var(--good)" }}>
-                      {isFix ? "fixture" : "live"}
-                    </span>
+                    {isFix ? (
+                      <FixtureBadge />
+                    ) : (
+                      <span style={{ color: "var(--good)" }}>live</span>
+                    )}
                     {r.checksum ? (
                       <code className="code" style={{ marginLeft: "0.4rem" }}>{r.checksum.slice(0, 8)}</code>
                     ) : null}
@@ -141,12 +152,15 @@ export default async function DataHub() {
       </p>
 
       {fixtureSources.length > 0 && (
-        <div className="panel error">
-          <strong>Fixture-sourced series.</strong> {fixtureSources.join("; ")} —
-          tagged <code className="code">fixture</code> below — load from a vendored
-          payload rather than a live pull (CIHI has no open API). Provenance is
-          recorded as <code className="code">fixture:…</code>; live series instead
-          show <code className="code">WDS:</code> / <code className="code">SODA:</code>.
+        <div id="why-fixture" className="panel error why-fixture">
+          <strong>Why “fixture”?</strong> {fixtureSources.join("; ")} — tagged{" "}
+          <code className="code">fixture</code> — have <strong>no open API</strong>: CIHI
+          publishes only manual Excel/CSV downloads (record-level data is access-controlled),
+          so these series load from a vendored payload rather than a live pull, and refresh
+          when a newer CIHI table is vendored in. Provenance is recorded as{" "}
+          <code className="code">fixture:…</code>; live series instead show{" "}
+          <code className="code">WDS:</code> (StatCan) / <code className="code">SODA:</code> (NS
+          Open Data) and re-pull on every ingest.
         </div>
       )}
 
