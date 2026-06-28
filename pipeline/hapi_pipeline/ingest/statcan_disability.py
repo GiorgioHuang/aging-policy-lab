@@ -15,9 +15,11 @@ Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_disability`:
     'Persons without disabilities', 'Total population, with and without
     disabilities'}; the statistic column is 'Estimates' (number vs percentage of
     persons, plus their 95% CI bounds).
-  * Filtered to GEO ∈ {Canada, Nova Scotia}, age '65 years and over', 'Total,
-    gender', 'Persons with disabilities', and the percentage estimate (excludes
-    the person counts and the CI bounds).
+  * The table reports COUNTS only (Estimates = 'Number of persons' + CI bounds),
+    not a percentage — so the prevalence RATE is DERIVED: filter to GEO ∈
+    {Canada, Nova Scotia}, age '65 years and over', 'Total, gender', the point
+    'Number of persons' estimate, keeping both the 'Persons with disabilities'
+    and 'Total population' counts, then rate = with ÷ total × 100 per (geo, year).
 """
 from __future__ import annotations
 
@@ -39,21 +41,25 @@ _DIM_HINTS = {
 }
 
 
-def _is_with_disability(member: str) -> bool:
-    """The 'persons with disabilities' status — not 'without', not the total."""
+def _status_tag(member: str) -> str | None:
+    """Tag the Disability member as the with-disabilities count ('with') or the
+    total-population denominator ('total'); ignore the 'without' member."""
     m = member.strip().lower()
-    return "with disab" in m and "without" not in m
+    if "with disab" in m and "without" not in m:
+        return "with"
+    if "total population" in m or "with and without" in m:
+        return "total"
+    return None
 
 
-def _is_percent_stat(member: str) -> bool:
-    """The prevalence rate (the 'Percentage of persons' estimate) — not the person
-    count ('Number of persons') and not any confidence-interval bound."""
-    m = member.strip().lower()
-    if m == "":
-        return True
-    if any(w in m for w in ("confidence", "interval", "low", "high", "margin")):
+def _is_count(estimate: str) -> bool:
+    """The point 'Number of persons' estimate — not a confidence-interval bound.
+    (Table 13-10-0374 reports counts only; the prevalence rate is derived as
+    persons-with-disabilities ÷ total-population.)"""
+    e = estimate.strip().lower()
+    if any(w in e for w in ("confidence", "interval", "low", "high", "margin")):
         return False
-    return "percent" in m or "proportion" in m or "%" in m
+    return e == "" or "number" in e
 
 
 class StatCanDisabilityConnector(Connector):
@@ -101,10 +107,10 @@ class StatCanDisabilityConnector(Connector):
         f_age = sc.find_field(fields, "age")
         f_sex = sc.find_field(fields, "gender", "sex")
         f_status = sc.find_field(fields, "disabilit", "persons with")
-        f_stat = sc.find_field(fields, "statistic", "characteristic")
+        f_est = sc.find_field(fields, "estimate", "statistic", "characteristic")
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
+        writer.writerow(["REF_DATE", "GEO", "STATUS_TAG", "VALUE"])
         for row in reader:
             if sc.map_geo(sc.col(row, "GEO")) is None:
                 continue
@@ -112,12 +118,13 @@ class StatCanDisabilityConnector(Connector):
                 continue
             if f_sex and not sc.is_total_gender(row.get(f_sex, "")):
                 continue
-            if f_status and not _is_with_disability(row.get(f_status, "")):
+            tag = _status_tag(row.get(f_status, "")) if f_status else None
+            if tag is None:
                 continue
-            if f_stat and not _is_percent_stat(row.get(f_stat, "")):
+            if f_est and not _is_count(row.get(f_est, "")):
                 continue
             writer.writerow([sc.col(row, "REF_DATE"), sc.col(row, "GEO"),
-                             sc.col(row, "VALUE"), sc.col(row, "STATUS")])
+                             tag, sc.col(row, "VALUE")])
         return out.getvalue()
 
     def inspect_live(self) -> str:
@@ -126,7 +133,9 @@ class StatCanDisabilityConnector(Connector):
 
     def parse(self, payload: RawPayload) -> list[ObservationRecord]:
         reader = csv.DictReader(io.StringIO(payload.content.decode("utf-8-sig")))
-        records: list[ObservationRecord] = []
+        # Accumulate the with-disabilities and total-population counts per
+        # (jurisdiction, year), then derive the prevalence rate = with / total.
+        counts: dict[tuple[str, str], dict[str, float]] = {}
         for row in reader:
             jcode = sc.map_geo(sc.col(row, "GEO"))
             if jcode is None:
@@ -135,16 +144,24 @@ class StatCanDisabilityConnector(Connector):
             if not year or int(year) < MIN_YEAR:
                 continue
             raw = sc.col(row, "VALUE").strip()
-            status = sc.col(row, "STATUS").strip().upper()
-            suppressed = raw == "" or status in ("F", "X", "..", "...")
+            if raw == "":
+                continue
+            tag = (row.get("STATUS_TAG") or "").strip()
+            if tag in ("with", "total"):
+                counts.setdefault((jcode, year), {})[tag] = float(raw)
+
+        records: list[ObservationRecord] = []
+        for (jcode, year), c in counts.items():
+            w, tot = c.get("with"), c.get("total")
+            rate = round(w / tot * 100.0, 1) if (w is not None and tot) else None
             records.append(
                 ObservationRecord(
                     indicator_code=INDICATOR,
                     jurisdiction_code=jcode,
                     period_start=f"{year}-01-01",
                     period_end=f"{year}-12-31",
-                    value=None if suppressed else float(raw),
-                    quality_flag="suppressed" if suppressed else "ok",
+                    value=rate,
+                    quality_flag="ok" if rate is not None else "suppressed",
                 )
             )
         return records

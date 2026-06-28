@@ -1,5 +1,9 @@
-REF_DATE,GEO,VALUE,STATUS
-2017,Canada,37.8,
-2022,Canada,40.4,
-2017,Nova Scotia,42.0,
-2022,Nova Scotia,44.5,
+REF_DATE,GEO,STATUS_TAG,VALUE
+2017,Canada,with,2470000
+2017,Canada,total,6500000
+2022,Canada,with,3000000
+2022,Canada,total,7430000
+2017,Nova Scotia,with,84000
+2017,Nova Scotia,total,200000
+2022,Nova Scotia,with,100000
+2022,Nova Scotia,total,225000
