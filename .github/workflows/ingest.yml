@@ -72,3 +72,28 @@ jobs:
       - name: Show loaded observations
         run: python -m hapi_pipeline.cli observations --limit 500
         working-directory: pipeline
+
+      - name: Show analysis findings (ITS coefficients)
+        run: python -m hapi_pipeline.cli findings
+        working-directory: pipeline
+
+  findings:
+    # Read-only: print the stored analytic findings (ITS coefficients) without
+    # re-running the slow live ingest. Useful to confirm the policy-impact
+    # analytics landed in Neon after a prior ingest.
+    needs: check
+    if: needs.check.outputs.ok == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pipeline
+        run: pip install -r pipeline/requirements.txt
+      - name: Print findings (ITS + trends)
+        run: python -m hapi_pipeline.cli findings --all
+        working-directory: pipeline
