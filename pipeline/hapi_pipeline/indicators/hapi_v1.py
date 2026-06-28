@@ -63,12 +63,45 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # High blood pressure prevalence, 65+ (CCHS 13-10-0096) — cardiovascular risk.
+        "code": "health.high_blood_pressure_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 35.0, "max": 65.0},
+        "weight": 1.0,
+    },
+    {
+        # Diabetes prevalence, 65+ (CCHS 13-10-0096) — major chronic condition.
+        "code": "health.diabetes_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 10.0, "max": 35.0},
+        "weight": 1.0,
+    },
+    {
+        # Fruit & vegetable consumption 5+/day, 65+ (CCHS 13-10-0096) — nutrition behaviour.
+        "code": "health.fruit_veg_65plus",
+        "domain": "health",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 20.0, "max": 55.0},
+        "weight": 1.0,
+    },
+    {
         # Influenza immunization in the past 12 months, 65+ (CCHS 13-10-0096) —
         # preventive-care access for the recommended/publicly-funded senior group.
         "code": "care_access.flu_immunization_65plus",
         "domain": "care_access",
         "direction": "higher_is_better",
         "normalization": {"method": "min_max", "min": 40.0, "max": 85.0},
+        "weight": 1.0,
+    },
+    {
+        # Contact with a medical doctor in past 12 months, 65+ (CCHS 13-10-0096) —
+        # care utilization/access complement to the regular-provider indicator.
+        "code": "care_access.doctor_contact_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 80.0, "max": 98.0},
         "weight": 1.0,
     },
     {

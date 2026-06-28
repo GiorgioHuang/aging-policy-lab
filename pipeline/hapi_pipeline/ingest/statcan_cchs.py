@@ -38,6 +38,10 @@ IND_LIFE_SATISFACTION = "social_participation.life_satisfaction_65plus"
 IND_MOOD = "health.mood_disorder_65plus"
 IND_FLU = "care_access.flu_immunization_65plus"
 IND_ARTHRITIS = "independence.arthritis_65plus"
+IND_BP = "health.high_blood_pressure_65plus"
+IND_DIABETES = "health.diabetes_65plus"
+IND_FRUITVEG = "health.fruit_veg_65plus"
+IND_DOCTOR = "care_access.doctor_contact_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -64,6 +68,14 @@ def _classify(indicator: str) -> str | None:
         return IND_FLU
     if "arthritis" in h:
         return IND_ARTHRITIS
+    if "high blood pressure" in h:
+        return IND_BP
+    if "diabetes" in h:
+        return IND_DIABETES
+    if "fruit" in h and "vegetable" in h:
+        return IND_FRUITVEG
+    if "medical doctor" in h and "contact" in h:
+        return IND_DOCTOR
     return None
 
 
@@ -182,6 +194,61 @@ class StatCanCCHSConnector(Connector):
             unit="% of persons 65+",
             direction="lower_is_better",
             normalization={"method": "min_max", "min": 30.0, "max": 60.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_BP,
+            domain="health",
+            name="High blood pressure, population 65+",
+            definition="Share of persons aged 65+ reporting diagnosed high blood pressure "
+                       "(hypertension) — a leading modifiable cardiovascular risk factor "
+                       "(lower is better).",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'High blood pressure'.",
+            unit="% of persons 65+",
+            direction="lower_is_better",
+            normalization={"method": "min_max", "min": 35.0, "max": 65.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_DIABETES,
+            domain="health",
+            name="Diabetes, population 65+",
+            definition="Share of persons aged 65+ reporting diagnosed diabetes — a major "
+                       "chronic condition driving complications and care needs (lower is "
+                       "better).",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Diabetes'.",
+            unit="% of persons 65+",
+            direction="lower_is_better",
+            normalization={"method": "min_max", "min": 10.0, "max": 35.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_FRUITVEG,
+            domain="health",
+            name="Fruit & vegetable consumption (5+/day), population 65+",
+            definition="Share of persons aged 65+ consuming fruit and vegetables five or "
+                       "more times per day — a positive nutrition/health-behaviour measure.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Fruit and vegetable consumption, 5 times or more per day'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 20.0, "max": 55.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_DOCTOR,
+            domain="care_access",
+            name="Contact with a medical doctor (past 12 months), population 65+",
+            definition="Share of persons aged 65+ who consulted a medical doctor in the "
+                       "past year — a care-utilization/access measure complementing the "
+                       "regular-provider indicator.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Contact with a medical doctor in the past 12 months'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 80.0, "max": 98.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
