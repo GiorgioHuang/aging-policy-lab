@@ -71,19 +71,25 @@ function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
   const r = f.result ?? {};
   const intervention = (f.windowSpec?.intervention as string) ?? null;
   const isIts = f.method === "its";
-  // Overlay the linked policy's event on the trend chart (policy ↔ outcome).
-  const eventIso = (f.windowSpec?.intervention as string) ?? (r.policy_event as string) ?? null;
+  // Overlay every policy targeting this indicator on the trend chart (policy ↔ outcome).
   const trendEvents: ChartEvent[] = [];
-  if (!isIts && eventIso) {
-    const d = new Date(eventIso);
-    if (!Number.isNaN(d.getTime())) {
-      trendEvents.push({
-        t: d.getUTCFullYear() + d.getUTCMonth() / 12,
-        label: eventIso.slice(0, 7),
-        title: f.policyTitle ?? "policy event",
-      });
+  if (!isIts) {
+    const evs =
+      (r.policy_events as { title: string; date: string | null }[] | undefined) ??
+      (r.policy_event ? [{ title: f.policyTitle ?? "policy event", date: r.policy_event as string }] : []);
+    for (const e of evs) {
+      if (!e.date) continue;
+      const d = new Date(e.date);
+      if (!Number.isNaN(d.getTime())) {
+        trendEvents.push({
+          t: d.getUTCFullYear() + d.getUTCMonth() / 12,
+          label: e.date.slice(0, 7),
+          title: e.title,
+        });
+      }
     }
   }
+  const trendPolicies = trendEvents.map((e) => e.title);
   // Use the segmented-regression chart for an estimable ITS that carries an
   // intercept (needed to reconstruct the fitted lines); otherwise the plain trend.
   const itsModel =
@@ -99,8 +105,14 @@ function FindingCard({ f, series }: { f: Finding; series: ChartPoint[] }) {
       <p className="meta">
         {f.indicatorCode ? <code className="code">{f.indicatorCode}</code> : null}
         {f.jurisdictionCode ? ` · ${f.jurisdictionCode}` : null}
-        {f.policyTitle ? <> · policy: {f.policyTitle}</> : null}
-        {intervention ? <> · event {intervention}</> : null}
+        {isIts
+          ? f.policyTitle
+            ? <> · policy: {f.policyTitle}</>
+            : null
+          : trendPolicies.length > 0
+            ? <> · {trendPolicies.length === 1 ? "policy" : "policies"}: {trendPolicies.join(" · ")}</>
+            : null}
+        {isIts && intervention ? <> · event {intervention}</> : null}
       </p>
 
       {itsModel && series.length > 1 ? (

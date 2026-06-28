@@ -82,7 +82,13 @@ def _upsert(cur, *, slug, title, tier, method, policy_id, indicator_code,
 def run_analyses(conn) -> int:
     written = 0
     with conn.cursor() as cur:
-        # ── Tier 1: trend per policy→indicator link ───────────────────────────
+        # Findings are fully recomputable from policies + observations. Clear them
+        # first so retired indicators and superseded slugs don't linger as orphans
+        # (the observation store is append-only, but findings are derived state).
+        cur.execute("DELETE FROM analysis_finding")
+
+        # ── Tier 1: ONE descriptive trend per (indicator, jurisdiction),
+        #    overlaying every policy that targets it (no per-policy duplicates) ──
         cur.execute(
             """SELECT pi.policy_id, p.title, p.released_at, j.code AS jur, i.code AS ind
                  FROM policy_indicator pi
@@ -90,25 +96,30 @@ def run_analyses(conn) -> int:
                  JOIN jurisdiction j ON j.id = p.jurisdiction_id
                  JOIN indicator i ON i.id = pi.indicator_id"""
         )
-        links = cur.fetchall()
-        for policy_id, ptitle, released_at, pjur, ind in links:
+        groups: dict[tuple[str, str], list] = {}
+        for policy_id, ptitle, released_at, pjur, ind in cur.fetchall():
             geo = "CA-NS" if pjur == "CA-NS" else "CA"  # national series for federal policies
+            groups.setdefault((ind, geo), []).append((policy_id, ptitle, released_at))
+        for (ind, geo), members in groups.items():
             series = descriptive.load_series(cur, ind, geo)
             if len(series) < 2:
                 continue
+            members = sorted(members, key=lambda m: m[2] or date.max)
+            events = [{"title": t, "date": r.isoformat() if r else None} for (_pid, t, r) in members]
             tr = descriptive.trend(series)
-            tr["policy_event"] = released_at.isoformat() if released_at else None
+            tr["policy_events"] = events
+            tr["policy_event"] = events[0]["date"] if events else None  # back-compat
             _upsert(
                 cur,
-                slug=f"trend:{policy_id}:{ind}:{geo}",
+                slug=f"trend:{ind}:{geo}",
                 title=f"Trend: {ind} in {geo}",
                 tier="association",
                 method="trend",
-                policy_id=policy_id,
+                policy_id=members[0][0],  # primary (earliest-dated) linked policy
                 indicator_code=ind,
                 jurisdiction_code=geo,
                 window_spec={"from": tr["from"], "to": tr["to"],
-                             "intervention": tr["policy_event"]},
+                             "policies": [e["title"] for e in events]},
                 result=tr,
                 assumptions=TIER1_ASSUMPTIONS,
                 limitations=TIER1_LIMITS,

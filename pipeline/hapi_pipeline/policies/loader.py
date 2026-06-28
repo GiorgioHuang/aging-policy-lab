@@ -96,12 +96,14 @@ def load_policies(conn, path: Path = SEED_PATH) -> LoadResult:
                 )
 
             # Link to indicators that exist (skip + report unknown ones).
+            wanted_ids: list[int] = []
             for code in p.get("indicators", []):
                 iid = inds.get(code)
                 if iid is None:
                     if code not in res.missing_indicators:
                         res.missing_indicators.append(code)
                     continue
+                wanted_ids.append(iid)
                 cur.execute(
                     "INSERT INTO policy_indicator (policy_id, indicator_id) "
                     "VALUES (%s,%s) ON CONFLICT DO NOTHING",
@@ -109,6 +111,17 @@ def load_policies(conn, path: Path = SEED_PATH) -> LoadResult:
                 )
                 if cur.rowcount:
                     res.links += 1
+
+            # Reconcile: drop links this policy no longer declares in the seed, so a
+            # retired/repointed indicator doesn't leave a stale policy_indicator row
+            # (which would otherwise keep generating analytics findings for it).
+            if wanted_ids:
+                cur.execute(
+                    "DELETE FROM policy_indicator WHERE policy_id = %s AND indicator_id <> ALL(%s)",
+                    (policy_id, wanted_ids),
+                )
+            else:
+                cur.execute("DELETE FROM policy_indicator WHERE policy_id = %s", (policy_id,))
 
         conn.commit()
     return res
