@@ -22,6 +22,7 @@ pipeline/hapi_pipeline/
 │   ├── statcan_wds.py · ns_open_data.py
 │   ├── ns_ltc_waitlist.py          care_access (NS LTC Waitlist, Socrata c39g-gsdd)
 │   ├── ns_ltc_facilities.py        care_access (NS LTC/residential-care facilities + beds, Socrata x76a-axw2)
+│   ├── ns_virtual_care.py          digital_inclusion (VirtualCareNS visits + registrations, Socrata fac5-58sq)
 │   ├── cihi_caregiver_distress.py  independence (CIHI Caregiver Distress, manual)
 │   ├── cihi_ltc_beds.py            care_access (CIHI LTC beds/homes per 1k 65+, manual)
 │   ├── cihi_ccrs_ltc.py            care_access (CIHI CCRS/IRRS LTC residents, NS, manual)

@@ -1,14 +1,8 @@
 [
-  {"zone": "Central", "type": "VirtualCareNS", "date": "2023-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "3120"},
-  {"zone": "Western", "type": "VirtualCareNS", "date": "2023-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1840"},
-  {"zone": "Eastern", "type": "VirtualCareNS", "date": "2023-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1510"},
-  {"zone": "Northern", "type": "VirtualCareNS", "date": "2023-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1230"},
-  {"zone": "Central", "type": "VirtualCareNS", "date": "2024-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "3680"},
-  {"zone": "Western", "type": "VirtualCareNS", "date": "2024-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "2150"},
-  {"zone": "Eastern", "type": "VirtualCareNS", "date": "2024-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1790"},
-  {"zone": "Northern", "type": "VirtualCareNS", "date": "2024-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1460"},
-  {"zone": "Central", "type": "VirtualCareNS", "date": "2025-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "3950"},
-  {"zone": "Western", "type": "VirtualCareNS", "date": "2025-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "2320"},
-  {"zone": "Eastern", "type": "VirtualCareNS", "date": "2025-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1910"},
-  {"zone": "Northern", "type": "VirtualCareNS", "date": "2025-06-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "1560"}
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2021-12-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "4126"},
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2022-12-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "32401"},
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2023-12-01T00:00:00.000", "measure_name": "Visits were completed through VirtualCareNS", "actual": "75285"},
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2021-12-01T00:00:00.000", "measure_name": "Nova Scotians have registered for VirtualCareNS", "actual": "16000"},
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2022-12-01T00:00:00.000", "measure_name": "Nova Scotians have registered for VirtualCareNS", "actual": "54000"},
+  {"zone": "Unknown", "type": "VirtualCareNS", "date": "2023-12-01T00:00:00.000", "measure_name": "Nova Scotians have registered for VirtualCareNS", "actual": "85952"}
 ]
