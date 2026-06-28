@@ -55,6 +55,32 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Mood-disorder prevalence, 65+ (CCHS 13-10-0096) — mental-health morbidity.
+        "code": "health.mood_disorder_65plus",
+        "domain": "health",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 3.0, "max": 15.0},
+        "weight": 1.0,
+    },
+    {
+        # Influenza immunization in the past 12 months, 65+ (CCHS 13-10-0096) —
+        # preventive-care access for the recommended/publicly-funded senior group.
+        "code": "care_access.flu_immunization_65plus",
+        "domain": "care_access",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 40.0, "max": 85.0},
+        "weight": 1.0,
+    },
+    {
+        # Arthritis prevalence, 65+ (CCHS 13-10-0096) — leading chronic cause of
+        # activity limitation in later life.
+        "code": "independence.arthritis_65plus",
+        "domain": "independence",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 30.0, "max": 60.0},
+        "weight": 1.0,
+    },
+    {
         "code": "independence.functional_health_65_74",
         "domain": "independence",
         "direction": "higher_is_better",

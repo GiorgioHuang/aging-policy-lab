@@ -35,6 +35,9 @@ IND_BELONGING = "social_participation.community_belonging_65plus"
 IND_PROVIDER = "care_access.regular_provider_65plus"
 IND_PERCEIVED_HEALTH = "health.perceived_health_65plus"
 IND_LIFE_SATISFACTION = "social_participation.life_satisfaction_65plus"
+IND_MOOD = "health.mood_disorder_65plus"
+IND_FLU = "care_access.flu_immunization_65plus"
+IND_ARTHRITIS = "independence.arthritis_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -55,6 +58,12 @@ def _classify(indicator: str) -> str | None:
         return IND_PERCEIVED_HEALTH
     if "life satisfaction" in h and "satisf" in h:
         return IND_LIFE_SATISFACTION
+    if "mood disorder" in h:
+        return IND_MOOD
+    if "influenza" in h and "immuniz" in h:
+        return IND_FLU
+    if "arthritis" in h:
+        return IND_ARTHRITIS
     return None
 
 
@@ -131,6 +140,48 @@ class StatCanCCHSConnector(Connector):
             unit="% of persons 65+",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 80.0, "max": 100.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_MOOD,
+            domain="health",
+            name="Mood disorder, population 65+",
+            definition="Share of persons aged 65+ reporting a diagnosed mood disorder "
+                       "(e.g. depression, bipolar, mania, dysthymia) — a mental-health "
+                       "morbidity measure (lower is better).",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Mood disorder'.",
+            unit="% of persons 65+",
+            direction="lower_is_better",
+            normalization={"method": "min_max", "min": 3.0, "max": 15.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_FLU,
+            domain="care_access",
+            name="Influenza immunization in the past 12 months, population 65+",
+            definition="Share of persons aged 65+ who received a seasonal influenza "
+                       "vaccination in the past year — a preventive-care access measure "
+                       "for a group for whom the shot is recommended and publicly funded.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Influenza immunization in the past 12 months'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 40.0, "max": 85.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_ARTHRITIS,
+            domain="independence",
+            name="Arthritis, population 65+",
+            definition="Share of persons aged 65+ reporting diagnosed arthritis — the "
+                       "leading chronic cause of activity limitation in later life "
+                       "(lower is better).",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Arthritis (15 years and over)'.",
+            unit="% of persons 65+",
+            direction="lower_is_better",
+            normalization={"method": "min_max", "min": 30.0, "max": 60.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
