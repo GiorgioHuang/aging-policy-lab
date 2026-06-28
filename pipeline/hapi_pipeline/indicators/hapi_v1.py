@@ -47,6 +47,15 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Health-adjusted life expectancy at 65 (StatCan 13-10-0971) — years of
+        # *healthy* life remaining; the quality complement to life_expectancy_65.
+        "code": "health.hale_65",
+        "domain": "health",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 10.0, "max": 20.0},
+        "weight": 1.0,
+    },
+    {
         # Subjective-health complement to life expectancy (CCHS 13-10-0096).
         "code": "health.perceived_health_65plus",
         "domain": "health",

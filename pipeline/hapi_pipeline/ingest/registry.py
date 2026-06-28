@@ -11,6 +11,7 @@ from .ns_open_data import NSOpenDataConnector
 from .ns_virtual_care import NSVirtualCareConnector
 from .statcan_cchs import StatCanCCHSConnector
 from .statcan_functional_health import StatCanFunctionalHealthConnector
+from .statcan_hale import StatCanHALEConnector
 from .statcan_internet_use import StatCanInternetUseConnector
 from .statcan_life_expectancy import StatCanLifeExpectancyConnector
 from .statcan_low_income import StatCanLowIncomeConnector
@@ -32,6 +33,7 @@ CONNECTORS: list[Connector] = [
     StatCanLowIncomeConnector(),
     StatCanInternetUseConnector(),
     StatCanLifeExpectancyConnector(),
+    StatCanHALEConnector(),
     StatCanCCHSConnector(),
     StatCanFunctionalHealthConnector(),
     StatCanLTCEmploymentConnector(),
