@@ -50,7 +50,15 @@ export async function getIndicatorGroups(): Promise<IndicatorGroup[]> {
     `SELECT indicator_code, indicator_domain, indicator_name, unit,
             jurisdiction_code, period_start::text, period_end::text, value::text,
             quality_flag, datasource_name, publisher, licence, source_version, checksum
-       FROM observation_lineage
+       FROM (
+            SELECT *, row_number() OVER (
+                       PARTITION BY indicator_code, jurisdiction_code, period_start
+                       ORDER BY (source_version LIKE 'fixture:%') ASC,
+                                dataset_version_id DESC
+                   ) AS rn
+              FROM observation_lineage
+       ) deduped
+      WHERE rn = 1
    ORDER BY indicator_domain, indicator_code, jurisdiction_code, period_start`,
   );
 
