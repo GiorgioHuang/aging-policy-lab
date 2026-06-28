@@ -13,9 +13,12 @@ the `Persons in low income` dimension. We filter to:
   * Low income lines     = "Low income measure after tax" (LIM-AT),
   * Statistics           = "Percentage of persons in low income" (the *rate*).
 
-This is the headline HAPI Financial Security indicator for older adults:
-the share of seniors living below the LIM-AT line. Direction is lower_is_better
-(a lower senior poverty rate scores higher).
+Two Financial Security indicators from this one table (INDICATOR-tagged):
+  * `low_income_rate_65plus` — the share of seniors below the LIM-AT line
+    (Statistics = "Percentage of persons in low income"); lower_is_better.
+  * `low_income_gap_65plus` — the average gap ratio, i.e. how far below the line
+    low-income seniors fall, as a % of the line — the *depth* of poverty
+    (Statistics = "Average gap ratio"); lower_is_better.
 """
 from __future__ import annotations
 
@@ -54,9 +57,18 @@ def _wanted_line(line: str) -> bool:
     return ("low income measure" in ll and "after" in ll) or "lim-at" in ll or ll == ""
 
 
-def _wanted_stat(stat: str) -> bool:
-    st = stat.lower()
-    return ("percentage" in st and "low income" in st) or "rate" in st or st == ""
+IND_RATE = "financial_security.low_income_rate_65plus"
+IND_GAP = "financial_security.low_income_gap_65plus"
+
+
+def _classify_stat(stat: str) -> str | None:
+    """Map the 'Statistics' member to one of our two Financial Security indicators."""
+    st = stat.strip().lower()
+    if "percentage" in st and "low income" in st:
+        return IND_RATE
+    if "gap ratio" in st:
+        return IND_GAP
+    return None
 
 
 class StatCanLowIncomeConnector(Connector):
@@ -76,7 +88,7 @@ class StatCanLowIncomeConnector(Connector):
 
     indicators = [
         IndicatorSpec(
-            code="financial_security.low_income_rate_65plus",
+            code=IND_RATE,
             domain="financial_security",
             name="Low-income rate, population 65+ (LIM-AT)",
             definition="Share of persons aged 65+ living below the Low Income Measure, "
@@ -87,7 +99,21 @@ class StatCanLowIncomeConnector(Connector):
             direction="lower_is_better",
             normalization={"method": "min_max", "min": 2.0, "max": 30.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        )
+        ),
+        IndicatorSpec(
+            code=IND_GAP,
+            domain="financial_security",
+            name="Low-income gap ratio, population 65+ (LIM-AT)",
+            definition="Average gap ratio for low-income seniors — how far below the "
+                       "LIM-AT line they fall, as a percentage of the line (the depth "
+                       "of poverty, complementing the headcount rate).",
+            formula="StatCan Table 11-10-0135: persons in low income='Persons 65 years "
+                    "and over', LIM-AT, average gap ratio.",
+            unit="% below the LIM-AT line",
+            direction="lower_is_better",
+            normalization={"method": "min_max", "min": 5.0, "max": 40.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
     ]
 
     def fetch_live(self) -> RawPayload:
@@ -105,7 +131,7 @@ class StatCanLowIncomeConnector(Connector):
         f_stat = sc.find_field(fields, "statistic")
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["REF_DATE", "GEO", "VALUE", "STATUS"])
+        writer.writerow(["INDICATOR", "REF_DATE", "GEO", "VALUE", "STATUS"])
         for row in reader:
             geo = sc.col(row, "GEO")
             if geo not in GEO_TO_JURISDICTION:
@@ -114,9 +140,10 @@ class StatCanLowIncomeConnector(Connector):
                 continue
             if f_line and not _wanted_line(row.get(f_line, "")):
                 continue
-            if f_stat and not _wanted_stat(row.get(f_stat, "")):
+            code = _classify_stat(row.get(f_stat, "")) if f_stat else IND_RATE
+            if code is None:
                 continue
-            writer.writerow([sc.col(row, "REF_DATE"), geo,
+            writer.writerow([code, sc.col(row, "REF_DATE"), geo,
                              sc.col(row, "VALUE"), sc.col(row, "STATUS")])
         return out.getvalue()
 
@@ -127,6 +154,7 @@ class StatCanLowIncomeConnector(Connector):
         reader = csv.DictReader(io.StringIO(payload.content.decode("utf-8-sig")))
         records: list[ObservationRecord] = []
         for row in reader:
+            code = (row.get("INDICATOR") or IND_RATE).strip()
             jcode = GEO_TO_JURISDICTION.get(sc.col(row, "GEO"))
             if jcode is None:
                 continue
@@ -138,7 +166,7 @@ class StatCanLowIncomeConnector(Connector):
             suppressed = raw == "" or status in ("F", "X", "..", "...")
             records.append(
                 ObservationRecord(
-                    indicator_code="financial_security.low_income_rate_65plus",
+                    indicator_code=code,
                     jurisdiction_code=jcode,
                     period_start=f"{year}-01-01",
                     period_end=f"{year}-12-31",

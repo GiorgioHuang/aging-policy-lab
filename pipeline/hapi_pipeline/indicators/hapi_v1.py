@@ -47,6 +47,14 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
+        # Subjective-health complement to life expectancy (CCHS 13-10-0096).
+        "code": "health.perceived_health_65plus",
+        "domain": "health",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 20.0, "max": 60.0},
+        "weight": 1.0,
+    },
+    {
         "code": "independence.functional_health_65_74",
         "domain": "independence",
         "direction": "higher_is_better",
@@ -80,6 +88,14 @@ INDICATORS: list[dict] = [
         "direction": "higher_is_better",
         # already a rate (% of 65+ reporting strong community belonging)
         "normalization": {"method": "min_max", "min": 50.0, "max": 90.0},
+        "weight": 1.0,
+    },
+    {
+        # Subjective wellbeing (CCHS 13-10-0096): % of 65+ satisfied/very satisfied.
+        "code": "social_participation.life_satisfaction_65plus",
+        "domain": "social_participation",
+        "direction": "higher_is_better",
+        "normalization": {"method": "min_max", "min": 80.0, "max": 100.0},
         "weight": 1.0,
     },
     {
@@ -161,6 +177,15 @@ INDICATORS: list[dict] = [
         # already a rate (% of persons 65+); no per-capita step. Range brackets the
         # observed CA+NS span (CA ~14-17%, NS up to ~25%) so neither floors/ceils.
         "normalization": {"method": "min_max", "min": 2.0, "max": 30.0},
+        "weight": 1.0,
+    },
+    {
+        # Depth of senior poverty: average gap ratio below the LIM-AT line (same
+        # table 11-10-0135). Complements the headcount rate. lower_is_better.
+        "code": "financial_security.low_income_gap_65plus",
+        "domain": "financial_security",
+        "direction": "lower_is_better",
+        "normalization": {"method": "min_max", "min": 5.0, "max": 40.0},
         "weight": 1.0,
     },
     {

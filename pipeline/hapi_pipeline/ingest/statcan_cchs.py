@@ -1,10 +1,12 @@
 """StatCan connector — CCHS health characteristics (Table 13-10-0096).
 
-Feeds two HAPI domains from one already-live CCHS table:
-  * Social Participation — sense of belonging to local community (strong)
+Feeds four HAPI indicators across three domains from one already-live CCHS table:
+  * Social Participation — sense of belonging to local community (strong);
+                           life satisfaction (satisfied or very satisfied)
   * Care Access          — has a regular healthcare provider (the API-accessible,
                            auto-refreshing Care-Access backbone; CIHI home-care
                            remains a manually-refreshed complement)
+  * Health               — perceived health (very good or excellent)
 
 Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_cchs` on a
 networked runner:
@@ -31,6 +33,8 @@ PRODUCT_ID = "13100096"
 MIN_YEAR = 2015
 IND_BELONGING = "social_participation.community_belonging_65plus"
 IND_PROVIDER = "care_access.regular_provider_65plus"
+IND_PERCEIVED_HEALTH = "health.perceived_health_65plus"
+IND_LIFE_SATISFACTION = "social_participation.life_satisfaction_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -47,6 +51,10 @@ def _classify(indicator: str) -> str | None:
         return IND_BELONGING
     if "regular" in h and ("provider" in h or "health care" in h or "healthcare" in h):
         return IND_PROVIDER
+    if "perceived health" in h and ("very good" in h or "excellent" in h):
+        return IND_PERCEIVED_HEALTH
+    if "life satisfaction" in h and "satisf" in h:
+        return IND_LIFE_SATISFACTION
     return None
 
 
@@ -67,8 +75,9 @@ class StatCanCCHSConnector(Connector):
         licence="Statistics Canada Open Licence",
         update_frequency="annual",
         notes="WDS getFullTableDownloadCSV(13100096), CCHS; filtered to 65+, both "
-              "sexes, percent. Community belonging -> Social Participation; "
-              "regular healthcare provider -> Care Access.",
+              "sexes, percent. Community belonging + life satisfaction -> Social "
+              "Participation; regular healthcare provider -> Care Access; perceived "
+              "health -> Health.",
     )
 
     indicators = [
@@ -93,6 +102,32 @@ class StatCanCCHSConnector(Connector):
                        "provider — a core measure of primary-care access.",
             formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
                     "'Has a regular healthcare provider'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 80.0, "max": 100.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_PERCEIVED_HEALTH,
+            domain="health",
+            name="Perceived health (very good or excellent), population 65+",
+            definition="Share of persons aged 65+ who rate their own health as very good "
+                       "or excellent — a subjective-health complement to life expectancy.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Perceived health, very good or excellent'.",
+            unit="% of persons 65+",
+            direction="higher_is_better",
+            normalization={"method": "min_max", "min": 20.0, "max": 60.0},
+            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
+        ),
+        IndicatorSpec(
+            code=IND_LIFE_SATISFACTION,
+            domain="social_participation",
+            name="Life satisfaction (satisfied or very satisfied), population 65+",
+            definition="Share of persons aged 65+ who report being satisfied or very "
+                       "satisfied with life — a subjective-wellbeing measure.",
+            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
+                    "'Life satisfaction, satisfied or very satisfied'.",
             unit="% of persons 65+",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 80.0, "max": 100.0},
