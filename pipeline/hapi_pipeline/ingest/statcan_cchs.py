@@ -41,10 +41,6 @@ IND_ARTHRITIS = "independence.arthritis_65plus"
 IND_BP = "health.high_blood_pressure_65plus"
 IND_DIABETES = "health.diabetes_65plus"
 IND_FRUITVEG = "health.fruit_veg_65plus"
-IND_ANXIETY = "health.anxiety_disorder_65plus"
-IND_OBESITY = "health.obesity_65plus"
-IND_SMOKER = "health.smoker_65plus"
-IND_MENTAL_HEALTH = "health.perceived_mental_health_65plus"
 
 _DIM_HINTS = {
     "age": ("age",),
@@ -77,14 +73,6 @@ def _classify(indicator: str) -> str | None:
         return IND_DIABETES
     if "fruit" in h and "vegetable" in h:
         return IND_FRUITVEG
-    if "anxiety disorder" in h:
-        return IND_ANXIETY
-    if "body mass index" in h and "obese" in h and "overweight" not in h and "youth" not in h:
-        return IND_OBESITY
-    if "current smoker" in h and "occasional" in h:
-        return IND_SMOKER
-    if "perceived mental health" in h and ("very good" in h or "excellent" in h):
-        return IND_MENTAL_HEALTH
     return None
 
 
@@ -244,59 +232,6 @@ class StatCanCCHSConnector(Connector):
             unit="% of persons 65+",
             direction="higher_is_better",
             normalization={"method": "min_max", "min": 20.0, "max": 55.0},
-            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        ),
-        IndicatorSpec(
-            code=IND_ANXIETY,
-            domain="health",
-            name="Anxiety disorder, population 65+",
-            definition="Share of persons aged 65+ reporting a diagnosed anxiety disorder "
-                       "— a mental-health morbidity measure complementing mood disorder "
-                       "(lower is better).",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Anxiety disorder'.",
-            unit="% of persons 65+",
-            direction="lower_is_better",
-            normalization={"method": "min_max", "min": 3.0, "max": 18.0},
-            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        ),
-        IndicatorSpec(
-            code=IND_OBESITY,
-            domain="health",
-            name="Obesity (self-reported), population 65+",
-            definition="Share of persons aged 65+ in the obese BMI category "
-                       "(self-reported, adjusted) — a metabolic risk factor (lower is better).",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Body mass index, adjusted self-reported, adult (18 years and over), obese'.",
-            unit="% of persons 65+",
-            direction="lower_is_better",
-            normalization={"method": "min_max", "min": 15.0, "max": 40.0},
-            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        ),
-        IndicatorSpec(
-            code=IND_SMOKER,
-            domain="health",
-            name="Current smoker (daily or occasional), population 65+",
-            definition="Share of persons aged 65+ who currently smoke daily or occasionally "
-                       "— a leading modifiable risk factor (lower is better).",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Current smoker, daily or occasional'.",
-            unit="% of persons 65+",
-            direction="lower_is_better",
-            normalization={"method": "min_max", "min": 4.0, "max": 20.0},
-            coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
-        ),
-        IndicatorSpec(
-            code=IND_MENTAL_HEALTH,
-            domain="health",
-            name="Perceived mental health (very good or excellent), population 65+",
-            definition="Share of persons aged 65+ who rate their own mental health as very "
-                       "good or excellent — a positive subjective mental-wellbeing measure.",
-            formula="StatCan Table 13-10-0096: age 65+, both sexes, percent, indicator="
-                    "'Perceived mental health, very good or excellent'.",
-            unit="% of persons 65+",
-            direction="higher_is_better",
-            normalization={"method": "min_max", "min": 50.0, "max": 85.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         ),
     ]
