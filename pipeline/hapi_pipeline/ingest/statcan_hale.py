@@ -5,19 +5,21 @@ live (life expectancy adjusted for time spent in less-than-full health). It is t
 canonical healthy-ageing outcome and the quality complement to the raw life
 expectancy at 65 (`statcan_life_expectancy`, Table 13-10-0389).
 
-Source (WebSearch 2026-06; direct gov fetch blocked in this sandbox — confirm on a
-networked runner with `hapi inspect statcan_hale`):
-  * Table 13-10-0971 "Health-adjusted life expectancy, at birth and at age 65, by
-    sex … 2019 to 2023" (productId 13100971).
+Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_hale` on a
+networked runner:
+  * Table 13-10-0971 (productId 13100971).
     https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310097101
-  * Pulled as the WDS full-table CSV and filtered to GEO ∈ {Canada, Nova Scotia},
-    the "at age 65" age member, both-sexes, all income groups, and the HALE
-    estimate (excluding its confidence-interval bounds).
+  * Real columns: REF_DATE, GEO, 'Age group', 'Sex', 'Income group',
+    'Characteristics', VALUE, STATUS. GEO includes Canada and Nova Scotia; years
+    2019, 2020, 2023. Members: Age group ∈ {'At age 65', 'At birth'}; Sex ∈
+    {'Both sexes', …}; Income group ∈ {'All income groups', quintile 1-5};
+    Characteristics ∈ {'Health-adjusted life expectancy', 'Life expectancy',
+    and their Low/High 95% CI variants}.
+  * Filtered to GEO ∈ {Canada, Nova Scotia}, age 'At age 65', 'Both sexes',
+    'All income groups', characteristic 'Health-adjusted life expectancy'
+    (requires "adjusted" — excludes plain life expectancy and the CI bounds).
 
-The filters match case-insensitively by substring and are deliberately tolerant;
-`hapi inspect statcan_hale` dumps the real dimension members — tighten here if the
-income / characteristic / age wording differs, or repoint PRODUCT_ID if a more
-complete HALE table is available. higher_is_better.
+higher_is_better. A short (periodic) series — HALE is published every few years.
 """
 from __future__ import annotations
 
@@ -52,13 +54,15 @@ def _is_all_income(member: str) -> bool:
 
 
 def _is_hale_estimate(member: str) -> bool:
-    """The HALE estimate itself, not its confidence-interval bounds."""
+    """The HALE estimate ('Health-adjusted life expectancy') itself — not its
+    confidence-interval bounds, and not the plain 'Life expectancy' member that
+    shares this table (which lacks 'adjusted')."""
     c = member.strip().lower()
     if c == "":
         return True
     if any(w in c for w in ("confidence", "interval", "lower", "upper", "low", "high", "margin")):
         return False
-    return "adjusted life" in c or "hale" in c or "expectancy" in c
+    return "adjusted" in c
 
 
 class StatCanHALEConnector(Connector):
