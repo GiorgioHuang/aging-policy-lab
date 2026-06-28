@@ -1,8 +1,11 @@
-// Dependency-free SVG timeline strip, rendered on the server.
-//
-// Plots every policy as a dot on a shared year axis, coloured by jurisdiction —
-// a one-glance view of when aging policy clustered (and where the gaps are)
-// across the whole 1952→present span. Dots in the same year stack vertically.
+"use client";
+
+// Interactive SVG timeline strip. Plots every policy as a dot on a shared year
+// axis, coloured by jurisdiction. Hover a dot for its full title; click a
+// jurisdiction in the legend to toggle it.
+
+import { useMemo, useState } from "react";
+import { useTip, TipLayer, LegendChip } from "./chart-ui";
 
 export type TimelineItem = {
   id: string;
@@ -18,8 +21,13 @@ const JUR_COLORS: Record<string, string> = {
 const fallbackColor = "#e0a23b";
 
 export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
-  const pts = items.filter((d) => Number.isFinite(d.year));
-  if (pts.length < 2) return null;
+  const all = items.filter((d) => Number.isFinite(d.year));
+  const jurs = useMemo(() => [...new Set(all.map((d) => d.jurisdiction))], [all]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const { ref, tip, move, clear } = useTip();
+
+  const pts = all.filter((d) => !hidden.has(d.jurisdiction));
+  if (all.length < 2) return null;
 
   const W = 720;
   const padL = 16;
@@ -27,16 +35,13 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
   const axisY = 150;
   const plotW = W - padL - padR;
 
-  const years = pts.map((d) => d.year);
-  let minY = Math.min(...years);
-  let maxY = Math.max(...years);
-  // round outward to tidy decade-ish bounds
-  minY = Math.floor(minY / 5) * 5;
-  maxY = Math.ceil(maxY / 5) * 5;
+  // bounds derive from ALL items so toggling doesn't rescale the axis
+  const years = all.map((d) => d.year);
+  const minY = Math.floor(Math.min(...years) / 5) * 5;
+  const maxY = Math.ceil(Math.max(...years) / 5) * 5;
   const span = maxY - minY || 1;
   const x = (yr: number) => padL + ((yr - minY) / span) * plotW;
 
-  // stack dots that share a year so they don't overlap
   const counts = new Map<number, number>();
   const placed = pts
     .slice()
@@ -47,59 +52,68 @@ export function PolicyTimeline({ items }: { items: TimelineItem[] }) {
       return { ...d, stack: k };
     });
 
-  // decade gridlines/labels
   const firstDecade = Math.ceil(minY / 10) * 10;
   const decades: number[] = [];
   for (let y = firstDecade; y <= maxY; y += 10) decades.push(y);
 
-  const jurs = [...new Set(pts.map((d) => d.jurisdiction))];
   const colorFor = (j: string) => JUR_COLORS[j] ?? fallbackColor;
+  const toggle = (j: string) =>
+    setHidden((prev) => {
+      const next = new Set(prev);
+      next.has(j) ? next.delete(j) : next.add(j);
+      return next;
+    });
 
   return (
-    <svg
-      className="chart"
-      viewBox={`0 0 ${W} 196`}
-      role="img"
-      aria-label={`Policy timeline ${minY}–${maxY}`}
-    >
-      {/* decade gridlines */}
-      {decades.map((y) => (
-        <g key={`dec-${y}`}>
-          <line x1={x(y)} y1={20} x2={x(y)} y2={axisY} stroke="#1b2335" strokeWidth="1" />
-          <text x={x(y)} y={axisY + 16} textAnchor="middle" className="chart-axis">
-            {y}
-          </text>
-        </g>
-      ))}
-
-      {/* axis baseline */}
-      <line x1={padL} y1={axisY} x2={W - padR} y2={axisY} stroke="#2c3650" strokeWidth="1.5" />
-
-      {/* policy dots (stacked upward from the axis) */}
-      {placed.map((d) => {
-        const cyDot = axisY - 10 - d.stack * 12;
-        const c = colorFor(d.jurisdiction);
-        return (
-          <g key={d.id}>
-            <line x1={x(d.year)} y1={axisY} x2={x(d.year)} y2={cyDot} stroke={c} strokeWidth="1" opacity="0.35" />
-            <circle cx={x(d.year)} cy={cyDot} r="4" fill={c} fillOpacity="0.9">
-              <title>
-                {d.year} · {d.jurisdiction}: {d.title}
-              </title>
-            </circle>
-          </g>
-        );
-      })}
-
-      {/* legend */}
-      <g transform={`translate(${padL}, 184)`} className="chart-axis">
-        {jurs.map((j, i) => (
-          <g key={j} transform={`translate(${i * 92}, 0)`}>
-            <circle cx="4" cy="-3" r="4" fill={colorFor(j)} />
-            <text x="14" y="0">{j}</text>
+    <div className="chart-wrap" ref={ref} onMouseLeave={clear}>
+      <svg className="chart" viewBox={`0 0 ${W} 168`} role="img" aria-label={`Policy timeline ${minY}–${maxY}`}>
+        {decades.map((y) => (
+          <g key={`dec-${y}`}>
+            <line x1={x(y)} y1={20} x2={x(y)} y2={axisY} stroke="#1b2335" strokeWidth="1" />
+            <text x={x(y)} y={axisY + 16} textAnchor="middle" className="chart-axis">
+              {y}
+            </text>
           </g>
         ))}
-      </g>
-    </svg>
+        <line x1={padL} y1={axisY} x2={W - padR} y2={axisY} stroke="#2c3650" strokeWidth="1.5" />
+
+        {placed.map((d) => {
+          const cyDot = axisY - 10 - d.stack * 12;
+          const c = colorFor(d.jurisdiction);
+          return (
+            <g key={d.id}>
+              <line x1={x(d.year)} y1={axisY} x2={x(d.year)} y2={cyDot} stroke={c} strokeWidth="1" opacity="0.35" />
+              <circle
+                className="hit"
+                cx={x(d.year)}
+                cy={cyDot}
+                r="5"
+                fill={c}
+                fillOpacity="0.9"
+                onMouseMove={(e) =>
+                  move(
+                    e,
+                    <>
+                      <div className="tip-title">{d.title}</div>
+                      <div className="tip-muted">
+                        {d.year} · {d.jurisdiction}
+                      </div>
+                    </>,
+                  )
+                }
+              />
+            </g>
+          );
+        })}
+      </svg>
+
+      <div className="chart-legend">
+        {jurs.map((j) => (
+          <LegendChip key={j} color={colorFor(j)} label={j} on={!hidden.has(j)} onClick={() => toggle(j)} />
+        ))}
+      </div>
+
+      <TipLayer tip={tip} />
+    </div>
   );
 }
