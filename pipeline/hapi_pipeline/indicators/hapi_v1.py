@@ -123,10 +123,10 @@ INDICATORS: list[dict] = [
         "weight": 1.0,
     },
     {
-        # ADL difficulty / needs help, 65+ (StatCan 13-10-0789, Canadian Health
-        # Survey on Seniors) — share of seniors with difficulty or needing help
-        # with activities of daily living; the most direct functional-independence
-        # measure. lower_is_better.
+        # Severe/total ADL impairment, 65+ (StatCan 13-10-0789, Canadian Health
+        # Survey on Seniors) — share of seniors classified with severe or total
+        # impairment on the activities-of-daily-living scale; the most direct
+        # measure of lost functional independence. lower_is_better.
         "code": "independence.adl_difficulty_65plus",
         "domain": "independence",
         "direction": "lower_is_better",

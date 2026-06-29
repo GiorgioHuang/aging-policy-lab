@@ -5,15 +5,24 @@ daily living (ADL) — bathing, dressing, eating, moving about — the most dire
 measure of functional independence in later life. Source is the Canadian Health
 Survey on Seniors (CHSS, 2019/2020). lower_is_better.
 
-Source (WebSearch 2026-06; direct gov fetch blocked in this sandbox — the exact
-ADL characteristic + statistic wording is confirmed on a networked runner with
-`hapi inspect statcan_adl`, then the matcher below is narrowed to one member):
+Source confirmed 2026-06 via WebSearch + `hapi inspect statcan_adl` on a
+networked runner:
   * Table 13-10-0789 "Health characteristics of seniors aged 65 and over,
     Canadian Health Survey on Seniors, by age group and sex, Canada (excluding
     territories) and provinces" (productId 13100789).
     https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1310078901
-  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age 65+, both sexes,
-    the percentage statistic, and an ADL-difficulty/help characteristic.
+  * Real columns: REF_DATE, GEO, 'Age group', 'Sex', 'Indicators',
+    'Characteristics', VALUE, STATUS. GEO is 'Canada (excluding territories)' +
+    provinces (incl. Nova Scotia); year 2019 (CHSS). Members: Age group ∈
+    {'65 to 74 years', '65 years and over (total)', '75 to 84 years', '85 years
+    and over'}; Sex ∈ {'Both sexes', 'Females', 'Males'}; 'Characteristics' (the
+    statistic) ∈ {'Number of persons', 'Percent', and their 95% CI bounds}.
+  * The ADL member in 'Indicators' is 'Instrumental and basic activities of daily
+    living classification: Severe impairment or total impairment' (its complement
+    is 'Mild impairment/no functional impairment').
+  * Filtered to GEO ∈ {Canada(excl. terr.), Nova Scotia}, age '65 years and over
+    (total)', 'Both sexes', the 'Percent' statistic, and the severe/total ADL
+    impairment member.
 
 Filters match case-insensitively by substring and are deliberately tolerant.
 """
@@ -38,15 +47,18 @@ _DIM_HINTS = {
 
 
 def _classify(indicator: str) -> str | None:
-    """Map a CHSS health-characteristic member to the ADL indicator. Broad on the
-    first pass (so inspect surfaces every ADL-related member); narrow to one after
-    inspection."""
+    """Map a CHSS 'Indicators' member to the ADL indicator. Confirmed against the
+    live Table 13-10-0789 schema (`hapi inspect statcan_adl`): the ADL signal is
+    the member 'Instrumental and basic activities of daily living classification:
+    Severe impairment or total impairment'. Keep only the severe/total class (the
+    loss-of-independence outcome); exclude its complementary 'Mild impairment/no
+    functional impairment' member, which would otherwise duplicate the cell."""
     h = indicator.strip().lower()
-    adl = "daily living" in h or "adl" in h
-    limited = any(w in h for w in ("difficulty", "needs help", "need help",
-                                   "received help", "receives help", "impairment",
-                                   "at least one"))
-    return INDICATOR if (adl and limited) else None
+    if "activities of daily living" not in h:
+        return None
+    if "severe impairment" in h or "total impairment" in h:
+        return INDICATOR
+    return None
 
 
 def _is_percent(stat: str) -> bool:
@@ -75,12 +87,13 @@ class StatCanADLConnector(Connector):
         IndicatorSpec(
             code=INDICATOR,
             domain="independence",
-            name="Difficulty / needs help with activities of daily living, 65+",
-            definition="Share of persons aged 65+ who have difficulty with, or need help "
-                       "for, one or more activities of daily living (Canadian Health "
-                       "Survey on Seniors) — a direct functional-independence measure.",
-            formula="StatCan Table 13-10-0789: age 65+, both sexes, percent, ADL "
-                    "difficulty/help characteristic.",
+            name="Severe or total ADL impairment, 65+",
+            definition="Share of persons aged 65+ classified with severe or total "
+                       "impairment on the instrumental & basic activities-of-daily-living "
+                       "scale (Canadian Health Survey on Seniors) — a direct measure of "
+                       "lost functional independence in later life.",
+            formula="StatCan Table 13-10-0789: age '65 years and over (total)', both "
+                    "sexes, 'Percent', ADL classification = severe/total impairment.",
             unit="% of persons 65+",
             direction="lower_is_better",
             normalization={"method": "min_max", "min": 5.0, "max": 40.0},

@@ -88,7 +88,7 @@ def is_age_65plus(age: str) -> bool:
     a = age.strip().lower()
     if a in {"65 years and over", "65 years and older", "65 years and over (1)"}:
         return True
-    return "65" in a and ("over" in a or "older" in a) and "to" not in a and "-" not in a
+    return "65" in a and ("over" in a or "older" in a) and " to " not in a and "-" not in a
 
 
 def map_geo(geo: str) -> str | None:
