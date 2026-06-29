@@ -32,6 +32,7 @@ jobs:
           python -m hapi_pipeline.cli inspect --source statcan_ltc_employment
           python -m hapi_pipeline.cli inspect --source statcan_hale
           python -m hapi_pipeline.cli inspect --source statcan_disability
+          python -m hapi_pipeline.cli inspect --source statcan_adl
           python -m hapi_pipeline.cli inspect --source ns_ltc_facilities
           python -m hapi_pipeline.cli inspect --source ns_virtual_care
         working-directory: pipeline
