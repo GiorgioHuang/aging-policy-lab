@@ -3,7 +3,8 @@
     hapi check                         verify DB connectivity + jurisdiction count
     hapi enums                         print the shared enum contracts
     hapi ingest [--source N] [--live]  run Data Hub connectors (idempotent)
-    hapi observations [--limit N]      print loaded values with full lineage
+    hapi observations [--limit N] [--indicator SUBSTR]
+                                       print loaded values with full lineage
 
 Later phases add indicators/analytics commands (docs/11).
 """
@@ -105,15 +106,22 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 def _cmd_observations(args: argparse.Namespace) -> int:
     from .db import connect
 
-    sql = """
+    where = ""
+    params: list = []
+    if getattr(args, "indicator", None):
+        where = "WHERE indicator_code ILIKE %s"
+        params.append(f"%{args.indicator}%")
+    sql = f"""
         SELECT indicator_code, jurisdiction_code, period_start, value,
                quality_flag, datasource_name, source_version, left(checksum, 10)
           FROM observation_lineage
+         {where}
          ORDER BY indicator_code, jurisdiction_code, period_start
          LIMIT %s
     """
+    params.append(args.limit)
     with connect() as conn, conn.cursor() as cur:
-        cur.execute(sql, (args.limit,))
+        cur.execute(sql, tuple(params))
         rows = cur.fetchall()
     if not rows:
         print("no observations yet — run `hapi ingest`")
@@ -382,6 +390,8 @@ def main(argv: list[str] | None = None) -> int:
 
     p_obs = sub.add_parser("observations", help="print loaded values with lineage")
     p_obs.add_argument("--limit", type=int, default=50)
+    p_obs.add_argument("--indicator", help="filter by indicator_code substring (ILIKE), "
+                                           "e.g. independence.adl")
     p_obs.set_defaults(func=_cmd_observations)
 
     p_prune = sub.add_parser("prune-indicator",

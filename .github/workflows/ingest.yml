@@ -70,7 +70,11 @@ jobs:
         working-directory: pipeline
 
       - name: Show loaded observations
-        run: python -m hapi_pipeline.cli observations --limit 500
+        run: python -m hapi_pipeline.cli observations --limit 1000
+        working-directory: pipeline
+
+      - name: Show ADL (Independence) observations
+        run: python -m hapi_pipeline.cli observations --indicator independence.adl --limit 50
         working-directory: pipeline
 
       - name: Show analysis findings (ITS coefficients)
