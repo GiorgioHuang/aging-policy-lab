@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { LogoMark } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Healthy Aging Policy Observatory",
@@ -27,8 +28,11 @@ export default function RootLayout({
       <body>
         <header className="topnav">
           <div className="topnav-inner">
-            <Link href="/" className="brand">
-              HAPI<span className="brand-dim"> · Observatory</span>
+            <Link href="/" className="brand" aria-label="Healthy Aging Policy Observatory — home">
+              <LogoMark size={24} />
+              <span className="brand-text">
+                HAPI<span className="brand-dim"> · Observatory</span>
+              </span>
             </Link>
             <nav>
               {NAV.map((item) => (

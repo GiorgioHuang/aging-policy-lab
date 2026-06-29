@@ -50,14 +50,21 @@ a:hover {
   margin: 0 auto;
   padding: 0.7rem 1.5rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 1.25rem;
   flex-wrap: wrap;
 }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.02em;
+}
+.brand svg {
+  display: block;
+  flex: none;
 }
 .brand:hover {
   text-decoration: none;
