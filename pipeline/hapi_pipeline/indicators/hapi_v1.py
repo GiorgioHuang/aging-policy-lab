@@ -130,7 +130,11 @@ INDICATORS: list[dict] = [
         "code": "independence.adl_difficulty_65plus",
         "domain": "independence",
         "direction": "lower_is_better",
-        "normalization": {"method": "min_max", "min": 5.0, "max": 40.0},
+        # Severe/total ADL impairment is the worst, least-common category, so the
+        # share runs low: the live CHSS series is ~1.7-3.4% (CA 2.6/2.3, NS 1.7/3.4
+        # for 2019/2020). 0..8% brackets it with margin so the score discriminates
+        # rather than clamping every cell to ~100.
+        "normalization": {"method": "min_max", "min": 0.0, "max": 8.0},
         "weight": 1.0,
     },
     {

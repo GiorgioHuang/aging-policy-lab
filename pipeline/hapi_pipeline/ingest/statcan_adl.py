@@ -96,7 +96,9 @@ class StatCanADLConnector(Connector):
                     "sexes, 'Percent', ADL classification = severe/total impairment.",
             unit="% of persons 65+",
             direction="lower_is_better",
-            normalization={"method": "min_max", "min": 5.0, "max": 40.0},
+            # Live CHSS 2019/2020 values run ~1.7-3.4% (severe/total is the worst,
+            # least-common ADL category); 0..8% brackets the observed series.
+            normalization={"method": "min_max", "min": 0.0, "max": 8.0},
             coverage={"jurisdictions": ["CA", "CA-NS"], "from": MIN_YEAR},
         )
     ]
