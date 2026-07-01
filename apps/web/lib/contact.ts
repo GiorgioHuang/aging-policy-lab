@@ -45,6 +45,73 @@ function looksLikeEmail(s: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
+// The lifecycle states a message can be in (mirrors the CHECK in migration 0005).
+export const CONTACT_STATUSES = ["new", "read", "archived", "spam"] as const;
+export type ContactStatus = (typeof CONTACT_STATUSES)[number];
+
+export type ContactMessage = {
+  id: string;
+  createdAt: string;
+  name: string | null;
+  email: string | null;
+  organization: string | null;
+  subject: string | null;
+  message: string;
+  status: ContactStatus;
+};
+
+/** Read the inbox for the protected /admin/messages page (newest first). */
+export async function listContactMessages(limit = 200): Promise<ContactMessage[]> {
+  const { rows } = await pool.query<{
+    id: string;
+    created_at: string;
+    name: string | null;
+    email: string | null;
+    organization: string | null;
+    subject: string | null;
+    message: string;
+    status: ContactStatus;
+  }>(
+    `SELECT id, created_at::text AS created_at, name, email, organization,
+            subject, message, status
+       FROM contact_message
+   ORDER BY created_at DESC
+      LIMIT $1`,
+    [limit],
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    createdAt: r.created_at,
+    name: r.name,
+    email: r.email,
+    organization: r.organization,
+    subject: r.subject,
+    message: r.message,
+    status: r.status,
+  }));
+}
+
+/** Per-status counts for the inbox header (e.g. how many are unread). */
+export async function contactStatusCounts(): Promise<Record<string, number>> {
+  const { rows } = await pool.query<{ status: string; n: string }>(
+    `SELECT status, count(*)::text AS n FROM contact_message GROUP BY status`,
+  );
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.status] = Number(r.n);
+  return out;
+}
+
+/** Move a message to a new lifecycle state. Status is whitelisted; id is bound. */
+export async function updateContactStatus(id: string, status: string): Promise<void> {
+  if (!(CONTACT_STATUSES as readonly string[]).includes(status)) {
+    throw new Error(`invalid status: ${status}`);
+  }
+  if (!/^\d+$/.test(id)) {
+    throw new Error(`invalid id: ${id}`);
+  }
+  await pool.query(`UPDATE contact_message SET status = $2 WHERE id = $1`, [id, status]);
+}
+
 export async function saveContactMessage(
   input: ContactInput,
   meta: { ip?: string; userAgent?: string | null },
