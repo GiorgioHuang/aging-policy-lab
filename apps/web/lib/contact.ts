@@ -7,12 +7,14 @@
  *
  * Privacy/security posture:
  *   - No maintainer email anywhere; replies happen out-of-band or via GitHub.
- *   - The client IP is never stored raw — only an optional salted SHA-256 prefix
- *     (needs CONTACT_IP_SALT), for abuse triage.
+ *   - The client IP stored in the DB is never raw — only an optional salted
+ *     SHA-256 prefix (needs CONTACT_IP_SALT), for abuse triage.
  *   - Best-effort notifications go to whatever channels are configured — a
  *     Telegram bot (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID) and/or a generic
  *     Slack/Discord webhook (CONTACT_WEBHOOK_URL) — so inquiries are *timely*
- *     without exposing a personal inbox. Notifications never block the response.
+ *     without exposing a personal inbox. Each notification includes the sender's
+ *     raw IP + User-Agent (to the maintainer's channel only). Never blocks the
+ *     response.
  */
 import { createHash } from "crypto";
 import { pool } from "./db";
@@ -158,28 +160,43 @@ export async function saveContactMessage(
     ],
   );
 
-  notify(fields);
+  notify(fields, meta);
 }
 
 // Fan out a single plain-text summary to every configured channel. Best-effort
 // and fire-and-forget: a notification failure must never surface to the sender,
 // so all errors are swallowed. Plain text (no Markdown/HTML) is used deliberately
 // so arbitrary user content can't break formatting or inject markup.
-function notify(f: {
-  name: string;
-  email: string;
-  organization: string;
-  subject: string;
-  message: string;
-}): void {
+//
+// The notification includes the sender's raw IP and User-Agent for triage. These
+// go only to the maintainer's own channel (Telegram / private webhook) — never to
+// visitors — and the IP stored in the DB remains a salted hash, not the raw value.
+function notify(
+  f: {
+    name: string;
+    email: string;
+    organization: string;
+    subject: string;
+    message: string;
+  },
+  meta: { ip?: string; userAgent?: string | null },
+): void {
   const from =
     (f.name || "anonymous") +
     (f.email ? ` <${f.email}>` : "") +
     (f.organization ? ` (${f.organization})` : "");
-  const text =
-    `📬 New Observatory contact\n` +
-    (f.subject ? `Subject: ${f.subject}\n` : "") +
-    `From: ${from}\n\n${f.message}`;
+  const ua = (meta.userAgent ?? "").slice(0, 300);
+  const text = [
+    "📬 New Observatory contact",
+    f.subject ? `Subject: ${f.subject}` : null,
+    `From: ${from}`,
+    meta.ip ? `IP: ${meta.ip}` : null,
+    ua ? `UA: ${ua}` : null,
+    "",
+    f.message,
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
   sendTelegram(text);
   sendWebhook(text);
 }
