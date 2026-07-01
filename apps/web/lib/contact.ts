@@ -9,9 +9,10 @@
  *   - No maintainer email anywhere; replies happen out-of-band or via GitHub.
  *   - The client IP is never stored raw — only an optional salted SHA-256 prefix
  *     (needs CONTACT_IP_SALT), for abuse triage.
- *   - If CONTACT_WEBHOOK_URL is set, a best-effort notification is POSTed to a
- *     channel the maintainer controls (Slack/Discord-compatible) so inquiries are
- *     *timely* without exposing a personal inbox. Never blocks the response.
+ *   - Best-effort notifications go to whatever channels are configured — a
+ *     Telegram bot (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID) and/or a generic
+ *     Slack/Discord webhook (CONTACT_WEBHOOK_URL) — so inquiries are *timely*
+ *     without exposing a personal inbox. Notifications never block the response.
  */
 import { createHash } from "crypto";
 import { pool } from "./db";
@@ -90,21 +91,20 @@ export async function saveContactMessage(
     ],
   );
 
-  notifyWebhook(fields);
+  notify(fields);
 }
 
-// Best-effort, fire-and-forget. Slack expects {text}, Discord expects {content};
-// sending both keys satisfies either (each ignores the extra). A failure here
-// must never surface to the sender, so all errors are swallowed.
-function notifyWebhook(f: {
+// Fan out a single plain-text summary to every configured channel. Best-effort
+// and fire-and-forget: a notification failure must never surface to the sender,
+// so all errors are swallowed. Plain text (no Markdown/HTML) is used deliberately
+// so arbitrary user content can't break formatting or inject markup.
+function notify(f: {
   name: string;
   email: string;
   organization: string;
   subject: string;
   message: string;
 }): void {
-  const hook = process.env.CONTACT_WEBHOOK_URL;
-  if (!hook) return;
   const from =
     (f.name || "anonymous") +
     (f.email ? ` <${f.email}>` : "") +
@@ -113,6 +113,33 @@ function notifyWebhook(f: {
     `📬 New Observatory contact\n` +
     (f.subject ? `Subject: ${f.subject}\n` : "") +
     `From: ${from}\n\n${f.message}`;
+  sendTelegram(text);
+  sendWebhook(text);
+}
+
+// Telegram bot: instant push straight from the server to Telegram's API — no
+// third-party relay. Set TELEGRAM_BOT_TOKEN (from @BotFather) and TELEGRAM_CHAT_ID
+// (your chat with the bot). Telegram caps a message at 4096 chars.
+function sendTelegram(text: string): void {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+  void fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: text.slice(0, 3900),
+      disable_web_page_preview: true,
+    }),
+  }).catch(() => {});
+}
+
+// Generic incoming webhook. Slack expects {text}, Discord expects {content};
+// sending both keys satisfies either (each ignores the extra).
+function sendWebhook(text: string): void {
+  const hook = process.env.CONTACT_WEBHOOK_URL;
+  if (!hook) return;
   void fetch(hook, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
