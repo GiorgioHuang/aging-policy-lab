@@ -7,8 +7,8 @@
  *
  * Privacy/security posture:
  *   - No maintainer email anywhere; replies happen out-of-band or via GitHub.
- *   - The client IP stored in the DB is never raw — only an optional salted
- *     SHA-256 prefix (needs CONTACT_IP_SALT), for abuse triage.
+ *   - The sender's raw IP and User-Agent are recorded for triage — stored on the
+ *     row and shown on the protected /admin/messages page.
  *   - Best-effort notifications go to whatever channels are configured — a
  *     Telegram bot (TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID) and/or a generic
  *     Slack/Discord webhook (CONTACT_WEBHOOK_URL) — so inquiries are *timely*
@@ -16,7 +16,6 @@
  *     raw IP + User-Agent (to the maintainer's channel only). Never blocks the
  *     response.
  */
-import { createHash } from "crypto";
 import { pool } from "./db";
 
 export class ContactValidationError extends Error {}
@@ -60,6 +59,8 @@ export type ContactMessage = {
   subject: string | null;
   message: string;
   status: ContactStatus;
+  ip: string | null;
+  userAgent: string | null;
 };
 
 /** Read the inbox for the protected /admin/messages page (newest first). */
@@ -73,9 +74,11 @@ export async function listContactMessages(limit = 200): Promise<ContactMessage[]
     subject: string | null;
     message: string;
     status: ContactStatus;
+    ip: string | null;
+    user_agent: string | null;
   }>(
     `SELECT id, created_at::text AS created_at, name, email, organization,
-            subject, message, status
+            subject, message, status, ip, user_agent
        FROM contact_message
    ORDER BY created_at DESC
       LIMIT $1`,
@@ -90,6 +93,8 @@ export async function listContactMessages(limit = 200): Promise<ContactMessage[]
     subject: r.subject,
     message: r.message,
     status: r.status,
+    ip: r.ip,
+    userAgent: r.user_agent,
   }));
 }
 
@@ -138,16 +143,12 @@ export async function saveContactMessage(
     throw new ContactValidationError("That email address doesn't look valid.");
   }
 
-  const salt = process.env.CONTACT_IP_SALT;
-  const ipHash =
-    salt && meta.ip
-      ? createHash("sha256").update(`${salt}|${meta.ip}`).digest("hex").slice(0, 32)
-      : null;
+  const ip = (meta.ip ?? "").slice(0, 100) || null;
   const userAgent = (meta.userAgent ?? "").slice(0, 400) || null;
 
   await pool.query(
     `INSERT INTO contact_message
-       (name, email, organization, subject, message, source, user_agent, ip_hash)
+       (name, email, organization, subject, message, source, user_agent, ip)
      VALUES ($1, $2, $3, $4, $5, 'about-form', $6, $7)`,
     [
       fields.name || null,
@@ -156,7 +157,7 @@ export async function saveContactMessage(
       fields.subject || null,
       fields.message,
       userAgent,
-      ipHash,
+      ip,
     ],
   );
 

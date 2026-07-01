@@ -909,6 +909,17 @@ table.data tbody tr:last-child td {
   overflow-wrap: anywhere;
   font-size: 0.92rem;
 }
+.msg-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0 0 0.7rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
 .msg-actions {
   display: flex;
   flex-wrap: wrap;

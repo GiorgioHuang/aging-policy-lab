@@ -53,6 +53,13 @@ function Row({ m }: { m: ContactMessage }) {
 
       <p className="msg-body">{m.message}</p>
 
+      {(m.ip || m.userAgent) && (
+        <div className="msg-tech">
+          {m.ip ? <span>IP {m.ip}</span> : null}
+          {m.userAgent ? <span title={m.userAgent}>UA {m.userAgent}</span> : null}
+        </div>
+      )}
+
       <div className="msg-actions">
         {CONTACT_STATUSES.filter((s) => s !== m.status).map((s) => (
           <form key={s} action={setStatus}>
