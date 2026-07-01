@@ -16,6 +16,7 @@ const NAV: Array<{ href: string; label: string }> = [
   { href: "/hapi", label: "HAPI" },
   { href: "/analytics", label: "Analytics" },
   { href: "/assistant", label: "Assistant" },
+  { href: "/about", label: "About" },
 ];
 
 export default function RootLayout({
