@@ -67,7 +67,9 @@ export function ContactForm() {
           <input name="name" maxLength={120} autoComplete="name" />
         </label>
         <label>
-          Email <span className="contact-opt">(optional)</span>
+          <span className="contact-cap">
+            Email <span className="contact-opt">(optional)</span>
+          </span>
           <input
             name="email"
             type="email"
@@ -79,7 +81,9 @@ export function ContactForm() {
       </div>
 
       <label>
-        Organization <span className="contact-opt">(optional)</span>
+        <span className="contact-cap">
+          Organization <span className="contact-opt">(optional)</span>
+        </span>
         <input name="organization" maxLength={200} />
       </label>
 
