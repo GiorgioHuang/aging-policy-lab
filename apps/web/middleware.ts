@@ -21,8 +21,12 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 export function middleware(req: NextRequest) {
-  const expectedUser = process.env.ADMIN_USER || "admin";
-  const expectedPass = process.env.ADMIN_PASSWORD;
+  // Trim env values: secrets created via the Console or `echo` commonly carry a
+  // trailing newline, which would otherwise never match the typed password and
+  // leave the browser stuck re-prompting. Trimming the expected (server) side
+  // makes auth newline-proof; the browser never sends surrounding whitespace.
+  const expectedUser = (process.env.ADMIN_USER || "admin").trim();
+  const expectedPass = (process.env.ADMIN_PASSWORD || "").trim();
 
   // Fail closed — the admin area stays locked until a password is configured.
   if (!expectedPass) {
