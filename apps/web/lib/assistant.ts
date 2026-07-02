@@ -79,7 +79,10 @@ export async function getEvidencePack(topic: string): Promise<EvidencePack> {
 // [P#]/[L#]/[F#] tag maps to a visible item. Mirrors pipeline/hapi_pipeline/ai/
 // assistant.py so the web and CLI produce the same grounded, cited output.
 
-const DRAFT_MODEL = process.env.HAPI_SUMMARY_MODEL || "claude-opus-4-8";
+// Sonnet by default for the web draft (fast + economical for a public endpoint);
+// override with HAPI_ASSISTANT_MODEL. Kept independent of the pipeline's
+// HAPI_SUMMARY_MODEL so the two can be tuned separately.
+const DRAFT_MODEL = process.env.HAPI_ASSISTANT_MODEL || "claude-sonnet-5";
 
 const DRAFT_SYSTEM =
   "You draft cited literature-review starting points for a Canadian healthy-aging " +
