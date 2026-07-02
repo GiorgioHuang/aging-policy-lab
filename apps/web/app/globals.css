@@ -662,6 +662,55 @@ table.data tbody tr:last-child td {
   color: #ff9b9b;
 }
 
+/* ── AI Research Assistant — cited draft ─────────────────────────────────────── */
+.draft-panel {
+  border-color: var(--accent);
+}
+.draft-note {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0 0 0.85rem;
+}
+.draft-status {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.draft-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.draft-cli {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.82rem;
+  color: var(--good);
+  overflow-x: auto;
+  margin: 0;
+}
+.draft-spinner {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+  animation: draft-spin 0.8s linear infinite;
+}
+@keyframes draft-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── About page ─────────────────────────────────────────────────────────────── */
 .about section {
   margin: 2.25rem 0;

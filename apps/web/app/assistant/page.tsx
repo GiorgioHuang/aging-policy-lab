@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getEvidencePack, type EvidencePack } from "@/lib/assistant";
+import { AssistantDraft } from "@/components/AssistantDraft";
 
 export const dynamic = "force-dynamic";
 
@@ -106,13 +107,7 @@ export default async function Assistant({
             </section>
           )}
 
-          <div className="panel" style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
-            This is the grounded retrieval. The <strong>cited draft review</strong> is
-            generated from this exact pack by the assistant —{" "}
-            <code className="code">python -m hapi_pipeline.cli assistant &quot;{topic}&quot;</code>{" "}
-            (needs <code className="code">ANTHROPIC_API_KEY</code>) — with a citation on every
-            claim and no fabricated sources.
-          </div>
+          <AssistantDraft topic={topic!} />
         </>
       ) : (
         <p style={{ color: "var(--muted)" }}>Enter a topic above to retrieve an evidence pack.</p>
