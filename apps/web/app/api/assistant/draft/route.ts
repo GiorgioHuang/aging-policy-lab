@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const pack = await getEvidencePack(topic);
-    const result = await draftReview(pack);
+    const result = await draftReview(pack, { ip: clientIp(req) });
     // Only cache a produced draft — transient failures should be retryable.
     if (result.draft) cache.set(key, { at: Date.now(), result });
     return NextResponse.json({ ok: true, ...result });

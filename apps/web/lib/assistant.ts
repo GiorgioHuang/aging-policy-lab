@@ -101,19 +101,87 @@ function packIsEmpty(pack: EvidencePack): boolean {
   return pack.policies.length + pack.literature.length + pack.findings.length === 0;
 }
 
+type LogInfo = {
+  status: "ok" | "empty_pack" | "refusal" | "error";
+  model?: string;
+  draft?: string | null;
+  latencyMs?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+};
+
+// Record a generation: a structured line for Cloud Run logs (metadata only) plus
+// a durable audit row in assistant_log (migration 0007). Best-effort — a logging
+// failure must never break the user's response, so everything is swallowed.
+async function logDraft(
+  pack: EvidencePack,
+  info: LogInfo,
+  meta: { ip?: string },
+): Promise<void> {
+  try {
+    console.log(
+      JSON.stringify({
+        evt: "assistant_draft",
+        topic: pack.topic,
+        status: info.status,
+        model: info.model ?? null,
+        n_policies: pack.policies.length,
+        n_literature: pack.literature.length,
+        n_findings: pack.findings.length,
+        input_tokens: info.inputTokens ?? null,
+        output_tokens: info.outputTokens ?? null,
+        latency_ms: info.latencyMs ?? null,
+      }),
+    );
+  } catch {
+    /* console never throws in practice; ignore */
+  }
+  try {
+    await pool.query(
+      `INSERT INTO assistant_log
+         (topic, model, status, draft, n_policies, n_literature, n_findings,
+          input_tokens, output_tokens, latency_ms, ip)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        pack.topic.slice(0, 200),
+        info.model ?? null,
+        info.status,
+        info.draft ?? null,
+        pack.policies.length,
+        pack.literature.length,
+        pack.findings.length,
+        info.inputTokens ?? null,
+        info.outputTokens ?? null,
+        info.latencyMs ?? null,
+        (meta.ip ?? "").slice(0, 100) || null,
+      ],
+    );
+  } catch (e) {
+    console.error("assistant_log insert failed:", e);
+  }
+}
+
 /**
- * Generate the cited draft review from an evidence pack. Returns a structured
- * result rather than throwing so the caller can show a graceful message:
+ * Generate the cited draft review from an evidence pack. Every generation (not
+ * cache hits) is logged to assistant_log + Cloud Run. Returns a structured result
+ * rather than throwing so the caller can show a graceful message:
  *   reason "no_api_key"  — ANTHROPIC_API_KEY isn't configured on the server
  *   reason "empty_pack"  — nothing to cite
  *   reason "refusal"     — the model declined (safety)
  *   reason "error"       — an API/network failure (logged server-side)
  */
-export async function draftReview(pack: EvidencePack): Promise<DraftResult> {
+export async function draftReview(
+  pack: EvidencePack,
+  meta: { ip?: string } = {},
+): Promise<DraftResult> {
   if (!process.env.ANTHROPIC_API_KEY) return { draft: null, reason: "no_api_key" };
-  if (packIsEmpty(pack)) return { draft: null, reason: "empty_pack" };
+  if (packIsEmpty(pack)) {
+    await logDraft(pack, { status: "empty_pack" }, meta);
+    return { draft: null, reason: "empty_pack" };
+  }
 
   const client = new Anthropic();
+  const startedAt = Date.now();
   try {
     const response = await client.messages.create({
       model: DRAFT_MODEL,
@@ -131,14 +199,32 @@ export async function draftReview(pack: EvidencePack): Promise<DraftResult> {
         },
       ],
     });
-    if (response.stop_reason === "refusal") return { draft: null, reason: "refusal" };
+    const latencyMs = Date.now() - startedAt;
+    const usage = {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+    };
+
+    if (response.stop_reason === "refusal") {
+      await logDraft(pack, { status: "refusal", model: DRAFT_MODEL, latencyMs, ...usage }, meta);
+      return { draft: null, reason: "refusal" };
+    }
     const text = response.content
       .map((b) => (b.type === "text" ? b.text : ""))
       .join("")
       .trim();
-    return text ? { draft: text, reason: null } : { draft: null, reason: "error" };
+    const result: DraftResult = text
+      ? { draft: text, reason: null }
+      : { draft: null, reason: "error" };
+    await logDraft(
+      pack,
+      { status: text ? "ok" : "error", model: DRAFT_MODEL, draft: result.draft, latencyMs, ...usage },
+      meta,
+    );
+    return result;
   } catch (e) {
     console.error("draftReview failed:", e);
+    await logDraft(pack, { status: "error", model: DRAFT_MODEL, latencyMs: Date.now() - startedAt }, meta);
     return { draft: null, reason: "error" };
   }
 }
