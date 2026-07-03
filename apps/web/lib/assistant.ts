@@ -117,7 +117,12 @@ export async function draftReview(pack: EvidencePack): Promise<DraftResult> {
   try {
     const response = await client.messages.create({
       model: DRAFT_MODEL,
-      max_tokens: 1500,
+      // Sonnet 5 runs adaptive thinking when `thinking` is omitted, and thinking
+      // tokens count against max_tokens — which truncated the draft mid-Sources.
+      // This is a bounded synthesis from a provided pack, so disable thinking and
+      // give the visible response the whole budget.
+      max_tokens: 2048,
+      thinking: { type: "disabled" },
       system: DRAFT_SYSTEM,
       messages: [
         {
