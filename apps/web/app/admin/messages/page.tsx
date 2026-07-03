@@ -84,6 +84,10 @@ export default async function AdminMessagesPage() {
 
   return (
     <main className="container admin">
+      <nav className="admin-nav">
+        <span className="admin-nav-here">Contact inbox</span>
+        <a href="/admin/assistant-log">Assistant log</a>
+      </nav>
       <h1>Contact inbox</h1>
       <p className="admin-summary">
         {total} message{total === 1 ? "" : "s"}

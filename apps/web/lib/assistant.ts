@@ -74,6 +74,87 @@ export async function getEvidencePack(topic: string): Promise<EvidencePack> {
   return { topic, policies, literature, findings };
 }
 
+// ── Assistant log (read side, for /admin/assistant-log) ───────────────────────
+
+export type AssistantLogRow = {
+  id: string;
+  createdAt: string;
+  topic: string;
+  model: string | null;
+  status: string;
+  draft: string | null;
+  nPolicies: number | null;
+  nLiterature: number | null;
+  nFindings: number | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  latencyMs: number | null;
+  ip: string | null;
+};
+
+export async function listAssistantLogs(limit = 200): Promise<AssistantLogRow[]> {
+  const { rows } = await pool.query<{
+    id: string;
+    created_at: string;
+    topic: string;
+    model: string | null;
+    status: string;
+    draft: string | null;
+    n_policies: number | null;
+    n_literature: number | null;
+    n_findings: number | null;
+    input_tokens: number | null;
+    output_tokens: number | null;
+    latency_ms: number | null;
+    ip: string | null;
+  }>(
+    `SELECT id, created_at::text AS created_at, topic, model, status, draft,
+            n_policies, n_literature, n_findings, input_tokens, output_tokens,
+            latency_ms, ip
+       FROM assistant_log
+   ORDER BY created_at DESC
+      LIMIT $1`,
+    [limit],
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    createdAt: r.created_at,
+    topic: r.topic,
+    model: r.model,
+    status: r.status,
+    draft: r.draft,
+    nPolicies: r.n_policies,
+    nLiterature: r.n_literature,
+    nFindings: r.n_findings,
+    inputTokens: r.input_tokens,
+    outputTokens: r.output_tokens,
+    latencyMs: r.latency_ms,
+    ip: r.ip,
+  }));
+}
+
+/** Header summary: total rows, per-status counts, and cumulative output tokens. */
+export async function assistantLogSummary(): Promise<{
+  total: number;
+  byStatus: Record<string, number>;
+  outputTokens: number;
+}> {
+  const { rows } = await pool.query<{ status: string; n: string; out: string | null }>(
+    `SELECT status, count(*)::text AS n, coalesce(sum(output_tokens), 0)::text AS out
+       FROM assistant_log GROUP BY status`,
+  );
+  const byStatus: Record<string, number> = {};
+  let total = 0;
+  let outputTokens = 0;
+  for (const r of rows) {
+    const n = Number(r.n);
+    byStatus[r.status] = n;
+    total += n;
+    outputTokens += Number(r.out ?? 0);
+  }
+  return { total, byStatus, outputTokens };
+}
+
 // ── Cited draft review (Claude) ───────────────────────────────────────────────
 // The draft is generated from the *same* evidence pack the page renders, so every
 // [P#]/[L#]/[F#] tag maps to a visible item. Mirrors pipeline/hapi_pipeline/ai/

@@ -907,6 +907,86 @@ table.data tbody tr:last-child td {
 .admin h1 {
   margin-bottom: 0.25rem;
 }
+.admin-nav {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.admin-nav-here {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Assistant log rows ──────────────────────────────────────────────────────── */
+.log-row {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+}
+.log-ok {
+  border-left-color: var(--good);
+}
+.log-error,
+.log-refusal {
+  border-left-color: #5a2730;
+}
+.log-empty_pack {
+  opacity: 0.8;
+}
+.log-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.log-topic {
+  color: var(--text);
+}
+.log-time {
+  color: var(--muted);
+  font-size: 0.76rem;
+  margin-left: auto;
+}
+.log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.4rem 0 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.badge.log-badge-ok {
+  color: var(--good);
+  border-color: #2f6f52;
+}
+.badge.log-badge-error,
+.badge.log-badge-refusal {
+  color: #ff9b9b;
+  border-color: #5a2730;
+}
+.log-draft > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+.log-draft-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+.log-nodraft {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0;
+}
 .admin-summary {
   color: var(--muted);
   font-size: 0.85rem;
