@@ -189,6 +189,7 @@ type LogInfo = {
   latencyMs?: number;
   inputTokens?: number;
   outputTokens?: number;
+  error?: string; // error message (Cloud Run log only; not stored)
 };
 
 // Record a generation: a structured line for Cloud Run logs (metadata only) plus
@@ -212,6 +213,7 @@ async function logDraft(
         input_tokens: info.inputTokens ?? null,
         output_tokens: info.outputTokens ?? null,
         latency_ms: info.latencyMs ?? null,
+        error: info.error ?? null,
       }),
     );
   } catch {
@@ -266,12 +268,11 @@ export async function draftReview(
   try {
     const response = await client.messages.create({
       model: DRAFT_MODEL,
-      // Sonnet 5 runs adaptive thinking when `thinking` is omitted, and thinking
-      // tokens count against max_tokens — which truncated the draft mid-Sources.
-      // This is a bounded synthesis from a provided pack, so disable thinking and
-      // give the visible response the whole budget.
-      max_tokens: 2048,
-      thinking: { type: "disabled" },
+      // Leave thinking on its default (adaptive on Sonnet 5). An explicit
+      // thinking:{type:"disabled"} was rejected by the deployed model. Adaptive
+      // thinking spends tokens from max_tokens, so budget generously (4000) so the
+      // ~450-word draft + Sources always fits without truncation.
+      max_tokens: 4000,
       system: DRAFT_SYSTEM,
       messages: [
         {
@@ -304,8 +305,13 @@ export async function draftReview(
     );
     return result;
   } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
     console.error("draftReview failed:", e);
-    await logDraft(pack, { status: "error", model: DRAFT_MODEL, latencyMs: Date.now() - startedAt }, meta);
+    await logDraft(
+      pack,
+      { status: "error", model: DRAFT_MODEL, latencyMs: Date.now() - startedAt, error: message },
+      meta,
+    );
     return { draft: null, reason: "error" };
   }
 }
