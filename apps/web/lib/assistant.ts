@@ -90,6 +90,7 @@ export type AssistantLogRow = {
   outputTokens: number | null;
   latencyMs: number | null;
   ip: string | null;
+  error: string | null;
 };
 
 export async function listAssistantLogs(limit = 200): Promise<AssistantLogRow[]> {
@@ -107,10 +108,11 @@ export async function listAssistantLogs(limit = 200): Promise<AssistantLogRow[]>
     output_tokens: number | null;
     latency_ms: number | null;
     ip: string | null;
+    error: string | null;
   }>(
     `SELECT id, created_at::text AS created_at, topic, model, status, draft,
             n_policies, n_literature, n_findings, input_tokens, output_tokens,
-            latency_ms, ip
+            latency_ms, ip, error
        FROM assistant_log
    ORDER BY created_at DESC
       LIMIT $1`,
@@ -130,6 +132,7 @@ export async function listAssistantLogs(limit = 200): Promise<AssistantLogRow[]>
     outputTokens: r.output_tokens,
     latencyMs: r.latency_ms,
     ip: r.ip,
+    error: r.error,
   }));
 }
 
@@ -223,8 +226,8 @@ async function logDraft(
     await pool.query(
       `INSERT INTO assistant_log
          (topic, model, status, draft, n_policies, n_literature, n_findings,
-          input_tokens, output_tokens, latency_ms, ip)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+          input_tokens, output_tokens, latency_ms, ip, error)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         pack.topic.slice(0, 200),
         info.model ?? null,
@@ -237,6 +240,7 @@ async function logDraft(
         info.outputTokens ?? null,
         info.latencyMs ?? null,
         (meta.ip ?? "").slice(0, 100) || null,
+        info.error ? info.error.slice(0, 500) : null,
       ],
     );
   } catch (e) {

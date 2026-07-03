@@ -987,6 +987,13 @@ table.data tbody tr:last-child td {
   font-size: 0.82rem;
   margin: 0;
 }
+.log-error-msg {
+  color: #ff9b9b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+  margin: 0.2rem 0 0;
+}
 .admin-summary {
   color: var(--muted);
   font-size: 0.85rem;

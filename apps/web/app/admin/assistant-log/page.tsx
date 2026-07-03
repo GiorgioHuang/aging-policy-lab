@@ -42,12 +42,14 @@ function Entry({ r }: { r: AssistantLogRow }) {
         {r.ip ? <span>{r.ip}</span> : null}
       </div>
 
+      {r.error ? <p className="log-error-msg">⚠ {r.error}</p> : null}
+
       {r.draft ? (
         <details className="log-draft">
           <summary>Draft ({r.draft.length.toLocaleString()} chars)</summary>
           <div className="log-draft-body">{r.draft}</div>
         </details>
-      ) : (
+      ) : r.error ? null : (
         <p className="log-nodraft">No output ({r.status}).</p>
       )}
     </article>
