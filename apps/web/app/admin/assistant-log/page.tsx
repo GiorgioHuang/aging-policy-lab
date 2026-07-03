@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { revalidatePath } from "next/cache";
 import {
   listAssistantLogs,
   assistantLogSummary,
+  deleteAssistantLog,
+  clearAssistantLogs,
   type AssistantLogRow,
 } from "@/lib/assistant";
 
@@ -12,6 +15,19 @@ export const metadata: Metadata = {
   title: "Assistant log — Admin",
   robots: { index: false, follow: false },
 };
+
+// Server Actions — POST to this route, gated by the /admin Basic-Auth middleware.
+async function deleteEntry(formData: FormData): Promise<void> {
+  "use server";
+  await deleteAssistantLog(String(formData.get("id") ?? ""));
+  revalidatePath("/admin/assistant-log");
+}
+
+async function clearAll(): Promise<void> {
+  "use server";
+  await clearAssistantLogs();
+  revalidatePath("/admin/assistant-log");
+}
 
 function fmtDate(iso: string): string {
   return new Date(iso).toISOString().slice(0, 16).replace("T", " ") + " UTC";
@@ -52,6 +68,15 @@ function Entry({ r }: { r: AssistantLogRow }) {
       ) : r.error ? null : (
         <p className="log-nodraft">No output ({r.status}).</p>
       )}
+
+      <div className="log-actions">
+        <form action={deleteEntry}>
+          <input type="hidden" name="id" value={r.id} />
+          <button type="submit" className="msg-btn">
+            Delete
+          </button>
+        </form>
+      </div>
     </article>
   );
 }
@@ -67,13 +92,22 @@ export default async function AdminAssistantLogPage() {
         <span className="admin-nav-here">Assistant log</span>
       </nav>
       <h1>Assistant log</h1>
-      <p className="admin-summary">
-        {summary.total} generation{summary.total === 1 ? "" : "s"}
-        {" · "}
-        {statuses.map((s) => `${summary.byStatus[s] ?? 0} ${s}`).join(" · ")}
-        {" · "}
-        {summary.outputTokens.toLocaleString()} output tokens
-      </p>
+      <div className="admin-summary-row">
+        <p className="admin-summary">
+          {summary.total} generation{summary.total === 1 ? "" : "s"}
+          {" · "}
+          {statuses.map((s) => `${summary.byStatus[s] ?? 0} ${s}`).join(" · ")}
+          {" · "}
+          {summary.outputTokens.toLocaleString()} output tokens
+        </p>
+        {rows.length > 0 ? (
+          <form action={clearAll}>
+            <button type="submit" className="msg-btn log-danger">
+              Clear all
+            </button>
+          </form>
+        ) : null}
+      </div>
 
       {rows.length === 0 ? (
         <div className="panel">No generations logged yet.</div>

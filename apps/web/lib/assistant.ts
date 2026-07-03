@@ -158,6 +158,17 @@ export async function assistantLogSummary(): Promise<{
   return { total, byStatus, outputTokens };
 }
 
+/** Delete one log row (id is a numeric bigint, validated before binding). */
+export async function deleteAssistantLog(id: string): Promise<void> {
+  if (!/^\d+$/.test(id)) throw new Error(`invalid id: ${id}`);
+  await pool.query(`DELETE FROM assistant_log WHERE id = $1`, [id]);
+}
+
+/** Delete every log row. */
+export async function clearAssistantLogs(): Promise<void> {
+  await pool.query(`DELETE FROM assistant_log`);
+}
+
 // ── Cited draft review (Claude) ───────────────────────────────────────────────
 // The draft is generated from the *same* evidence pack the page renders, so every
 // [P#]/[L#]/[F#] tag maps to a visible item. Mirrors pipeline/hapi_pipeline/ai/

@@ -994,6 +994,26 @@ table.data tbody tr:last-child td {
   overflow-wrap: anywhere;
   margin: 0.2rem 0 0;
 }
+.log-actions {
+  margin-top: 0.7rem;
+}
+.log-actions form {
+  margin: 0;
+}
+.admin-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.admin-summary-row form {
+  margin: 0;
+}
+.log-danger:hover {
+  border-color: #5a2730;
+  color: #ff9b9b;
+}
 .admin-summary {
   color: var(--muted);
   font-size: 0.85rem;
