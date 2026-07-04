@@ -16,6 +16,165 @@ export const metadata: Metadata = {
     "About the Canadian Healthy Aging Policy Observatory: what it is, how it works, its data and methodology, and how to get in touch.",
 };
 
+// Glossary of abbreviations, domain terms, and coined names that appear across
+// the platform. Grouped so a first-time visitor can decode any label on the site.
+type Term = { term: string; expansion?: string; body: string };
+const GLOSSARY: Array<{ group: string; terms: Term[] }> = [
+  {
+    group: "The platform",
+    terms: [
+      {
+        term: "Observatory",
+        body: "How we describe this platform: a research instrument that continuously monitors, quantifies, and evaluates aging policy — not a news site or a static report.",
+      },
+      {
+        term: "HAIL",
+        expansion: "Healthy Aging Intelligence Lab",
+        body: "The long-horizon research lab this Observatory belongs to, building durable, reusable assets for studying how policy shapes healthy aging.",
+      },
+      {
+        term: "HAPI",
+        expansion: "Healthy Aging Policy Index",
+        body: "Our own composite index (0–100) scoring how well a jurisdiction supports healthy aging, across six domains, with transparent weights and normalization.",
+      },
+      {
+        term: "Evidence pack",
+        body: "The exact set of policies, indicators, and literature the AI assistant is given for a topic. Every claim in a generated draft cites an item from this pack — nothing else.",
+      },
+    ],
+  },
+  {
+    group: "HAPI domains",
+    terms: [
+      {
+        term: "Six domains",
+        body: "HAPI is built from Health, Independence, Social Participation, Financial Security, Care Access, and Digital Inclusion — each scored from documented indicators and combined by audited weights.",
+      },
+      {
+        term: "Indicator",
+        body: "A single measured signal (e.g. an ADL-limitation rate) with a fixed definition, data source, normalization range, and direction (higher-is-better or lower-is-better).",
+      },
+      {
+        term: "Care Access",
+        body: "The v1-priority domain — access to home care and long-term care — chosen because it maps to high-signal CIHI/IRRS and Nova Scotia data.",
+      },
+    ],
+  },
+  {
+    group: "Methods & analytics",
+    terms: [
+      {
+        term: "Association vs. Causal",
+        body: "Two labels we apply strictly. Association = a descriptive trend or correlation. Causal = a claim backed by a quasi-experimental design. The site never upgrades one to the other.",
+      },
+      {
+        term: "ITS",
+        expansion: "Interrupted Time Series",
+        body: "A quasi-experimental design that models an outcome's trend before vs. after a policy's effective date, used for careful causal claims.",
+      },
+      {
+        term: "DiD",
+        expansion: "Difference-in-Differences",
+        body: "Compares a jurisdiction that adopted a policy against one that did not, before vs. after — relying on a parallel-trends assumption.",
+      },
+      {
+        term: "Synthetic Control",
+        body: "Builds a weighted 'synthetic' comparison jurisdiction from a donor pool to estimate what would have happened without the policy.",
+      },
+      {
+        term: "RAG",
+        expansion: "Retrieval-Augmented Generation",
+        body: "The assistant retrieves real policies and literature first, then drafts from that grounded material — so output stays traceable rather than invented.",
+      },
+      {
+        term: "KPI",
+        expansion: "Key Performance Indicator",
+        body: "A target metric attached to a policy record (e.g. a stated wait-time goal).",
+      },
+    ],
+  },
+  {
+    group: "Data & provenance",
+    terms: [
+      {
+        term: "Lineage",
+        body: "The chain that ties any number on the site back to its origin: Observation → DatasetVersion → DataSource. Shown on the Data Hub for reproducibility.",
+      },
+      {
+        term: "Observation",
+        body: "One immutable data point — an indicator's value for a jurisdiction at a point in time — stored with a checksum so it can't silently change.",
+      },
+      {
+        term: "DatasetVersion",
+        body: "A specific retrieval of an upstream dataset (with its retrieval date and content checksum). Re-running with unchanged upstream is a no-op.",
+      },
+      {
+        term: "ETL",
+        expansion: "Extract, Transform, Load",
+        body: "The pipeline stages that pull raw data from a source, clean it, and load validated observations into the database.",
+      },
+    ],
+  },
+  {
+    group: "Sources & institutions",
+    terms: [
+      {
+        term: "StatCan",
+        expansion: "Statistics Canada",
+        body: "Canada's national statistical agency — a primary source for demography and outcome indicators.",
+      },
+      {
+        term: "WDS",
+        expansion: "Web Data Service",
+        body: "Statistics Canada's API for programmatically retrieving data tables.",
+      },
+      {
+        term: "CIHI",
+        expansion: "Canadian Institute for Health Information",
+        body: "National source for health-system data, including home care and long-term care reporting.",
+      },
+      {
+        term: "IRRS",
+        expansion: "Integrated interRAI Reporting System",
+        body: "CIHI's consolidated home-care/long-term-care reporting system that replaces the legacy HCRS and CCRS. Care Access data follows IRRS going forward.",
+      },
+      {
+        term: "Census",
+        body: "Statistics Canada's national census — the backbone for population denominators and internet-use (Digital Inclusion) tables.",
+      },
+    ],
+  },
+  {
+    group: "Geography & domain",
+    terms: [
+      {
+        term: "NS",
+        expansion: "Nova Scotia",
+        body: "The first province modelled in depth — chosen as a replicable template that later extends to the rest of Canada.",
+      },
+      {
+        term: "Federal",
+        body: "The Government of Canada level, tracked alongside Nova Scotia so provincial and national policy can be compared.",
+      },
+      {
+        term: "LTC",
+        expansion: "Long-Term Care",
+        body: "Residential care for older adults who can no longer live independently — a core focus of the Care Access domain.",
+      },
+      {
+        term: "ADL",
+        expansion: "Activities of Daily Living",
+        body: "Basic self-care tasks (bathing, dressing, eating). Limitation rates are a standard measure of functional independence.",
+      },
+      {
+        term: "PIPEDA",
+        expansion: "Personal Information Protection and Electronic Documents Act",
+        body: "Canada's federal privacy law — the baseline the platform's privacy and data-handling design respects.",
+      },
+    ],
+  },
+];
+
 const MODULES: Array<{ title: string; href: string; body: string }> = [
   {
     title: "Policy Library",
@@ -106,6 +265,33 @@ export default function AboutPage() {
             GitHub for scrutiny and replication.
           </li>
         </ul>
+      </section>
+
+      <section id="glossary">
+        <h2>Glossary</h2>
+        <p className="about-glossary-lede">
+          The abbreviations, domain terms, and coined names used across the platform.
+        </p>
+        <div className="about-glossary">
+          {GLOSSARY.map((g) => (
+            <div key={g.group} className="glossary-group">
+              <h3 className="glossary-group-title">{g.group}</h3>
+              <dl className="glossary-list">
+                {g.terms.map((t) => (
+                  <div key={t.term} className="glossary-item">
+                    <dt>
+                      <span className="glossary-term">{t.term}</span>
+                      {t.expansion ? (
+                        <span className="glossary-expansion">{t.expansion}</span>
+                      ) : null}
+                    </dt>
+                    <dd>{t.body}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section id="contact" className="about-contact">
