@@ -128,7 +128,7 @@ a:hover {
 
 .snapshot {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -143,44 +143,76 @@ a:hover {
   border-color: var(--accent);
   text-decoration: none;
 }
+.snap-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
 .snap-code {
   font-weight: 600;
-  margin-bottom: 0.5rem;
 }
-.snap-scores {
+.snap-period {
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Overall — the highlighted headline score. */
+.snap-overall {
   display: flex;
-  gap: 1.25rem;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-bottom: 0.7rem;
 }
-.snap-metric {
-  display: flex;
-  flex-direction: column;
-}
-.snap-num {
-  font-size: 1.45rem;
+.snap-overall-num {
+  font-size: 2.1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1;
 }
-.snap-num.good {
+.snap-overall-num.good {
   color: var(--good);
 }
-.snap-num.mid {
+.snap-overall-num.mid {
   color: #e0b341;
 }
-.snap-num.low {
+.snap-overall-num.low {
   color: #ff9b9b;
 }
-.snap-metric-label {
-  font-size: 0.68rem;
+.snap-overall-label {
+  font-size: 0.72rem;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.snap-period {
-  margin-top: 0.5rem;
-  font-size: 0.74rem;
+
+/* Per-domain scores — de-emphasised supporting detail. */
+.snap-domains {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.15rem 0.9rem;
+  margin: 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+.snap-domain {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.snap-domain dt {
+  font-size: 0.72rem;
   color: var(--muted);
+}
+.snap-domain dd {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text);
   font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
 
 .dash-grid {

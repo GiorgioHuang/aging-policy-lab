@@ -21,6 +21,17 @@ const RADAR_LABELS: Record<string, string> = {
 };
 const JUR_COLOR = (code: string) => (code === "CA-NS" ? "#3ecf8e" : "#4f9dff");
 
+// Domain order + labels for the per-jurisdiction HAPI snapshot (excludes 'overall',
+// which is highlighted on its own). Care Access leads as the v1-priority domain.
+const SNAPSHOT_DOMAINS: Array<{ key: string; label: string }> = [
+  { key: "care_access", label: "Care Access" },
+  { key: "health", label: "Health" },
+  { key: "independence", label: "Independence" },
+  { key: "social_participation", label: "Social Participation" },
+  { key: "financial_security", label: "Financial Security" },
+  { key: "digital_inclusion", label: "Digital Inclusion" },
+];
+
 function buildRadar(
   evo: Overview["domainEvolution"],
 ): { axes: RadarAxis[]; years: string[]; series: RadarTemporalSeries[] } | null {
@@ -124,36 +135,49 @@ export default async function Home() {
             </section>
           )}
 
-          {overview && overview.hapi.length > 0 && (
-            <section className="panel">
-              <h2>HAPI snapshot by jurisdiction</h2>
-              <div className="snapshot">
-                {overview.hapi.map((h) => (
-                  <Link key={h.code} href="/hapi" className="snap-card">
-                    <div className="snap-code">{h.code}</div>
-                    <div className="snap-scores">
-                      <div className="snap-metric">
-                        <span className={`snap-num ${scoreClass(h.overall)}`}>
-                          {h.overall === null ? "—" : h.overall.toFixed(0)}
-                        </span>
-                        <span className="snap-metric-label">Overall</span>
-                      </div>
-                      <div className="snap-metric">
-                        <span className={`snap-num ${scoreClass(h.careAccess)}`}>
-                          {h.careAccess === null ? "—" : h.careAccess.toFixed(0)}
-                        </span>
-                        <span className="snap-metric-label">Care access</span>
-                      </div>
-                    </div>
-                    {h.period && <div className="snap-period">{h.period}</div>}
-                  </Link>
-                ))}
-              </div>
-              <p className="meta" style={{ marginBottom: 0 }}>
-                Composite index, 0–100 (higher is better). Methodology: <Link href="/hapi">HAPI →</Link>
-              </p>
-            </section>
-          )}
+          {overview && overview.hapi.length > 0 && (() => {
+            const profileByCode = new Map(
+              overview.domainProfile.map((d) => [d.code, d.scores]),
+            );
+            return (
+              <section className="panel">
+                <h2>HAPI snapshot by jurisdiction</h2>
+                <div className="snapshot">
+                  {overview.hapi.map((h) => {
+                    const scores = profileByCode.get(h.code) ?? {};
+                    return (
+                      <Link key={h.code} href="/hapi" className="snap-card">
+                        <div className="snap-head">
+                          <span className="snap-code">{h.code}</span>
+                          {h.period && <span className="snap-period">{h.period.slice(0, 4)}</span>}
+                        </div>
+                        <div className="snap-overall">
+                          <span className={`snap-overall-num ${scoreClass(h.overall)}`}>
+                            {h.overall === null ? "—" : h.overall.toFixed(0)}
+                          </span>
+                          <span className="snap-overall-label">Overall</span>
+                        </div>
+                        <dl className="snap-domains">
+                          {SNAPSHOT_DOMAINS.map((d) => {
+                            const v = scores[d.key];
+                            return (
+                              <div key={d.key} className="snap-domain">
+                                <dt>{d.label}</dt>
+                                <dd>{v === undefined || v === null ? "—" : v.toFixed(0)}</dd>
+                              </div>
+                            );
+                          })}
+                        </dl>
+                      </Link>
+                    );
+                  })}
+                </div>
+                <p className="meta" style={{ marginBottom: 0 }}>
+                  Composite index, 0–100 (higher is better). Methodology: <Link href="/hapi">HAPI →</Link>
+                </p>
+              </section>
+            );
+          })()}
 
           {overview && (() => {
             const radar = buildRadar(overview.domainEvolution);
