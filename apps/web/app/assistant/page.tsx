@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getEvidencePack, type EvidencePack } from "@/lib/assistant";
 import { AssistantDraft } from "@/components/AssistantDraft";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "AI Research Assistant",
+  description:
+    "Turn a research topic into a grounded evidence pack — policies, literature, and analytic findings " +
+    "from the platform's own stores, each with a citation id — plus a cited draft review, every claim sourced.",
+  path: "/assistant",
+});
 
 export const dynamic = "force-dynamic";
 

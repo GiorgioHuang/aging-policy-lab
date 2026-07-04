@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getPolicies, type JurisdictionPolicies, type Policy } from "@/lib/policies";
 import { PolicyTimeline, type TimelineItem } from "@/components/PolicyTimeline";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Policy Library",
+  description:
+    "A jurisdiction-aware, time-axis record of Canadian aging policy — each with its department, " +
+    "budget, lifecycle, themes, and the outcome indicators it is intended to move.",
+  path: "/policies",
+});
 
 export const dynamic = "force-dynamic";
 

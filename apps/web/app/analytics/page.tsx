@@ -1,7 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getFindings, getSeries, type Finding } from "@/lib/analytics";
 import { TrendChart, type ChartPoint, type ChartEvent } from "@/components/TrendChart";
 import { ItsChart, type ItsModel } from "@/components/ItsChart";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Policy Analytics",
+  description:
+    "Connecting aging policies to outcomes with explicit rigor: association is not causation. Every " +
+    "result is tagged Association or Causal, and causal findings carry their design, assumptions, and limits.",
+  path: "/analytics",
+});
 
 export const dynamic = "force-dynamic";
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import { ContactForm } from "@/components/ContactForm";
+import { pageMetadata } from "@/lib/seo";
 import {
   GITHUB_PROFILE_URL,
   GITHUB_REPO_URL,
@@ -10,11 +11,17 @@ import {
   GITHUB_USER,
 } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "About — Healthy Aging Policy Observatory",
+// Render at request time so the canonical/OG host reflects the runtime SITE_URL
+// (matching the dynamic content pages) even when the domain isn't set at build.
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = pageMetadata({
+  title: "About",
   description:
-    "About the Canadian Healthy Aging Policy Observatory: what it is, how it works, its data and methodology, and how to get in touch.",
-};
+    "About the Canadian Healthy Aging Policy Observatory: what it is, how it works, its data and " +
+    "methodology, a glossary of platform terms, and how to get in touch.",
+  path: "/about",
+});
 
 // Glossary of abbreviations, domain terms, and coined names that appear across
 // the platform. Grouped so a first-time visitor can decode any label on the site.

@@ -6,9 +6,19 @@ import {
   type HapiScoreRow,
   type PolicyEvent,
 } from "@/lib/hapi";
+import type { Metadata } from "next";
 import { TrendChart, type ChartPoint, type ChartEvent } from "@/components/TrendChart";
 import { type RadarAxis } from "@/components/DomainRadar";
 import { DomainRadarOverTime, type RadarTemporalSeries } from "@/components/DomainRadarOverTime";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "HAPI — Healthy Aging Policy Index",
+  description:
+    "An independent, documented index scoring how well a jurisdiction supports healthy aging, 0–100, " +
+    "over time — across six domains, with audited weights and every score auditable to its raw inputs.",
+  path: "/hapi",
+});
 
 export const dynamic = "force-dynamic";
 

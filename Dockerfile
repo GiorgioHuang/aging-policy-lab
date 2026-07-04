@@ -18,6 +18,12 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Canonical public origin for SEO (canonical URLs, Open Graph, sitemap, JSON-LD).
+# NEXT_PUBLIC_* is inlined at build time, so pass it here to bake the real domain
+# into static pages:  gcloud builds ... --substitutions ... / docker build --build-arg
+# NEXT_PUBLIC_SITE_URL=https://your-domain.ca . A safe placeholder is used if unset.
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 RUN npm run build --workspace apps/web
 
 FROM node:22-alpine AS runner

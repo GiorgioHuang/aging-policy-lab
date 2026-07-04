@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getIndicatorGroups,
@@ -5,6 +6,15 @@ import {
   type LineageRow,
 } from "@/lib/observations";
 import { TrendChart, type ChartPoint } from "@/components/TrendChart";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Data Hub",
+  description:
+    "Versioned aging indicators from Statistics Canada, CIHI, and Nova Scotia open data. Every value " +
+    "traces to its source through an immutable observation and a versioned dataset for full reproducibility.",
+  path: "/data",
+});
 
 export const dynamic = "force-dynamic";
 
