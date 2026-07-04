@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { LogoMark } from "@/components/Logo";
+import { GITHUB_REPO_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Healthy Aging Policy Observatory",
@@ -45,6 +46,26 @@ export default function RootLayout({
           </div>
         </header>
         {children}
+        <footer className="site-footer">
+          <div className="site-footer-inner">
+            <div className="footer-brand">
+              <LogoMark size={18} />
+              <span>Canadian Healthy Aging Policy Observatory</span>
+            </div>
+            <nav className="footer-links">
+              <Link href="/about">About</Link>
+              <Link href="/data">Data Hub</Link>
+              <Link href="/hapi">HAPI</Link>
+              <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
+                GitHub
+              </a>
+            </nav>
+            <p className="footer-note">
+              Part of the Healthy Aging Intelligence Lab (HAIL). Every figure traces to its
+              source; association is not causation. © {new Date().getFullYear()}
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );

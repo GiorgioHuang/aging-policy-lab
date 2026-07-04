@@ -22,6 +22,12 @@ body {
     Arial, sans-serif;
   line-height: 1.55;
 }
+/* Column layout so the footer settles at the bottom even on short pages. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
 a {
   color: var(--accent);
@@ -660,6 +666,42 @@ table.data tbody tr:last-child td {
 }
 .error code {
   color: #ff9b9b;
+}
+
+/* ── Site footer (every page) ────────────────────────────────────────────────── */
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: rgba(15, 20, 32, 0.6);
+}
+.site-footer-inner {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 1.6rem 1.5rem 2rem;
+}
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.footer-brand svg {
+  flex: none;
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin: 0.7rem 0;
+  font-size: 0.85rem;
+}
+.footer-note {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin: 0;
+  max-width: 60ch;
 }
 
 /* ── AI Research Assistant — cited draft ─────────────────────────────────────── */
