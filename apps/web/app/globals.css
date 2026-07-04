@@ -710,6 +710,11 @@ table.data tbody tr:last-child td {
   max-width: 60ch;
 }
 
+/* Keep each sentence intact: wrapping falls between sentences, never inside one. */
+.footer-sentence {
+  display: inline-block;
+}
+
 /* ── AI Research Assistant — cited draft ─────────────────────────────────────── */
 .draft-panel {
   border-color: var(--accent);

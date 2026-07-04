@@ -61,8 +61,13 @@ export default function RootLayout({
               </a>
             </nav>
             <p className="footer-note">
-              Part of the Healthy Aging Intelligence Lab (HAIL). Every figure traces to its
-              source; association is not causation. © {new Date().getFullYear()}
+              <span className="footer-sentence">
+                Part of the Healthy Aging Intelligence Lab (HAIL).
+              </span>{" "}
+              <span className="footer-sentence">
+                Every figure traces to its source; association is not causation.
+              </span>{" "}
+              <span className="footer-sentence">© {new Date().getFullYear()}</span>
             </p>
           </div>
         </footer>
