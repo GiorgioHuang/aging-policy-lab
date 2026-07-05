@@ -20,12 +20,12 @@ export const GITHUB_DISCUSSIONS_URL = `${GITHUB_REPO_URL}/discussions`;
 //                            everywhere (including robots.txt / sitemap.xml).
 //   • NEXT_PUBLIC_SITE_URL — inlined at BUILD time (pass as a Docker build-arg) so
 //                            statically rendered pages bake the real domain.
-// Set at least one; the fallback keeps builds valid until then. Trailing slash
-// stripped.
+// Defaults to the production domain below; either env var overrides it. Trailing
+// slash stripped.
 export const SITE_URL = (
   process.env.SITE_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://hapi-observatory.ca"
+  "https://acp.icareu.cc"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "Canadian Healthy Aging Policy Observatory";
