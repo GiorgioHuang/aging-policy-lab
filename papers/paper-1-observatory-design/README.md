@@ -13,15 +13,17 @@ dashboard — and that design is itself the contribution.
 
 Complete draft with **all quantitative results filled in** from the pipeline
 (corpus counts, HAPI domain/composite scores, weighting sensitivity, and the worked
-ITS coefficients). Remaining open items are editorial and marked `[TODO: …]`:
+ITS coefficients) and a **complete, verified reference list** (§11; academic
+citations checked for volume/pages/DOI). Remaining open items require only
+author/institution decisions or external confirmation, marked `[TODO: …]`:
 
 ```
 grep -n "TODO" paper.md
 ```
 
-They are: (a) the final author list & affiliations, (b) completing the reference
-list with full bibliographic details, and (c) acknowledgements. None require the
-database.
+They are: (a) the final author list & affiliations, (b) funding sources in the
+acknowledgements, and (c) confirming the exact vintage of each cited Statistics
+Canada table against the Data Hub. None require the database or block a preprint.
 
 ## Reproducing figures / numbers
 

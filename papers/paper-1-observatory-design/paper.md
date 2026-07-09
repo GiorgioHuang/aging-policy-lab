@@ -132,14 +132,17 @@ unchanged upstream data is a no-op. These ideas are standard in data engineering
 contribution is applying them rigorously to *policy* evaluation, where provenance is
 usually weakest.
 
-**LLMs for policy analysis.** Retrieval-augmented generation (RAG) has made it feasible
+**LLMs for policy analysis.** Retrieval-augmented generation (RAG) [10] has made it feasible
 to draft literature reviews and summaries grounded in a fixed corpus. The risk —
 fabricated citations and unsupported claims — is well documented. Our assistant is
 designed so that the model may cite *only* items in a pre-assembled evidence pack, and
 every generated claim carries a citation tag mapping to a visible source, making
 fabrication structurally detectable (§7).
 
-*[TODO: convert this section's named frameworks into full numbered references in §11.]*
+The frameworks and methods named in this section are cited in full in §11: the WHO
+aging reports [1, 2], the OECD/JRC composite-indicator handbook [3], the AgeWatch [4]
+and Active Ageing [5] indices, the interrupted-time-series literature [6, 7, 8], the
+FAIR data-stewardship principles [9], and retrieval-augmented generation [10].
 
 ## 3. System design
 
@@ -286,8 +289,8 @@ engine renormalizes by the weights of the domains actually available, so a cell
 missing a domain is scored fairly on the rest. Within a domain, indicators are
 averaged by their per-indicator weight.
 
-Following OECD/JRC guidance, HAPI defines and *reports side by side* three weighting
-schemes (`hapi weights`):
+Following OECD/JRC guidance [3], HAPI defines and *reports side by side* three
+weighting schemes (`hapi weights`):
 
 - **equal** — every domain 1.0 (the neutral default);
 - **expert** — theory/literature-anchored tiers (the v1 default): Tier 1 (weight 4)
@@ -380,7 +383,8 @@ named assumptions.
 ### 6.2 Worked example: interrupted time series
 
 The platform ships a worked ITS design as the reference Tier-2 pattern: around a
-policy's effective date `t0`, model an outcome series by **segmented regression** —
+policy's effective date `t0`, model an outcome series by **segmented regression**
+[7, 8] —
 a pre-intervention level and trend, plus a post-intervention **level change** and
 **slope change**:
 
@@ -389,7 +393,7 @@ y_t = β0 + β1·t + β2·1[t ≥ t0] + β3·(t − t0)^+ + ε_t
 ```
 
 where `β2` estimates the immediate level shift at the intervention and `β3` the change
-in trend afterward. Inference uses **Newey-West (HAC) standard errors** to handle
+in trend afterward. Inference uses **Newey-West (HAC) standard errors** [6] to handle
 autocorrelation in the residuals. The estimated effect is the gap between the observed
 post-intervention segment and the **counterfactual** — the pre-intervention trend
 projected forward.
@@ -512,7 +516,8 @@ one command is the reproducibility claim of §9 made concrete.
 
 **Reproducibility.** Re-runs yield identical results or show exactly what changed;
 every number traces to a source; every AI claim carries a citation. Ingestion is
-idempotent and dataset versions are content-addressed.
+idempotent and dataset versions are content-addressed, in keeping with FAIR
+data-stewardship principles [9].
 
 **Limitations.** (1) *Coverage.* With two jurisdictions, the empirical weighting and
 any cross-jurisdiction inference are indicative, not definitive; the design's value is
@@ -553,8 +558,10 @@ findings and stress-tests the analytics guardrails described here.
 
 ## Acknowledgements
 
-*[TODO: funding, data providers (Statistics Canada, CIHI, Nova Scotia open data),
-and collaborators.]*
+This work uses publicly available data from Statistics Canada, the Canadian
+Institute for Health Information (CIHI), and the Nova Scotia Open Data portal; we
+thank these providers for open access to the underlying tables. *[TODO: add funding
+sources and named collaborators.]*
 
 ## Data and code availability
 
@@ -565,27 +572,58 @@ repository README.
 
 ## 11. References
 
-*[TODO: complete bibliographic entries. Anchor references already relied on above:]*
+*Aging frameworks and composite indices.*
 
-1. World Health Organization. *World Report on Ageing and Health.* WHO, 2015.
-2. World Health Organization. *Decade of Healthy Ageing 2021–2030.* WHO, 2021.
-3. OECD & Joint Research Centre, European Commission. *Handbook on Constructing
-   Composite Indicators: Methodology and User Guide.* OECD, 2008.
-4. HelpAge International. *Global AgeWatch Index — Insight Report and Methodology.*
-5. Zaidi, A., et al. *Active Ageing Index: Concept, Methodology and Final Results.*
-   European Centre, Vienna.
-6. Newey, W. K., & West, K. D. "A Simple, Positive Semi-Definite,
-   Heteroskedasticity and Autocorrelation Consistent Covariance Matrix."
-   *Econometrica*, 1987.
+1. World Health Organization. *World Report on Ageing and Health.* Geneva: WHO,
+   2015. ISBN 978-92-4-156504-2.
+2. World Health Organization. *Decade of Healthy Ageing 2021–2030.* Geneva: WHO,
+   2020.
+3. Nardo, M., Saisana, M., Saltelli, A., Tarantola, S., Hoffmann, A., & Giovannini,
+   E. *Handbook on Constructing Composite Indicators: Methodology and User Guide.*
+   Paris: OECD Publishing, 2008. doi:10.1787/9789264043466-en.
+4. HelpAge International. *Global AgeWatch Index 2015: Insight Report.* London:
+   HelpAge International, 2015.
+5. Zaidi, A., Gasior, K., Hofmarcher, M. M., Lelkes, O., Marin, B., Rodrigues, R.,
+   Schmidt, A., Vanhuysse, P., & Zolyomi, E. *Active Ageing Index 2012: Concept,
+   Methodology and Final Results.* Vienna: European Centre for Social Welfare Policy
+   and Research, 2013.
+
+*Quasi-experimental methods (interrupted time series).*
+
+6. Newey, W. K., & West, K. D. "A Simple, Positive Semi-Definite, Heteroskedasticity
+   and Autocorrelation Consistent Covariance Matrix." *Econometrica*, 55(3),
+   703–708, 1987. doi:10.2307/1913610.
 7. Wagner, A. K., Soumerai, S. B., Zhang, F., & Ross-Degnan, D. "Segmented
    regression analysis of interrupted time series studies in medication use
-   research." *Journal of Clinical Pharmacy and Therapeutics*, 2002.
-8. Bernal, J. L., Cummins, S., & Gasparrini, A. "Interrupted time series regression
-   for the evaluation of public health interventions: a tutorial." *International
-   Journal of Epidemiology*, 2017.
-9. Statistics Canada. Web Data Service (WDS) and Canadian Community Health Survey
-   (CCHS) tables. *[TODO: cite specific tables used.]*
-10. Canadian Institute for Health Information. Integrated interRAI Reporting System
-    (IRRS) and long-term-care data. *[TODO: cite specifics.]*
-11. *[TODO: add RAG / LLM-grounding and reproducible-research-infrastructure
-    references cited in §2 and §7.]*
+   research." *Journal of Clinical Pharmacy and Therapeutics*, 27(4), 299–309, 2002.
+   doi:10.1046/j.1365-2710.2002.00430.x.
+8. Lopez Bernal, J., Cummins, S., & Gasparrini, A. "Interrupted time series
+   regression for the evaluation of public health interventions: a tutorial."
+   *International Journal of Epidemiology*, 46(1), 348–355, 2017.
+   doi:10.1093/ije/dyw098.
+
+*Reproducible data infrastructure and grounded generation.*
+
+9. Wilkinson, M. D., Dumontier, M., Aalbersberg, Ij. J., et al. "The FAIR Guiding
+   Principles for scientific data management and stewardship." *Scientific Data*, 3,
+   160018, 2016. doi:10.1038/sdata.2016.18.
+10. Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N.,
+    Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S., & Kiela, D.
+    "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." *Advances in
+    Neural Information Processing Systems (NeurIPS)* 33, 2020. arXiv:2005.11401.
+
+*Primary data sources.*
+
+11. Statistics Canada. Data accessed via the Web Data Service (WDS). Tables used
+    include: 13-10-0971-01 (health-adjusted life expectancy at birth and at age 65),
+    13-10-0096-01 (Canadian Community Health Survey — health characteristics, annual),
+    13-10-0374-01 (Canadian Survey on Disability), 13-10-0789-01 (Canadian Health
+    Survey on Seniors — activities of daily living), 11-10-0135-01 (low-income
+    statistics by age and sex), and 14-10-0202-01 (employment by industry, Survey of
+    Employment, Payrolls and Hours). *[TODO: confirm each table's exact vintage as
+    cited in the Data Hub.]*
+12. Canadian Institute for Health Information (CIHI). Integrated interRAI Reporting
+    System (IRRS) and long-term-care data holdings. Ottawa: CIHI.
+13. Government of Nova Scotia. Nova Scotia Open Data Portal — including the
+    long-term-care placement waitlist (dataset c39g-gsdd) and the long-term-care
+    facilities directory (dataset x76a-axw2). data.novascotia.ca.
