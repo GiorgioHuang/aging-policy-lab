@@ -325,6 +325,16 @@ def _cmd_findings(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_paper_tables(_args: argparse.Namespace) -> int:
+    """Emit ready-to-paste Markdown tables for the Paper 1 [TODO] slots."""
+    from .db import connect
+    from .paper import render
+
+    with connect() as conn:
+        print(render(conn))
+    return 0
+
+
 def _cmd_literature_seed(_args: argparse.Namespace) -> int:
     from .db import connect
     from .literature.loader import load_literature
@@ -423,6 +433,10 @@ def main(argv: list[str] | None = None) -> int:
     p_find.add_argument("--all", action="store_true",
                         help="also print Tier-1 trend findings (not just ITS)")
     p_find.set_defaults(func=_cmd_findings)
+
+    sub.add_parser("paper-tables",
+                   help="emit paper-ready Markdown tables (HAPI scores, weights, ITS, counts)"
+                   ).set_defaults(func=_cmd_paper_tables)
 
     p_lit = sub.add_parser("literature", help="literature KB")
     lit_sub = p_lit.add_subparsers(dest="lit_cmd", required=True)

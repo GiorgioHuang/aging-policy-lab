@@ -11,29 +11,46 @@ dashboard — and that design is itself the contribution.
 
 ## Status
 
-First complete draft. Open items are marked `[TODO: …]` in `paper.md`:
+Complete draft with **all quantitative results filled in** from the pipeline
+(corpus counts, HAPI domain/composite scores, weighting sensitivity, and the worked
+ITS coefficients). Remaining open items are editorial and marked `[TODO: …]`:
 
 ```
 grep -n "TODO" paper.md
 ```
 
-The main open items are (a) inserting the *computed* HAPI scores and the worked
-ITS coefficients from the live database (methodology and observed ranges are
-already written; final numbers reproduce from the pipeline), and (b) completing
-the reference list with full bibliographic details.
+They are: (a) the final author list & affiliations, (b) completing the reference
+list with full bibliographic details, and (c) acknowledgements. None require the
+database.
 
 ## Reproducing figures / numbers
 
-The paper cites platform artifacts. To regenerate them:
+Every quantitative block in the paper regenerates with one command:
 
 ```bash
-# HAPI domain + composite scores, and the weighting sensitivity table
-cd pipeline && python -m hapi_pipeline.cli score
-python -m hapi_pipeline.cli hapi weights          # equal / expert / empirical
-
-# The worked interrupted-time-series example
-python -m hapi_pipeline.cli analyze
+cd pipeline
+export DATABASE_URL=postgresql://hapi@localhost:5432/hapi   # a populated DB
+python -m hapi_pipeline.cli paper-tables
 ```
+
+`paper-tables` (see [`pipeline/hapi_pipeline/paper.py`](../../pipeline/hapi_pipeline/paper.py))
+prints ready-to-paste Markdown for the corpus counts, the HAPI domain/composite
+table, the weighting sensitivity table, and the ITS coefficients. To rebuild a
+populated demo DB from committed fixtures first:
+
+```bash
+bash db/migrate.sh --seed
+cd pipeline
+python -m hapi_pipeline.cli policies seed
+python -m hapi_pipeline.cli literature seed
+python -m hapi_pipeline.cli ingest      # loads committed fixtures (offline)
+python -m hapi_pipeline.cli score
+python -m hapi_pipeline.cli analyze
+python -m hapi_pipeline.cli paper-tables
+```
+
+The numbers in the current draft are from exactly this fixture-based instance;
+re-running against the production database refreshes them to live coverage.
 
 ## Building a PDF for arXiv
 

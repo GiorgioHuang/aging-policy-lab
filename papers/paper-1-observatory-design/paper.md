@@ -305,9 +305,29 @@ Because only weight *ratios* matter (the engine renormalizes), the sensitivity r
 shows whether the headline ordering of jurisdictions is robust to the weighting choice
 — the central robustness question for any composite index.
 
-*[TODO: insert the computed sensitivity table (composite under equal/expert/empirical
-for NS and federal at their latest period) from `hapi weights`, and a short paragraph
-stating whether the NS-vs-federal ordering is scheme-invariant.]*
+The three schemes place the following normalized weight on each domain:
+
+| Domain | equal | expert | empirical |
+|---|---:|---:|---:|
+| Health | 16.7 | 22.2 | 13.5 |
+| Independence | 16.7 | 16.7 | 18.1 |
+| Social Participation | 16.7 | 11.1 | 8.4 |
+| Financial Security | 16.7 | 16.7 | 25.2 |
+| Care Access | 16.7 | 22.2 | 18.4 |
+| Digital Inclusion | 16.7 | 11.1 | 16.4 |
+
+and imply these composites at each jurisdiction's latest period:
+
+| Jurisdiction | Period | equal | expert | empirical |
+|---|---|---:|---:|---:|
+| CA (federal) | 2024 | 43.2 | 41.7 | 44.6 |
+| CA-NS (Nova Scotia) | 2026 | 50.1 | 50.1 | 50.1 |
+
+The **maximum composite spread across schemes is 2.9 points**, and the NS-above-federal
+ordering holds under all three weightings. In other words, the headline comparison is
+robust to the weighting choice — the central robustness question for a composite index
+— even though the *level* shifts by a couple of points. (The empirical scheme is
+indicative while coverage is two jurisdictions and firms up as the set grows.)
 
 ### 5.4 Method versioning
 
@@ -317,11 +337,24 @@ interpretable and comparisons are never silently mixed across method definitions
 This is the index analogue of the data model's dataset versioning: reproducibility
 across *time* as well as across *inputs*.
 
-*[TODO: insert the computed HAPI domain + composite scores for NS and federal
-(a small table or the Figure-4 radar) from `python -m hapi_pipeline.cli score`.]*
+The computed v1 domain profiles (latest available score per domain, matching the
+platform's radar) and latest composites are:
 
-> **Figure 4 (HAPI domain profile).** Reproduce the radar/temporal profile from the
-> platform's `/hapi` view.
+| Jurisdiction | Overall | As of | Health | Independence | Social Participation | Financial Security | Care Access | Digital Inclusion |
+|---|---:|---|---:|---:|---:|---:|---:|---:|
+| CA (federal) | 42 | 2024 | 48 | 46 | 50 | 56 | 28 | 72 |
+| CA-NS (Nova Scotia) | 50 | 2026 | 38 | 44 | 69 | 21 | 50 | 59 |
+
+*HAPI v1; 0–100, higher is better; each domain shows its latest available score, as
+domains draw on different survey vintages.* The two jurisdictions differ in
+instructive ways — e.g. Nova Scotia scores higher on Social Participation but lower on
+Financial Security — illustrating that the composite is a profile, not a single
+ranking. These are demonstration-scale figures over two jurisdictions and should be
+read as evidence that the *method* runs end-to-end and reproduces, not as a definitive
+provincial assessment (§9).
+
+> **Figure 4 (HAPI domain profile).** The radar/temporal profile at the platform's
+> `/hapi` view renders the same domain scores over time.
 
 ## 6. Policy analytics and causal discipline
 
@@ -373,10 +406,33 @@ these assumptions — never upgraded silently from an association.
 > **Figure 5 (ITS).** Reproduce the segmented-regression figure (observed series,
 > fitted segments, dashed counterfactual) from the platform's `/analytics` view.
 
-*[TODO: insert the worked NS example's coefficients (level_change, slope_change with
-CIs and p-values, n_pre/n_post, R²) from `python -m hapi_pipeline.cli analyze`, and a
-one-paragraph honest reading — including whether the current pre/post point counts
-support estimation or only demonstrate the method.]*
+The v1 build carries three ITS designs, and their outcomes illustrate the discipline
+directly. Two are attached to real Nova Scotia policies but have too few points on one
+side of the intervention, so the platform **refuses to estimate coefficients** and
+returns an `insufficient_data` status:
+
+- *NS long-term-care waitlist* around the 2022 LTC capital plan (`care_access.ltc_waitlist_ns`,
+  intervention 2022-09): 1 pre / 3 post — below the ≥3-per-segment threshold.
+- *NS nursing & residential-care workforce* around the 2022 Continuing Care Assistant
+  strategy (`care_access.ltc_workforce_per_1k_65plus`, intervention 2022-10): 5 pre / 2
+  post — post-segment too short.
+
+That the platform *demonstrates the design without asserting an effect* on thin data is
+the honesty property, not a failure. The third design, an illustrative series with
+adequate coverage (5 pre / 5 post), exercises the full segmented regression:
+
+| Term | Coef | 95% CI | p |
+|---|---:|---|---:|
+| Pre-trend | 1477.0 | 1188.9 .. 1765.1 | <0.001 |
+| Level change | −1009.9 | −2075.4 .. 55.6 | 0.063 |
+| Slope change | −715.7 | −1125.1 .. −306.3 | <0.001 |
+
+*R² = 0.934; Newey–West (HAC) standard errors.* Here the intervention is associated
+with a significant **downward change in trend** (slope change −716, p < 0.001) on top
+of a rising pre-trend, with the immediate level change not significant at 0.05
+(p = 0.063). Reported as **Causal(ITS)** *only* alongside the four assumptions above —
+and even then the platform's convention is that this is a design result for a human to
+interpret, not a verdict.
 
 ### 6.3 Why enforce discipline in software
 
@@ -432,9 +488,25 @@ series break explicitly. That such an operational detail is captured in the data
 model's source metadata — rather than lost — is exactly the reproducibility property
 the design is for.
 
-*[TODO: summarize the instantiated corpus — counts of policies, indicators,
-observations, HAPI scores, findings, and literature — from the platform's overview,
-to quantify the v1 build.]*
+The v1 build, reproduced from the committed fixture dataset with the pipeline
+commands in the paper's repository README, comprises:
+
+| Asset | Count |
+|---|---:|
+| Policies | 26 |
+| Indicators (distinct, observed) | 34 |
+| Observations | 231 |
+| Dataset versions | 17 |
+| Data sources | 17 |
+| HAPI scores | 100 |
+| Analytic findings | 3 |
+| Literature references | 7 |
+| Jurisdictions | 3 |
+
+These counts reproduce deterministically from committed fixtures (captured from the
+real upstream tables) via `ingest → score → analyze`; the production deployment runs
+the same connectors against live sources. That the headline numbers regenerate from
+one command is the reproducibility claim of §9 made concrete.
 
 ## 9. Reproducibility, limitations, and ethics
 
