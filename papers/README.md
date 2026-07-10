@@ -4,12 +4,17 @@ Manuscripts that build on — and deposit assets back into — the Observatory
 platform. The research arc deepens a *single* platform rather than spawning
 disconnected studies; see [`docs/09-research-roadmap.md`](../docs/09-research-roadmap.md).
 
-| # | Working title | Status | Folder |
-|---|---------------|--------|--------|
-| 1 | Design of a Healthy Aging Policy Observatory | **drafting** | [`paper-1-observatory-design/`](paper-1-observatory-design/) |
-| 2 | An AI-assisted, Grounded Framework for Policy Analysis | planned | — |
-| 3 | Agent-based Simulation for Long-term Care Policy | planned | — |
-| 4 | Quasi-experimental Evaluation of Healthy Aging Policies | planned | — |
+| # | Working title | Core contribution | Status | Folder |
+|---|---------------|-------------------|--------|--------|
+| 1 | Design of a Reproducible Healthy Aging Policy Observatory | Research infrastructure | **drafting** | [`paper-1-observatory-design/`](paper-1-observatory-design/) |
+| 2 | The HAPI Methodology | Composite-indicator framework | planned | — |
+| 3 | AI-assisted Policy Intelligence | Grounded AI + evidence synthesis | planned | — |
+| 4 | Causal Evaluation of Canadian Aging Policies | ITS / DiD / synthetic control | planned | — |
+
+Each paper deepens *one* stage of the Healthy Aging Policy Intelligence Cycle
+(Observation → Evidence → Indicator → Policy → Outcome → Feedback) that Paper 1
+introduces: Paper 2 the Indicator stage, Paper 3 the Feedback stage, Paper 4 the
+Outcome stage.
 
 ## Conventions
 

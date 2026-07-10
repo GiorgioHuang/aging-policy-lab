@@ -1,9 +1,16 @@
 # Paper 1 — Design of a Healthy Aging Policy Observatory
 
-**Target:** arXiv preprint (cs.CY / cs.DL, cross-list stat.AP), English.
-**Thesis:** the platform architecture + the HAPI methodology constitute a
-*reproducible research instrument* for evaluating healthy-aging policy, not a
-dashboard — and that design is itself the contribution.
+**Target:** arXiv preprint (cs.CY / cs.DL, cross-list stat.AP), English; oriented
+toward a health-informatics venue.
+**Thesis:** the weaknesses of aging-policy evidence are *infrastructure* problems,
+not analysis problems; the response is a reproducible observatory, organized by the
+**Healthy Aging Policy Intelligence Cycle** (a policy-level Learning Health System).
+The design itself is the contribution.
+**Structure:** research-question-driven (RQ1 provenance, RQ2 reproducibility, RQ3
+grounding, RQ4 robustness), with a conceptual-framework section (§3) and a design-
+evaluation section (§7) that answers the RQs from the instantiated instrument. HAPI,
+analytics, and the AI assistant are scoped as *instantiated modules* (each the focus
+of Papers 2–4), not as this paper's contribution.
 
 ## Files
 
