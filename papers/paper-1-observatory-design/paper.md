@@ -306,7 +306,7 @@ and every generation is logged. *The grounded-AI framework is developed in Paper
 
 We evaluate the design against the four research questions, using the instrument
 instantiated on Nova Scotia (CA-NS) and the federal level (CA) with a Care Access
-focus. Unless noted, figures reproduce deterministically from committed fixtures
+focus. Unless noted, results reproduce deterministically from committed fixtures
 (captured from real upstream tables) via `ingest → score → analyze → paper-tables`;
 the production deployment runs the same connectors against live sources. The
 instantiated corpus:

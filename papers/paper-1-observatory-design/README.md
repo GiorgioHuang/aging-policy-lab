@@ -76,17 +76,18 @@ python -m hapi_pipeline.cli paper-tables
 The numbers in the current draft are from exactly this fixture-based instance;
 re-running against the production database refreshes them to live coverage.
 
-## Building a PDF for arXiv
+## Building the LaTeX source and PDF (arXiv)
 
-Draft lives in Markdown; produce LaTeX/PDF near submission:
+`build.sh` produces both from `paper.md` (title/author via metadata; the draft's
+manual section numbers are preserved, so it does **not** auto-number):
 
 ```bash
-pandoc paper.md -o paper.pdf \
-  --number-sections --toc \
-  -V documentclass=article -V geometry:margin=1in
-# arXiv wants source: `pandoc paper.md -o paper.tex --standalone` then tidy.
+bash build.sh
+#   -> build/paper.tex   (arXiv source; always produced, no TeX engine needed)
+#   -> build/paper.pdf   (if a LaTeX engine — xelatex/tectonic — is installed)
 ```
 
-Mermaid figures in the draft reference the diagrams in [`../../docs/`](../../docs);
-export them to PNG/PDF (e.g. `mermaid-cli`) and `\includegraphics` them in the
-LaTeX build.
+Both `build/paper.tex` and `build/paper.pdf` are committed. Toolchain: `pandoc`
+plus a LaTeX engine (`texlive-xetex` provides `xelatex`; `poppler-utils` if you
+want to render pages). Figures embed from [`figures/`](figures) as PNG; for a
+higher-quality arXiv upload, convert the `figures/*.svg` to PDF and swap the paths.
