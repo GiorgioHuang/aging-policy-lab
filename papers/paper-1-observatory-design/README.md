@@ -16,6 +16,21 @@ of Papers 2–4), not as this paper's contribution.
 
 - [`paper.md`](paper.md) — the manuscript draft.
 
+## Future strengthening (do NOT expand this paper prematurely)
+
+The draft's main strength is restraint; the scope is intentionally tight. One
+deliberately deferred enhancement is recorded here so it is not lost:
+
+- **Framework → Theory (a "Design Rationale").** The Healthy Aging Policy
+  Intelligence Cycle (§3) currently reads as a framework/flowchart. To make it a
+  *conceptual model*, a future revision (or Paper 2 / the thesis) can add a short
+  Design Rationale that *derives* each stage from an established principle — e.g.
+  Observation↔FAIR data stewardship, Evidence↔evidence-based policy, Indicator↔
+  composite-indicator theory, Policy/Outcome↔decision support, Feedback↔knowledge
+  translation, and the whole loop↔the Learning Health System — answering "why this
+  cycle and not a shorter one?". Deferred on purpose: adding it now would trade the
+  paper's discipline for bulk.
+
 ## Status
 
 Complete draft with **all quantitative results filled in** from the pipeline
