@@ -17,7 +17,7 @@ cat > build/_meta.yaml <<YAML
 ---
 title: "${TITLE}"
 author:
-  - Giorgio Huang (and collaborators)
+  - "Quangui Huang (Giorgio), Healthy Aging Intelligence Lab (HAIL)"
 date: "Preprint — draft, not peer reviewed"
 geometry: margin=1in
 fontsize: 11pt

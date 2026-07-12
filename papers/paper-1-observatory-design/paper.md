@@ -1,6 +1,6 @@
 # Design of a Reproducible Healthy Aging Policy Observatory: Infrastructure for Trustworthy Aging-Policy Evidence in Canada
 
-**Giorgio Huang**¹ *(and collaborators — [TODO: finalize author list & affiliations])*
+**Quangui Huang (Giorgio)**¹
 
 ¹ Healthy Aging Intelligence Lab (HAIL). Correspondence via
 https://github.com/GiorgioHuang/aging-policy-lab
@@ -426,8 +426,8 @@ methodology, grounded-AI, and causal-evaluation papers builds.
 
 This work uses publicly available data from Statistics Canada, the Canadian Institute
 for Health Information (CIHI), and the Nova Scotia Open Data portal; we thank these
-providers for open access to the underlying tables. *[TODO: add funding sources and
-named collaborators.]*
+providers for open access to the underlying tables. The author received no specific
+funding for this work.
 
 ## Data and code availability
 
