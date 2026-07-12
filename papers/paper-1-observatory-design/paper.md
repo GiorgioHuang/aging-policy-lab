@@ -154,15 +154,13 @@ the framework is developed in Paper 3.
 ## 3. Conceptual framework: the Healthy Aging Policy Intelligence Cycle
 
 The design is organized by a conceptual model that doubles as its theory of value.
-Healthy-aging policy intelligence is a cycle of six stages:
+Healthy-aging policy intelligence is a cycle of six stages (Figure 1):
 
-```
-        ┌───────────────────────────────────────────────┐
-        │                                               ▼
-   Observation ──▶ Evidence ──▶ Indicator ──▶ Policy ──▶ Outcome ──▶ Feedback
-        ▲                                                              │
-        └──────────────────────────────────────────────────────────────┘
-```
+![Figure 1](figures/intelligence-cycle.png)
+
+> **Figure 1.** The Healthy Aging Policy Intelligence Cycle. Six stages form a closed
+> loop; the italic labels mark the four points where the design hardens trust
+> (traceability, reproducibility, causal honesty, and grounding).
 
 - **Observation** — an immutable, source-linked datum ingested from an upstream table.
 - **Evidence** — observations assembled and quality-checked into an interpretable
@@ -188,7 +186,7 @@ paper shows the machinery exists, runs, and can be trusted.
 ### 4.1 Modules as cycle stages
 
 The Observatory is five modules over one database and one provenance discipline
-(Figure 1), each realizing part of the cycle:
+(Figure 2), each realizing part of the cycle:
 
 1. **Policy Library** (Policy) — a jurisdiction-aware, time-stamped, versioned record
    of aging policies: department, budget, target population, lifecycle, themes, and
@@ -202,12 +200,15 @@ The Observatory is five modules over one database and one provenance discipline
 5. **AI Research Assistant** (Feedback) — retrieval over the platform's own stores that
    produces cited evidence packs and draft reviews.
 
-> **Figure 1 (system context / cycle).** Reproduce from
-> [`docs/01-platform-overview.md`](../../docs/01-platform-overview.md).
+![Figure 2](figures/system-context.png)
+
+> **Figure 2.** System context: external public sources flow into the five
+> Observatory modules, which produce papers, dashboards, and literature reviews.
+> (Source: [`docs/01-platform-overview.md`](../../docs/01-platform-overview.md).)
 
 ### 4.2 Architecture
 
-The platform is a monorepo (Figure 2): a **Next.js/TypeScript** web app (`apps/web`)
+The platform is a monorepo (Figure 3): a **Next.js/TypeScript** web app (`apps/web`)
 for the researcher-facing surfaces; a **Python** pipeline (`pipeline/hapi_pipeline`)
 for ingestion, scoring, and analysis; a **PostgreSQL** schema with forward-only
 migrations (`db/`); and a shared contracts package. The pipeline is the reproducible
@@ -216,8 +217,12 @@ over what the pipeline produced. A number in the UI is never computed in the bro
 it renders a stored, lineage-bearing record. The AI layer wraps a hosted LLM behind
 narrow, audited entry points, and every generation is logged.
 
-> **Figure 2 (architecture).** Reproduce from
-> [`docs/02-architecture.md`](../../docs/02-architecture.md).
+![Figure 3](figures/architecture.png)
+
+> **Figure 3.** Architecture: the Python pipeline writes to PostgreSQL (raw →
+> transformed → indicators → analytics); the Next.js app reads those tables and
+> invokes the AI layer. (Source:
+> [`docs/02-architecture.md`](../../docs/02-architecture.md).)
 
 ### 4.3 Design principles
 
@@ -227,7 +232,7 @@ slice, then widen additively); *every artifact is demonstrable and reproducible*
 
 ## 5. Data model: making provenance structural
 
-The schema (Figure 3) centers on entities that make provenance and reproducibility
+The schema (Figure 4) centers on entities that make provenance and reproducibility
 *structural* rather than conventional:
 
 - **Jurisdiction** — a hierarchical tree (Canada → Federal / Nova Scotia → …); adding a
@@ -255,8 +260,11 @@ idempotent (re-ingesting unchanged upstream data is a no-op). This is what lets 
 platform claim any published number is auditable to the exact upstream table it came
 from — and it is what §7 evaluates directly (RQ1, RQ2).
 
-> **Figure 3 (entity–relationship).** Reproduce from
-> [`docs/03-data-model.md`](../../docs/03-data-model.md).
+![Figure 4](figures/data-model-er.png)
+
+> **Figure 4.** Entity–relationship model. Every value resolves along the lineage
+> chain Observation → DatasetVersion → DataSource; indicators roll up into HAPI
+> scores. (Source: [`docs/03-data-model.md`](../../docs/03-data-model.md).)
 
 ## 6. Instantiating the cycle
 
