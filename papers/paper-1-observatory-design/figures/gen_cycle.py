@@ -10,8 +10,8 @@ from __future__ import annotations
 import math
 import os
 
-W, H = 980, 660
-CX, CY = 490, 336
+W, H = 1120, 680
+CX, CY = 560, 344
 R = 232                      # node-centre ring radius
 NW, NH = 176, 62             # node box
 
@@ -24,13 +24,19 @@ STAGES = [
     ("Feedback", "cited synthesis"),
 ]
 
-# Trust-hardening callouts keyed by the stage index they sit next to.
-CALLOUTS = {
-    1: "traceable — lineage",       # Observation → Evidence
-    2: "reproducible — versioned",  # Indicator
-    4: "honest — causal tag",       # Outcome
-    5: "grounded — cited AI",       # Feedback
-}
+# Trust-hardening callouts placed by angle (deg). Four carry the design-evaluation
+# question they answer (§7); Outcome's causal honesty is a design discipline, not one
+# of the four numbered RQs. This makes Theory → Design → Evaluation close visibly.
+#   node angles: Observation -90, Evidence -30, Indicator 30, Policy 90,
+#                Outcome 150, Feedback 210(=-150)
+# Placed in the gaps between nodes (on the transitions) so they never overlap a box.
+CALLOUTS = [
+    (-60, "RQ1 · traceability", "lineage"),          # Observation → Evidence
+    (0,   "RQ2 · reproducibility", "versioned"),     # Evidence → Indicator
+    (60,  "RQ4 · robustness", "audited weights"),    # Indicator → (measure stage)
+    (120, "causal honesty", "association ≠ cause"),  # Outcome (design discipline)
+    (240, "RQ3 · grounding", "cited AI"),            # Feedback
+]
 
 ACCENT = "#3f7fd0"
 INK = "#0f1726"
@@ -90,17 +96,20 @@ def main() -> None:
         f'fill="{MUTED}">a policy-level learning health system</text>'
     )
 
-    # Callout labels (outside the ring).
-    for i, text in CALLOUTS.items():
-        lx, ly = pt(angles[i], R + 78)
-        anchor = "middle"
-        if math.cos(math.radians(angles[i])) > 0.3:
-            anchor = "start"
-        elif math.cos(math.radians(angles[i])) < -0.3:
-            anchor = "end"
+    # Callout labels (outside the ring): an RQ/discipline tag + its property.
+    for ang, label, sub in CALLOUTS:
+        lx, ly = pt(ang, R + 74)
+        c = math.cos(math.radians(ang))
+        anchor = "start" if c > 0.3 else ("end" if c < -0.3 else "middle")
+        is_rq = label.startswith("RQ")
+        color = ACCENT if is_rq else MUTED
         parts.append(
-            f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" '
-            f'font-size="12.5" font-style="italic" fill="{ACCENT}">{text}</text>'
+            f'<text x="{lx:.1f}" y="{ly-3:.1f}" text-anchor="{anchor}" '
+            f'font-size="13" font-weight="700" fill="{color}">{label}</text>'
+        )
+        parts.append(
+            f'<text x="{lx:.1f}" y="{ly+13:.1f}" text-anchor="{anchor}" '
+            f'font-size="11" font-style="italic" fill="{MUTED}">{sub}</text>'
         )
 
     # Nodes.

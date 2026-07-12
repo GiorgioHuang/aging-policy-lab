@@ -26,8 +26,10 @@ and are composite comparisons robust to method choices (robustness). We present 
 Canadian Healthy Aging Policy Observatory, whose data model makes provenance
 structural (immutable observations bound to versioned, content-addressed dataset
 snapshots) and whose analytics enforce an association-versus-causation distinction in
-software. Instantiated on Nova Scotia and the federal level with a Care Access focus,
-the instrument answers the design questions affirmatively: 100% of published values
+software. Instantiated on Nova Scotia and the federal level with a Care Access focus — an
+initial implementation, with scaling across provinces as future work the
+architecture enables — the instrument answers the design questions affirmatively:
+100% of published values
 resolve to an upstream source, the pipeline reproduces deterministically from
 committed inputs, the assistant cannot cite outside a fixed evidence pack, and the
 headline index ordering is invariant across three weighting schemes (composite spread
@@ -86,9 +88,12 @@ instrument, and its design mirrors a core health-informatics idea: the **Learnin
 Health System** (LHS) [11], in which data generate knowledge that improves practice
 and thereby generates new data, in a continuous loop. Where a clinical LHS closes that
 loop around care delivery, the observatory closes it around *policy* — an LHS for
-healthy-aging governance. Reading the design through evidence, knowledge translation,
-and decision support is what makes it a health-informatics contribution rather than a
-software-engineering one.
+healthy-aging governance. An observatory is, moreover, a **socio-technical system**:
+it couples data and AI infrastructure with the researchers, agencies, and governments
+whose practices it must fit, so its hardest design challenges are as much
+organizational — trust, provenance, honest communication — as computational. Reading
+the design through evidence, knowledge translation, and decision support is what makes
+it a health-informatics contribution rather than a software-engineering one.
 
 ### 1.3 Research questions
 
@@ -151,6 +156,15 @@ citations and unsupported claims. Our assistant constrains the model to cite *on
 items in a pre-assembled evidence pack, making fabrication structurally detectable;
 the framework is developed in Paper 3.
 
+**The gap.** These bodies of work each cover one facet and stop at its edge:
+existing aging observatories and indicator dashboards focus on *reporting* measures;
+composite-index research focuses on *measurement*; policy-evaluation studies focus on
+*single interventions*; and Learning Health System work targets primarily *clinical
+care*. To our knowledge, no existing system integrates provenance-first
+infrastructure, reproducibility by construction, grounded AI, and an explicit causal
+discipline into a *unified* observatory for healthy-aging policy. That integration —
+not any single component — is the gap this design fills.
+
 ## 3. Conceptual framework: the Healthy Aging Policy Intelligence Cycle
 
 The design is organized by a conceptual model that doubles as its theory of value.
@@ -159,8 +173,11 @@ Healthy-aging policy intelligence is a cycle of six stages (Figure 1):
 ![Figure 1](figures/intelligence-cycle.png)
 
 > **Figure 1.** The Healthy Aging Policy Intelligence Cycle. Six stages form a closed
-> loop; the italic labels mark the four points where the design hardens trust
-> (traceability, reproducibility, causal honesty, and grounding).
+> loop; the outer labels mark where the design hardens trust and which
+> design-evaluation question (§1.3, §7) each answers — RQ1 traceability, RQ2
+> reproducibility, RQ4 robustness, RQ3 grounding — with the Outcome stage's causal
+> honesty as an additional discipline. Theory (the cycle), design (the modules), and
+> evaluation (the RQs) thus close on one figure.
 
 - **Observation** — an immutable, source-linked datum ingested from an upstream table.
 - **Evidence** — observations assembled and quality-checked into an interpretable
@@ -392,9 +409,13 @@ restarts — the strategic point of building an instrument rather than a study.
 
 ## 9. Limitations and ethics
 
-**Limitations.** (1) *Coverage.* With two jurisdictions, the empirical weighting and any
-cross-jurisdiction inference are indicative; the design's value is in the method and
-its additive extensibility. (2) *Normalization ranges are choices.* Min-max reference
+**Limitations.** (1) *Coverage — an initial implementation.* This paper evaluates the
+*design* on a deliberately small slice: two jurisdictions and a demonstration-scale
+corpus (26 policies, 231 observations). The empirical weighting and any
+cross-jurisdiction inference are therefore indicative, and the results should not be
+read as a mature observatory. The design's value is in the method and its additive
+extensibility: adding a province is a row insert plus one connector, so scaling is
+future work the architecture enables rather than a redesign. (2) *Normalization ranges are choices.* Min-max reference
 ranges are documented and contestable; RQ4's robustness check mitigates but does not
 eliminate this — a composite index is a lens, not a measurement. (3) *Causal
 identification.* ITS and related designs rest on assumptions (no coincident shocks,
