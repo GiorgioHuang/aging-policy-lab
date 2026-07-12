@@ -1,0 +1,46 @@
+flowchart TB
+    subgraph Sources["External public sources"]
+        SC["Statistics Canada"]
+        HIB["Health Infobase"]
+        CIHI["CIHI"]
+        OD["Canada Open Data"]
+        NSOD["Nova Scotia Open Data / NS Health"]
+        CENSUS["Census of Population"]
+        POLICY["Government policy pages,<br/>budgets, news releases"]
+        LIT["Academic literature"]
+    end
+
+    subgraph Obs["Canadian Healthy Aging Policy Observatory"]
+        direction TB
+        DH["② Data Hub<br/>(ingest · version · validate)"]
+        PL["① Policy Library<br/>(timeline · lifecycle · AI summaries)"]
+        IND["③ Indicators / HAPI<br/>(normalize · score)"]
+        AN["④ Policy Analytics<br/>(association · quasi-experimental)"]
+        AI["⑤ AI Research Assistant<br/>(RAG · agentic research)"]
+    end
+
+    subgraph Outputs["Outputs"]
+        PAPERS["Papers & reproducible analyses"]
+        DASH["Dashboards / SaaS"]
+        REV["Literature reviews"]
+    end
+
+    SC & HIB & CIHI & OD & NSOD & CENSUS --> DH
+    POLICY --> PL
+    LIT --> AI
+
+    DH --> IND
+    PL --> IND
+    DH --> AN
+    PL --> AN
+    IND --> AN
+    DH --> AI
+    PL --> AI
+    IND --> AI
+    AN --> AI
+
+    AN --> PAPERS
+    IND --> DASH
+    PL --> DASH
+    AI --> REV
+

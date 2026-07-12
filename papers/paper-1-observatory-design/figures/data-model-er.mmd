@@ -1,0 +1,16 @@
+erDiagram
+    JURISDICTION ||--o{ JURISDICTION : "parent of"
+    JURISDICTION ||--o{ POLICY : "enacts"
+    JURISDICTION ||--o{ OBSERVATION : "measured in"
+
+    POLICY ||--o{ POLICY_VERSION : "has revisions"
+    POLICY }o--o{ INDICATOR : "targets (policy_indicator)"
+
+    INDICATOR ||--o{ OBSERVATION : "has values"
+    INDICATOR }o--o{ DATASOURCE : "computed from (indicator_source)"
+    INDICATOR ||--o{ HAPI_SCORE : "rolls up into"
+
+    DATASOURCE ||--o{ DATASET_VERSION : "versioned as"
+    DATASET_VERSION ||--o{ OBSERVATION : "provides"
+
+    JURISDICTION ||--o{ HAPI_SCORE : "scored for"

@@ -1,0 +1,25 @@
+flowchart TB
+    subgraph Web["apps/web — Next.js / TypeScript"]
+        UI["UI: Policy Library · HAPI · Analytics · Assistant"]
+        API["API routes / server actions"]
+    end
+
+    subgraph Py["pipeline — Python"]
+        ING["Ingest connectors"]
+        TR["Transform / normalize / lineage"]
+        HAPI["HAPI indicator engine"]
+        ANL["Analytics (statsmodels, etc.)"]
+        AIO["AI orchestration"]
+    end
+
+    DB[("PostgreSQL")]
+    CLAUDE["Claude API"]
+
+    ING --> TR --> DB
+    DB --> HAPI --> DB
+    DB --> ANL --> DB
+    AIO <--> CLAUDE
+    DB <--> AIO
+    API <--> DB
+    API <--> AIO
+    UI <--> API
