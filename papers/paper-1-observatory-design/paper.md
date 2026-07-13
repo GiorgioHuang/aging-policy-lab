@@ -500,12 +500,22 @@ reproduces from the pipeline commands in the paper's repository README.
 
 *Primary data sources.*
 
-12. Statistics Canada. Data accessed via the Web Data Service (WDS). Tables used
-    include 13-10-0971-01 (health-adjusted life expectancy), 13-10-0096-01 (Canadian
-    Community Health Survey — health characteristics), 13-10-0374-01 (Canadian Survey
-    on Disability), 13-10-0789-01 (Canadian Health Survey on Seniors — ADL),
-    11-10-0135-01 (low-income statistics), and 14-10-0202-01 (employment by industry,
-    SEPH). *[TODO: confirm each table's exact vintage as cited in the Data Hub.]*
+12. Statistics Canada. Data accessed via the Web Data Service (WDS)
+    `getFullTableDownloadCSV`, filtered to Canada and Nova Scotia at the reference
+    periods each table publishes. Tables used (as cited in the Data Hub connectors):
+    **13-10-0389** *Life expectancy, at birth and at age 65, by sex* (three-year
+    averages; Health); **13-10-0971** *Health-adjusted life expectancy* (periodic;
+    Health); **13-10-0096** *Health characteristics, annual estimates* (Canadian
+    Community Health Survey; Health, Care Access, Social Participation); **13-10-0966**
+    *Functional health* (CCHS cycles, 2015 onward; Independence); **13-10-0374**
+    disability rate, 65+ (Canadian Survey on Disability; Independence); **13-10-0789**
+    *Health characteristics of seniors aged 65 and over* (Canadian Health Survey on
+    Seniors, 2019–2020; Independence — ADL); **11-10-0135** *Low income statistics by
+    age, gender and economic family type* (annual; Financial Security); **14-10-0202**
+    *Employment by industry, annual* (SEPH, 2001–, NAICS 623; Care Access workforce);
+    **22-10-0135** *Internet use* (Canadian Internet Use Survey; Digital Inclusion);
+    and **17-10-0005** *Population estimates on July 1, by age and gender* (per-capita
+    denominators). Ottawa: Statistics Canada.
 13. Canadian Institute for Health Information (CIHI). Integrated interRAI Reporting
     System (IRRS) and long-term-care data holdings. Ottawa: CIHI.
 14. Government of Nova Scotia. Nova Scotia Open Data Portal — including the LTC
