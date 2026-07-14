@@ -16,7 +16,7 @@
 
 substitutions:
   _SERVICE: hapi-web
-  _REGION: northamerica-northeast1
+  _REGION: us-east1 # matches the existing cloud-run-source-deploy Artifact Registry location
   _AR_REPO: cloud-run-source-deploy # Artifact Registry repo (Cloud Run's source-deploy default)
   _SITE_URL: https://acp.icareu.cc
 
