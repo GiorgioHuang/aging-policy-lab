@@ -8,6 +8,10 @@ import {
   PAPER1_MARKDOWN_URL,
 } from "@/lib/site";
 
+// Render at request time so the footer reflects the runtime Cloud Run revision
+// (K_REVISION) and the canonical host matches the other pages.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = pageMetadata({
   title: "Research",
   description:
