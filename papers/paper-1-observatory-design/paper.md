@@ -381,10 +381,14 @@ ordering holds under all three weightings — so the headline comparison does no
 the weighting choice. For completeness, the computed v1 domain profiles (latest
 available score per domain) are:
 
-| Jurisdiction | Overall | Health | Independence | Social Part. | Financial Sec. | Care Access | Digital Incl. |
+| Jur. | Overall | Health | Indep. | Social | Financial | Care | Digital |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| CA (federal) | 42 | 48 | 46 | 50 | 56 | 28 | 72 |
-| CA-NS (Nova Scotia) | 50 | 38 | 44 | 69 | 21 | 50 | 59 |
+| CA (fed.) | 42 | 48 | 46 | 50 | 56 | 28 | 72 |
+| CA-NS | 50 | 38 | 44 | 69 | 21 | 50 | 59 |
+
+*Jur.: CA = federal, CA-NS = Nova Scotia. Columns are the six HAPI domains — Health,
+Indep(endence), Social (Participation), Financial (Security), Care (Access), Digital
+(Inclusion) — each showing its latest available score; 0–100, higher is better.*
 
 **Causal discipline in action.** The three ITS designs illustrate the Outcome-stage
 guarantee: two attached to real NS policies return `insufficient_data` (1/3 and 5/2

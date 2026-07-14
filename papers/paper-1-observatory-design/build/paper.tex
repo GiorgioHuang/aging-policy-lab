@@ -66,6 +66,11 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{etoolbox}
+\AtBeginEnvironment{longtable}{\small}
+\setlength{\tabcolsep}{4pt}
+% Figures live in ../figures relative to the build dir where we compile.
+\graphicspath{{../}{../figures/}{figures/}}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -618,15 +623,20 @@ per domain) are:
 
 \begin{longtable}[]{@{}lrrrrrrr@{}}
 \toprule\noalign{}
-Jurisdiction & Overall & Health & Independence & Social Part. &
-Financial Sec. & Care Access & Digital Incl. \\
+Jur. & Overall & Health & Indep. & Social & Financial & Care &
+Digital \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-CA (federal) & 42 & 48 & 46 & 50 & 56 & 28 & 72 \\
-CA-NS (Nova Scotia) & 50 & 38 & 44 & 69 & 21 & 50 & 59 \\
+CA (fed.) & 42 & 48 & 46 & 50 & 56 & 28 & 72 \\
+CA-NS & 50 & 38 & 44 & 69 & 21 & 50 & 59 \\
 \end{longtable}
+
+\emph{Jur.: CA = federal, CA-NS = Nova Scotia. Columns are the six HAPI
+domains --- Health, Indep(endence), Social (Participation), Financial
+(Security), Care (Access), Digital (Inclusion) --- each showing its
+latest available score; 0--100, higher is better.}
 
 \textbf{Causal discipline in action.} The three ITS designs illustrate
 the Outcome-stage guarantee: two attached to real NS policies return
@@ -643,7 +653,7 @@ Table 1 summarizes the four results.
 
 \textbf{Table 1.} Design-evaluation results.
 
-\begin{longtable}[]{@{}llll@{}}
+\begin{longtable}[]{@{}llp{0.33\linewidth}p{0.33\linewidth}@{}}
 \toprule\noalign{}
 RQ & Criterion & Evidence & Result \\
 \midrule\noalign{}
@@ -671,7 +681,7 @@ or lost.
 Scoping Paper 1 to the observatory design lets each analytical module be
 developed as a focused study that both deepens and reuses the platform:
 
-\begin{longtable}[]{@{}lll@{}}
+\begin{longtable}[]{@{}lp{0.60\linewidth}p{0.22\linewidth}@{}}
 \toprule\noalign{}
 Paper & Contribution & Instantiates \\
 \midrule\noalign{}
