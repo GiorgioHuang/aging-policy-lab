@@ -21,6 +21,7 @@ const ROUTES: Array<{
   { path: "/assistant", changeFrequency: "monthly", priority: 0.7 },
   { path: "/research", changeFrequency: "monthly", priority: 0.8 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.5 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

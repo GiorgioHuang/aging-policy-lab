@@ -128,9 +128,7 @@ export default function RootLayout({
             <nav className="footer-links">
               <Link href="/about">About</Link>
               <Link href="/research">Research</Link>
-              <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-                GitHub
-              </a>
+              <Link href="/contact">Contact</Link>
             </nav>
             <p className="footer-note">
               <span className="footer-sentence">

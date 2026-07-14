@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
-import { ContactForm } from "@/components/ContactForm";
 import { pageMetadata } from "@/lib/seo";
-import {
-  GITHUB_PROFILE_URL,
-  GITHUB_REPO_URL,
-  GITHUB_NEW_ISSUE_URL,
-  GITHUB_DISCUSSIONS_URL,
-  GITHUB_USER,
-} from "@/lib/site";
 
 // Render at request time so the canonical/OG host reflects the runtime SITE_URL
 // (matching the dynamic content pages) even when the domain isn't set at build.
@@ -19,7 +11,7 @@ export const metadata: Metadata = pageMetadata({
   title: "About",
   description:
     "About the Canadian Healthy Aging Policy Observatory: what it is, how it works, its data and " +
-    "methodology, a glossary of platform terms, and how to get in touch.",
+    "methodology, and a glossary of platform terms.",
   path: "/about",
 });
 
@@ -301,46 +293,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section id="contact" className="about-contact">
-        <h2>Contact</h2>
+      <section>
+        <h2>Get in touch</h2>
         <p>
-          The fastest and most transparent way to reach me is on <strong>GitHub</strong> — issues
-          and discussions are public, get notified instantly, and keep a durable record. For
-          anything not suited to a public thread (collaborations, data requests, sensitive matters),
-          use the private form below.
+          Questions, collaborations, or data requests are welcome — see the{" "}
+          <Link href="/contact">contact page</Link>.
         </p>
-
-        <div className="about-links">
-          <a className="btn" href={GITHUB_NEW_ISSUE_URL} target="_blank" rel="noopener noreferrer">
-            Open an issue
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={GITHUB_DISCUSSIONS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Start a discussion
-          </a>
-          <a
-            className="btn btn-ghost"
-            href={GITHUB_PROFILE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            @{GITHUB_USER} on GitHub
-          </a>
-        </div>
-
-        <p className="about-repo">
-          Source &amp; methodology:{" "}
-          <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
-            {GITHUB_REPO_URL.replace("https://", "")}
-          </a>
-        </p>
-
-        <h3 className="about-form-heading">Send a private message</h3>
-        <ContactForm />
       </section>
     </main>
   );
