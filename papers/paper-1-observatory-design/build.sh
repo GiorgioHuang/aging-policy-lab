@@ -84,3 +84,12 @@ if [ -n "$ENGINE" ]; then
 else
   echo "no LaTeX engine found — skipped PDF (install texlive-xetex to enable)."
 fi
+
+# Sync the deliverables the website serves, so /research is never stale. The web app
+# reads these from apps/web/public/papers (see apps/web/lib/site.ts).
+PUB="../../apps/web/public/papers"
+if [ -d "$PUB" ]; then
+  [ -f build/paper.pdf ] && cp build/paper.pdf "$PUB/observatory-design.pdf"
+  cp figures/intelligence-cycle.svg "$PUB/intelligence-cycle.svg"
+  echo "synced PDF + figure to apps/web/public/papers"
+fi
