@@ -112,13 +112,17 @@ def main() -> None:
             f'font-size="11" font-style="italic" fill="{MUTED}">{sub}</text>'
         )
 
-    # Nodes.
+    # Nodes. Policy is the observatory's subject, so it is emphasised as the
+    # visual anchor: a filled tint and a heavier border.
     for (name, sub), ang in zip(STAGES, angles):
         x, y = pt(ang, R)
         rx, ry = x - NW / 2, y - NH / 2
+        focus = name == "Policy"
+        fill = "#dcebff" if focus else "#ffffff"
+        sw = 2.8 if focus else 1.7
         parts.append(
             f'<rect x="{rx:.1f}" y="{ry:.1f}" width="{NW}" height="{NH}" rx="13" '
-            f'fill="#ffffff" stroke="{ACCENT}" stroke-width="1.7"/>'
+            f'fill="{fill}" stroke="{ACCENT}" stroke-width="{sw}"/>'
         )
         parts.append(
             f'<text x="{x:.1f}" y="{y-4:.1f}" text-anchor="middle" font-size="16.5" '

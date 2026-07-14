@@ -2,7 +2,8 @@
 
 **Quangui Huang (Giorgio)**¹
 
-¹ Healthy Aging Intelligence Lab (HAIL). Correspondence via
+¹ Independent researcher; Healthy Aging Intelligence Lab (HAIL) — an independent
+research initiative. Correspondence via
 https://github.com/GiorgioHuang/aging-policy-lab
 
 *Preprint. Draft — not peer reviewed.*
@@ -11,10 +12,11 @@ https://github.com/GiorgioHuang/aging-policy-lab
 
 ## Abstract
 
-The evidence base for aging policy suffers less from a shortage of analysis than
-from a shortage of *trustworthy infrastructure*: policy text and outcome data live
-apart, published numbers rarely trace to their sources, and descriptive co-movement
-is routinely dressed as causation. **We argue these are infrastructure problems, not
+Healthy aging is among the defining public-policy challenges of aging societies, and
+governments act on it continually. Yet the evidence base for *whether those actions
+work* suffers less from a shortage of analysis than from a shortage of *trustworthy
+infrastructure*: policy text and outcome data live apart, published numbers rarely
+trace to their sources, and descriptive co-movement is routinely dressed as causation. **We argue these are infrastructure problems, not
 analysis problems** — and that the response is a reproducible research instrument, an
 *observatory*, rather than another dashboard. We frame the design around a conceptual
 model, the **Healthy Aging Policy Intelligence Cycle** (Observation → Evidence →
@@ -143,8 +145,13 @@ its methodology is developed in full in Paper 2 (§8) and appears here only as a
 instantiated module. We follow OECD/JRC guidance [3] on transparency and sensitivity
 analysis.
 
-**Policy monitors and quasi-experimental evaluation.** Government/NGO trackers catalog
-policies but seldom integrate outcomes or support inference; academic evaluations
+**Policy monitors and quasi-experimental evaluation.** Established health-policy
+observatories — the European Observatory on Health Systems and Policies, and the
+monitoring functions of the OECD and WHO — synthesize cross-country policy and produce
+authoritative reports, but they are primarily *reporting* instruments: they seldom
+expose per-value provenance, reproduce end-to-end from source, or attach a formal
+causal discipline to their comparisons. Government/NGO trackers likewise catalog
+policies without integrating outcomes or supporting inference; academic evaluations
 produce rigorous single-policy studies but rarely as reusable infrastructure. The
 segmented-regression interrupted-time-series literature [6, 7, 8] provides the
 reference designs; the observatory operationalizes them under an explicit tagging
@@ -387,6 +394,17 @@ adequately-covered illustrative series (5/5) yields a significant downward slope
 only alongside its four assumptions. That the platform *demonstrates a design without
 estimating an effect on thin data* is the honesty property, evaluated live.
 
+Table 1 summarizes the four results.
+
+**Table 1.** Design-evaluation results.
+
+| RQ | Criterion | Evidence | Result |
+|---|---|---|---|
+| RQ1 | Traceability | 231 observations bound to lineage | 100% source-traceable (structural invariant) |
+| RQ2 | Reproducibility | deterministic pipeline; content-addressed versions | identical re-runs; idempotent ingestion |
+| RQ3 | Grounding | fixed, visible evidence pack | 0 ungrounded citations representable |
+| RQ4 | Robustness | 3 weighting schemes (equal/expert/empirical) | max composite spread 2.9 pts; ordering invariant |
+
 Together these answer the design questions affirmatively: the observatory is
 traceable, reproducible, grounded, and robust — the properties the Intelligence Cycle
 (§3) identifies as where trust is won or lost.
@@ -516,8 +534,11 @@ reproduces from the pipeline commands in the paper's repository README.
     **22-10-0135** *Internet use* (Canadian Internet Use Survey; Digital Inclusion);
     and **17-10-0005** *Population estimates on July 1, by age and gender* (per-capita
     denominators). Ottawa: Statistics Canada.
-13. Canadian Institute for Health Information (CIHI). Integrated interRAI Reporting
-    System (IRRS) and long-term-care data holdings. Ottawa: CIHI.
+13. Canadian Institute for Health Information (CIHI). Long-term-care and continuing-care
+    data holdings, transitioning to the Integrated interRAI Reporting System (IRRS)
+    from the legacy Home Care Reporting System (HCRS) and Continuing Care Reporting
+    System (CCRS); interRAI Home Care (RAI-HC) and MDS 2.0 assessment instruments. Used
+    here for the LTC bed-capacity and caregiver-distress signals. Ottawa: CIHI.
 14. Government of Nova Scotia. Nova Scotia Open Data Portal — including the LTC
     placement waitlist (c39g-gsdd) and the LTC facilities directory (x76a-axw2).
     data.novascotia.ca.

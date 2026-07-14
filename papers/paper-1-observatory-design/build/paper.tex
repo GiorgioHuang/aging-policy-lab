@@ -74,7 +74,7 @@
 \urlstyle{same}
 \hypersetup{
   pdftitle={Design of a Reproducible Healthy Aging Policy Observatory: Infrastructure for Trustworthy Aging-Policy Evidence in Canada},
-  pdfauthor={Quangui Huang (Giorgio), Healthy Aging Intelligence Lab (HAIL)},
+  pdfauthor={Quangui Huang (Giorgio), Independent researcher (Healthy Aging Intelligence Lab / HAIL initiative)},
   colorlinks=true,
   linkcolor={RoyalBlue},
   filecolor={Maroon},
@@ -84,7 +84,8 @@
 
 \title{Design of a Reproducible Healthy Aging Policy Observatory:
 Infrastructure for Trustworthy Aging-Policy Evidence in Canada}
-\author{Quangui Huang (Giorgio), Healthy Aging Intelligence Lab (HAIL)}
+\author{Quangui Huang (Giorgio), Independent researcher (Healthy Aging
+Intelligence Lab / HAIL initiative)}
 \date{Preprint --- draft, not peer reviewed}
 
 \begin{document}
@@ -93,7 +94,9 @@ Infrastructure for Trustworthy Aging-Policy Evidence in Canada}
 \hypertarget{abstract}{%
 \subsection{Abstract}\label{abstract}}
 
-The evidence base for aging policy suffers less from a shortage of
+Healthy aging is among the defining public-policy challenges of aging
+societies, and governments act on it continually. Yet the evidence base
+for \emph{whether those actions work} suffers less from a shortage of
 analysis than from a shortage of \emph{trustworthy infrastructure}:
 policy text and outcome data live apart, published numbers rarely trace
 to their sources, and descriptive co-movement is routinely dressed as
@@ -270,14 +273,19 @@ is developed in full in Paper 2 (§8) and appears here only as an
 instantiated module. We follow OECD/JRC guidance {[}3{]} on transparency
 and sensitivity analysis.
 
-\textbf{Policy monitors and quasi-experimental evaluation.}
-Government/NGO trackers catalog policies but seldom integrate outcomes
-or support inference; academic evaluations produce rigorous
-single-policy studies but rarely as reusable infrastructure. The
-segmented-regression interrupted-time-series literature {[}6, 7, 8{]}
-provides the reference designs; the observatory operationalizes them
-under an explicit tagging discipline and defers their empirical
-application to Paper 4.
+\textbf{Policy monitors and quasi-experimental evaluation.} Established
+health-policy observatories --- the European Observatory on Health
+Systems and Policies, and the monitoring functions of the OECD and WHO
+--- synthesize cross-country policy and produce authoritative reports,
+but they are primarily \emph{reporting} instruments: they seldom expose
+per-value provenance, reproduce end-to-end from source, or attach a
+formal causal discipline to their comparisons. Government/NGO trackers
+likewise catalog policies without integrating outcomes or supporting
+inference; academic evaluations produce rigorous single-policy studies
+but rarely as reusable infrastructure. The segmented-regression
+interrupted-time-series literature {[}6, 7, 8{]} provides the reference
+designs; the observatory operationalizes them under an explicit tagging
+discipline and defers their empirical application to Paper 4.
 
 \textbf{LLMs for policy analysis.} Retrieval-augmented generation (RAG)
 {[}10{]} makes it feasible to draft grounded syntheses over a fixed
@@ -631,6 +639,27 @@ four assumptions. That the platform \emph{demonstrates a design without
 estimating an effect on thin data} is the honesty property, evaluated
 live.
 
+Table 1 summarizes the four results.
+
+\textbf{Table 1.} Design-evaluation results.
+
+\begin{longtable}[]{@{}llll@{}}
+\toprule\noalign{}
+RQ & Criterion & Evidence & Result \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+RQ1 & Traceability & 231 observations bound to lineage & 100\%
+source-traceable (structural invariant) \\
+RQ2 & Reproducibility & deterministic pipeline; content-addressed
+versions & identical re-runs; idempotent ingestion \\
+RQ3 & Grounding & fixed, visible evidence pack & 0 ungrounded citations
+representable \\
+RQ4 & Robustness & 3 weighting schemes (equal/expert/empirical) & max
+composite spread 2.9 pts; ordering invariant \\
+\end{longtable}
+
 Together these answer the design questions affirmatively: the
 observatory is traceable, reproducible, grounded, and robust --- the
 properties the Intelligence Cycle (§3) identifies as where trust is won
@@ -832,9 +861,12 @@ generation.}
   and \textbf{17-10-0005} \emph{Population estimates on July 1, by age
   and gender} (per-capita denominators). Ottawa: Statistics Canada.
 \item
-  Canadian Institute for Health Information (CIHI). Integrated interRAI
-  Reporting System (IRRS) and long-term-care data holdings. Ottawa:
-  CIHI.
+  Canadian Institute for Health Information (CIHI). Long-term-care and
+  continuing-care data holdings, transitioning to the Integrated
+  interRAI Reporting System (IRRS) from the legacy Home Care Reporting
+  System (HCRS) and Continuing Care Reporting System (CCRS); interRAI
+  Home Care (RAI-HC) and MDS 2.0 assessment instruments. Used here for
+  the LTC bed-capacity and caregiver-distress signals. Ottawa: CIHI.
 \item
   Government of Nova Scotia. Nova Scotia Open Data Portal --- including
   the LTC placement waitlist (c39g-gsdd) and the LTC facilities
