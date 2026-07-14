@@ -747,6 +747,15 @@ table.data tbody tr:last-child td {
   display: inline-block;
 }
 
+.footer-version {
+  margin: 0.5rem 0 0;
+  font-size: 0.7rem;
+  color: var(--muted);
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
 /* ── AI Research Assistant — cited draft ─────────────────────────────────────── */
 .draft-panel {
   border-color: var(--accent);

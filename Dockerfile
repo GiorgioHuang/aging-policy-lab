@@ -24,6 +24,11 @@ COPY . .
 # NEXT_PUBLIC_SITE_URL=https://your-domain.ca . A safe placeholder is used if unset.
 ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+# Deployed build id shown in the footer. Pass the commit SHA to bake the exact
+# version:  docker build --build-arg NEXT_PUBLIC_APP_VERSION=$SHORT_SHA . (falls
+# back to the committed short SHA in apps/web/lib/version.ts when unset).
+ARG NEXT_PUBLIC_APP_VERSION
+ENV NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
 RUN npm run build --workspace apps/web
 
 FROM node:22-alpine AS runner

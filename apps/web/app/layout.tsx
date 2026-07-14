@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { LogoMark } from "@/components/Logo";
+import { APP_VERSION } from "@/lib/version";
 import {
   GITHUB_REPO_URL,
   SITE_URL,
@@ -59,7 +60,6 @@ const NAV: Array<{ href: string; label: string }> = [
   { href: "/hapi", label: "HAPI" },
   { href: "/analytics", label: "Analytics" },
   { href: "/assistant", label: "Assistant" },
-  { href: "/about", label: "About" },
 ];
 
 // Organization + WebSite structured data (JSON-LD). Helps search engines
@@ -128,21 +128,19 @@ export default function RootLayout({
             <nav className="footer-links">
               <Link href="/about">About</Link>
               <Link href="/research">Research</Link>
-              <Link href="/data">Data Hub</Link>
-              <Link href="/hapi">HAPI</Link>
               <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">
                 GitHub
               </a>
             </nav>
             <p className="footer-note">
               <span className="footer-sentence">
-                Part of the Healthy Aging Intelligence Lab (HAIL).
-              </span>{" "}
-              <span className="footer-sentence">
                 Every figure traces to its source; association is not causation.
               </span>{" "}
-              <span className="footer-sentence">© {new Date().getFullYear()}</span>
+              <span className="footer-sentence">
+                © 2026 Healthy Aging Intelligence Lab (HAIL)
+              </span>
             </p>
+            <p className="footer-version">build {APP_VERSION}</p>
           </div>
         </footer>
       </body>
