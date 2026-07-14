@@ -18,5 +18,9 @@ const raw =
   (process.env.K_REVISION || "").trim() ||
   "70a01d0";
 
-// Cloud Run revision names are "<service>-<nnnnn>-<suffix>"; drop the service prefix.
-export const APP_VERSION = raw.replace(/^aging-policy-lab-/, "");
+// Display cleanup: a full 40-char commit SHA → short 7-char (so passing either
+// $SHORT_SHA or $COMMIT_SHA at build works); otherwise strip the Cloud Run service
+// prefix from a revision name ("<service>-<nnnnn>-<suffix>").
+export const APP_VERSION = /^[0-9a-f]{40}$/i.test(raw)
+  ? raw.slice(0, 7)
+  : raw.replace(/^aging-policy-lab-/, "");
