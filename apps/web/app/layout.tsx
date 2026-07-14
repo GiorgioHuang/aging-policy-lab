@@ -55,9 +55,9 @@ export const metadata: Metadata = {
 
 const NAV: Array<{ href: string; label: string }> = [
   { href: "/", label: "Dashboard" },
+  { href: "/hapi", label: "HAPI" },
   { href: "/policies", label: "Policy Library" },
   { href: "/data", label: "Data Hub" },
-  { href: "/hapi", label: "HAPI" },
   { href: "/analytics", label: "Analytics" },
   { href: "/assistant", label: "Assistant" },
 ];
