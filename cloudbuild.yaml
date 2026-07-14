@@ -1,0 +1,58 @@
+# Cloud Build config for the web app (apps/web) → Cloud Run.
+#
+# Purpose: bake the exact commit SHA into the image so the site footer shows the
+# real deployed version. Cloud Build provides $SHORT_SHA / $PROJECT_ID; we pass
+# $SHORT_SHA as the NEXT_PUBLIC_APP_VERSION build-arg (see Dockerfile).
+#
+# To use it: in the Cloud Build trigger, set Configuration → "Cloud Build
+# configuration file (yaml or json)" → location "/cloudbuild.yaml". The
+# substitutions below default to this project's known values; override any that
+# differ (e.g. _AR_REPO) in the trigger's "Substitution variables" section.
+#
+# The runtime secrets/env already set on the Cloud Run service (ANTHROPIC_API_KEY,
+# ADMIN_PASSWORD, TELEGRAM_*, etc.) are preserved: deploying with --image +
+# --update-secrets updates only DATABASE_URL and keeps the rest of the revision's
+# configuration.
+
+substitutions:
+  _SERVICE: hapi-web
+  _REGION: northamerica-northeast1
+  _AR_REPO: cloud-run-source-deploy # Artifact Registry repo (Cloud Run's source-deploy default)
+  _SITE_URL: https://acp.icareu.cc
+
+steps:
+  # 1. Build the image, baking the commit SHA and the canonical site URL.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg=NEXT_PUBLIC_APP_VERSION=$SHORT_SHA
+      - --build-arg=NEXT_PUBLIC_SITE_URL=${_SITE_URL}
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
+      - .
+
+  # 2. Push it to Artifact Registry.
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
+
+  # 3. Deploy to Cloud Run (preserves existing env/secrets besides DATABASE_URL).
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --allow-unauthenticated
+      - --update-secrets=DATABASE_URL=DATABASE_URL:latest
+      - --min-instances=0
+      - --quiet
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
