@@ -33,7 +33,9 @@ PSQL=(psql "$CONN" -v ON_ERROR_STOP=1 --quiet --no-psqlrc)
 SEED=false
 [[ "${1:-}" == "--seed" ]] && SEED=true
 
-echo "▶ Connecting to: ${CONN%%\?*}"
+# Log the target host/db only — never credentials. (CI logs on a public repo are
+# world-readable, and GitHub secret-masking does not catch substrings of a secret.)
+echo "▶ Connecting to: $(printf '%s' "$CONN" | sed -E 's#//[^@/]+@#//***@#; s#\?.*##')"
 "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS schema_migrations (
     filename   text PRIMARY KEY,
     applied_at timestamptz NOT NULL DEFAULT now()
