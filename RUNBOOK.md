@@ -112,14 +112,14 @@ printf '%s' 'postgresql://<user>:<pwd>@<ep>-pooler.<region>.aws.neon.tech/<db>?s
 
 ### 2. Deploy (Cloud Build builds the Dockerfile, then deploys)
 ```bash
-gcloud run deploy hapi-web \
+gcloud run deploy aging-policy-lab \
   --source . \
-  --region northamerica-northeast1 \
+  --region us-east1 \
   --allow-unauthenticated \
   --update-secrets DATABASE_URL=DATABASE_URL:latest \
   --min-instances 0
 ```
-`northamerica-northeast1` (Montreal) is closest to NS. The first deploy prints the
+`us-east1` (Montreal) is closest to NS. The first deploy prints the
 service URL — open `<url>/data`.
 
 ### 3. Grant the runtime service account access to the secret

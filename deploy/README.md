@@ -30,11 +30,11 @@ delete old digests, keeping the newest few:
 
 ```bash
 gcloud artifacts docker images list \
-  us-east1-docker.pkg.dev/PROJECT_ID/cloud-run-source-deploy/hapi-web \
+  us-east1-docker.pkg.dev/PROJECT_ID/cloud-run-source-deploy/aging-policy-lab \
   --include-tags --sort-by=~UPDATE_TIME --format='value(version)' \
 | tail -n +6 \
 | xargs -I{} gcloud artifacts docker images delete \
-    "us-east1-docker.pkg.dev/PROJECT_ID/cloud-run-source-deploy/hapi-web@{}" \
+    "us-east1-docker.pkg.dev/PROJECT_ID/cloud-run-source-deploy/aging-policy-lab@{}" \
     --delete-tags --quiet
 ```
 

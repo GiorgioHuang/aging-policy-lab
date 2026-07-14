@@ -110,7 +110,7 @@ automate ingestion, and **deploy the web app to Google Cloud Run**, see
 Deploy the web tier in one command (Cloud Build builds the [`Dockerfile`](Dockerfile)):
 
 ```bash
-gcloud run deploy hapi-web --source . --region northamerica-northeast1 \
+gcloud run deploy aging-policy-lab --source . --region us-east1 \
   --allow-unauthenticated --update-secrets DATABASE_URL=DATABASE_URL:latest
 ```
 

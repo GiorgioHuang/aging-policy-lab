@@ -3,7 +3,7 @@
 # Multi-stage: install workspace deps -> build standalone -> minimal runtime.
 # Build context is the repo root (apps/web is an npm workspace).
 #
-#   gcloud run deploy hapi-web --source . --region <region> \
+#   gcloud run deploy aging-policy-lab --source . --region <region> \
 #     --update-secrets DATABASE_URL=DATABASE_URL:latest --allow-unauthenticated
 # ─────────────────────────────────────────────────────────────────────────────
 FROM node:22-alpine AS deps
