@@ -127,6 +127,7 @@ export default function RootLayout({
             </div>
             <nav className="footer-links">
               <Link href="/about">About</Link>
+              <Link href="/research">Research</Link>
               <Link href="/data">Data Hub</Link>
               <Link href="/hapi">HAPI</Link>
               <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer">

@@ -12,6 +12,13 @@ export const GITHUB_REPO_URL = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}
 export const GITHUB_NEW_ISSUE_URL = `${GITHUB_REPO_URL}/issues/new`;
 export const GITHUB_DISCUSSIONS_URL = `${GITHUB_REPO_URL}/discussions`;
 
+// ── Research papers ───────────────────────────────────────────────────────────
+// Paper 1 is finalized; the PDF + cycle figure are served from /public/papers.
+// Papers 2–4 are planned (see docs/09-research-roadmap.md).
+export const PAPER1_PDF = "/papers/observatory-design.pdf";
+export const PAPER1_SOURCE_URL = `${GITHUB_REPO_URL}/tree/main/papers/paper-1-observatory-design`;
+export const PAPER1_MARKDOWN_URL = `${GITHUB_REPO_URL}/blob/main/papers/paper-1-observatory-design/paper.md`;
+
 // ── SEO / site identity ──────────────────────────────────────────────────────
 // The canonical origin used for metadataBase, canonical URLs, Open Graph, the
 // sitemap, and structured data. Configure via either:
