@@ -22,7 +22,7 @@ cat > build/_meta.yaml <<YAML
 ---
 title: "${TITLE}"
 author:
-  - "Quangui Huang (Giorgio), Independent researcher (Healthy Aging Intelligence Lab / HAIL initiative)"
+  - "Quangui Huang (Giorgio)"
 date: "Preprint — draft, not peer reviewed"
 geometry: margin=1in
 fontsize: 11pt
@@ -59,6 +59,11 @@ path = sys.argv[1]
 s = open(path).read()
 s = s.replace(r"{@{}llll@{}}", r"{@{}llp{0.33\linewidth}p{0.33\linewidth}@{}}")
 s = s.replace(r"{@{}lll@{}}",  r"{@{}lp{0.60\linewidth}p{0.22\linewidth}@{}}")
+# Stack the affiliation under the name so the byline isn't one over-wide line.
+s = s.replace(
+    r"\author{Quangui Huang (Giorgio)}",
+    r"\author{Quangui Huang (Giorgio)\\[3pt]{\small Independent researcher "
+    r"$\cdot$ Healthy Aging Intelligence Lab (HAIL) initiative}}")
 open(path, "w").write(s)
 PY
 echo "wrote build/paper.tex"
