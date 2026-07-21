@@ -2,27 +2,13 @@
 
 **A research infrastructure for monitoring, quantifying, and evaluating the effects of aging-related public policy across Canadian governments.**
 
+🌐 **Live site:** [acp.icareu.cc](https://acp.icareu.cc)
+
 > Part of the **Healthy Aging Intelligence Lab (HAIL)** — using AI, data science, and policy analysis to help Canada build a fairer, more efficient, and more sustainable system of support for an aging population.
 
 > **Status: Phase 5 — Researcher dashboard + SaaS seams.** All five modules have a working v1, now tied together by a **cross-cutting dashboard** at `/`: a KPI strip (policies · indicators · observations · HAPI scores · findings · references), a per-jurisdiction **HAPI snapshot** (overall + care-access composite), recent policies and recent findings (Association/Causal tagged), the live jurisdiction tree, and a shared top nav across every module. HAPI v1 now spans **all six domains** — Health (StatCan life expectancy at 65, Table 13-10-0389), Independence (CCHS functional health, Table 13-10-0966), Social Participation (CCHS community belonging, Table 13-10-0096), Financial Security (StatCan seniors' low-income rate, Table 11-10-0135), Care Access (CIHI home care), and Digital Inclusion (StatCan seniors' internet use, Table 22-10-0135) — so `overall` is a genuine six-domain composite, not a restatement of one domain. The composite is **weighted** with theory-anchored expert tiers (Health + Care Access tier 1; Financial Security + Independence tier 2; Social Participation + Digital Inclusion tier 3) and **sensitivity-tested** against equal and empirical schemes (`hapi weights`) — the headline scores are robust to the weighting choice. See [`pipeline/hapi_pipeline/indicators/weighting.py`](pipeline/hapi_pipeline/indicators/weighting.py). Under the hood the platform is now **multi-tenant-ready**: a single access seam ([`apps/web/lib/access.ts`](apps/web/lib/access.ts)) resolves "who is asking" and every org-scoped read routes through it, backed by nullable `org_id` columns ([`db/migrations/0004`](db/migrations/0004_tenancy_org_id.sql)) — a no-op single-tenant today, switch-on-able for SaaS (Stage 2/3) without a schema rewrite. The earlier phases stand: **Policy Analytics** (Tier-1 `Association` trends + a worked **interrupted time series**, `Causal(ITS)`, with assumptions/limitations) and the **AI Research Assistant** (topic → cited **evidence pack** + Claude-drafted review). The web app surfaces everything: `/` · `/policies` · `/hapi` · `/data` · `/analytics` · `/assistant`. See [`docs/11-implementation-roadmap.md`](docs/11-implementation-roadmap.md).
 >
 > ⚠️ This environment can't reach the live source domains, so connectors run against **vendored sample fixtures** by default (realistic but not official statistics; provenance recorded as `fixture:…`). Run `hapi ingest --live` where the network allows.
-
----
-
-## 中文概览
-
-`aging-policy-lab` 不是一个普通的政策网站,而是一座**研究基础设施(Research Infrastructure)**。它的核心不是"收集政策",而是**持续监测、量化评估、预测加拿大各级政府老龄化政策的效果**。
-
-平台定位为 **Canadian Healthy Aging Policy Observatory(加拿大健康老龄化政策观察平台)**,隶属于一个十年愿景的实验室 **Healthy Aging Intelligence Lab(HAIL)**。它同时承担三重角色:
-
-- **研究平台** —— 持续产出论文与数据,而非一次性课题;
-- **创业项目** —— 未来可发展为 SaaS 或研究服务;
-- **研究资产库** —— 不断积累数据库、指标体系、AI Agent、文献知识库、政策知识图谱与可视化看板。
-
-第一版(v1)先聚焦 **Nova Scotia + 联邦(Federal)** 作为可复制的模板,未来扩展至全加拿大。本仓库当前阶段只交付**设计文档/白皮书**,作为后续开发蓝图与第一篇论文的基础。
-
-平台由五个核心模块组成:① Policy Library(政策库)② Data Hub(数据中心)③ Indicators / HAPI(指标体系)④ Policy Analytics(政策分析)⑤ AI Research Assistant(AI 研究助手)。
 
 ---
 
@@ -126,3 +112,19 @@ Documentation is intended to be released under **CC-BY-4.0** (see [`LICENSE`](LI
 ## A note on rigor
 
 This platform analyzes public data to surface *associations* and to support *evidence-based* evaluation. Association is not causation. Causal claims require careful quasi-experimental designs (interrupted time series, difference-in-differences, synthetic control), each with stated assumptions and limitations. The observatory is built to make that distinction explicit at every step — see [`docs/07-module-policy-analytics.md`](docs/07-module-policy-analytics.md).
+
+---
+
+## 中文概览
+
+`aging-policy-lab` 不是一个普通的政策网站,而是一座**研究基础设施(Research Infrastructure)**。它的核心不是"收集政策",而是**持续监测、量化评估、预测加拿大各级政府老龄化政策的效果**。
+
+平台定位为 **Canadian Healthy Aging Policy Observatory(加拿大健康老龄化政策观察平台)**,隶属于一个十年愿景的实验室 **Healthy Aging Intelligence Lab(HAIL)**。它同时承担三重角色:
+
+- **研究平台** —— 持续产出论文与数据,而非一次性课题;
+- **创业项目** —— 未来可发展为 SaaS 或研究服务;
+- **研究资产库** —— 不断积累数据库、指标体系、AI Agent、文献知识库、政策知识图谱与可视化看板。
+
+第一版(v1)先聚焦 **Nova Scotia + 联邦(Federal)** 作为可复制的模板,未来扩展至全加拿大。
+
+平台由五个核心模块组成:① Policy Library(政策库)② Data Hub(数据中心)③ Indicators / HAPI(指标体系)④ Policy Analytics(政策分析)⑤ AI Research Assistant(AI 研究助手)。在线访问:<https://acp.icareu.cc>。
