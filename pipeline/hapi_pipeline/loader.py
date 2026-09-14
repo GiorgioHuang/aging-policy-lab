@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 
+from .db import connect
 from .ingest.base import (
     Connector,
     DataSourceSpec,
@@ -140,7 +141,7 @@ def _insert_observations(
     return loaded, issues
 
 
-def ingest(conn, connector: Connector, *, live: bool = False) -> IngestResult:
+def ingest(connector: Connector, *, live: bool = False) -> IngestResult:
     """Run one connector end-to-end: extract -> validate -> load (idempotent).
 
     A connector with no live path (e.g. CIHI, a manual portal download) falls
@@ -148,6 +149,12 @@ def ingest(conn, connector: Connector, *, live: bool = False) -> IngestResult:
     fetch fails transiently (e.g. a StatCan 5xx/timeout, after retries) also
     degrades to its vendored fixture, so a `--live` run still loads every source
     with last-known-good data instead of failing the whole pipeline.
+
+    The network fetch happens BEFORE any DB connection is opened, and the write
+    runs on a fresh short-lived connection. A slow upstream can therefore no
+    longer hold a Postgres connection idle long enough for a serverless pooler
+    to drop it mid-run — the failure mode that turned a transient StatCan
+    slowdown into "the connection is closed" write errors.
     """
     fallback_issue: str | None = None
     try:
@@ -162,7 +169,9 @@ def ingest(conn, connector: Connector, *, live: bool = False) -> IngestResult:
     if fallback_issue:
         issues.insert(0, fallback_issue)
 
-    with conn.cursor() as cur:
+    # Open the DB connection only now, after the (possibly slow) fetch, and
+    # hold it just for this connector's write.
+    with connect() as conn, conn.cursor() as cur:
         ds_id = _upsert_datasource(cur, connector.source)
         ind_ids = {ind.code: _upsert_indicator(cur, ind) for ind in connector.indicators}
         for iid in ind_ids.values():

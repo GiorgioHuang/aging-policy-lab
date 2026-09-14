@@ -36,7 +36,6 @@ def _cmd_enums(_args: argparse.Namespace) -> int:
 
 
 def _cmd_ingest(args: argparse.Namespace) -> int:
-    from .db import connect
     from .ingest.registry import all_connectors, get_connector
     from .loader import ingest
 
@@ -75,31 +74,33 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
                 print(f"    ⚠ {issue}")
         return rc
 
+    # Each connector opens its own short-lived DB connection inside ingest()
+    # (after its network fetch), so one slow source can't hold a connection idle
+    # long enough for a serverless pooler to drop it and break later writes.
     rc = 0
-    with connect() as conn:
-        for c in connectors:
-            try:
-                res = ingest(conn, c, live=args.live)
-            except NotImplementedError as exc:
-                print(f"• {c.name}: skipped — {exc}")
-                continue
-            except Exception as exc:  # noqa: BLE001
-                print(f"✗ {c.name}: failed — {exc}", file=sys.stderr)
-                rc = 1
-                continue
-            tag = "fixture" if res.source_version.startswith("fixture:") else "live"
-            if res.no_op:
-                print(
-                    f"· {c.name}: no-op (unchanged; checksum {res.checksum[:12]}…, "
-                    f"{res.records_parsed} records already loaded)"
-                )
-            else:
-                print(
-                    f"✚ {c.name}: loaded {res.observations_loaded} observation(s) "
-                    f"[{tag}] checksum {res.checksum[:12]}…"
-                )
-            for issue in res.issues:
-                print(f"    ⚠ {issue}")
+    for c in connectors:
+        try:
+            res = ingest(c, live=args.live)
+        except NotImplementedError as exc:
+            print(f"• {c.name}: skipped — {exc}")
+            continue
+        except Exception as exc:  # noqa: BLE001
+            print(f"✗ {c.name}: failed — {exc}", file=sys.stderr)
+            rc = 1
+            continue
+        tag = "fixture" if res.source_version.startswith("fixture:") else "live"
+        if res.no_op:
+            print(
+                f"· {c.name}: no-op (unchanged; checksum {res.checksum[:12]}…, "
+                f"{res.records_parsed} records already loaded)"
+            )
+        else:
+            print(
+                f"✚ {c.name}: loaded {res.observations_loaded} observation(s) "
+                f"[{tag}] checksum {res.checksum[:12]}…"
+            )
+        for issue in res.issues:
+            print(f"    ⚠ {issue}")
     return rc
 
 

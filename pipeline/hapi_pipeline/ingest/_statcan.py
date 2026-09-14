@@ -52,8 +52,8 @@ def _urlopen_retry(url: str, timeout: int, retries: int = 2, backoff: float = 2.
 
 def fetch_full_table_csv(product_id: str) -> str:
     """Return the full cube as CSV text (the real upstream; used only with --live)."""
-    meta = json.loads(_urlopen_retry(wds_full_csv_url(product_id), timeout=30).decode("utf-8"))
-    zbytes = _urlopen_retry(meta["object"], timeout=90)
+    meta = json.loads(_urlopen_retry(wds_full_csv_url(product_id), timeout=20).decode("utf-8"))
+    zbytes = _urlopen_retry(meta["object"], timeout=60)
     with zipfile.ZipFile(io.BytesIO(zbytes)) as zf:
         data_name = next(
             n for n in zf.namelist()
