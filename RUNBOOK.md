@@ -335,6 +335,11 @@ probe lists the feed-like links on those pages (`watch probe --discover URL…`)
 - **Mondays** — also opens an issue labelled `policy-watch` listing the week's
   candidates (skipped when there are none). `mode: fetch-and-digest` does both now.
 
+**Backfill.** Daily runs only look back `since_days` (30). To pull in older items
+once — e.g. the aging bills already before the Legislature when a source is
+added — run `mode: fetch` with `source: ns_bills` (or `legisinfo_bills`) and a
+long `since_days` such as `400`. Dedup makes repeat runs harmless.
+
 ### 4. Review
 
 Actions → **Policy Watch review** → Run workflow with `accept` / `reject` ids from

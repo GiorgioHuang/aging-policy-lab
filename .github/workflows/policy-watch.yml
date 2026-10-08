@@ -23,6 +23,9 @@ on:
       since_days:
         description: Ignore items published more than this many days ago
         default: "30"
+      source:
+        description: "Only this source (e.g. ns_bills); empty = all. Use with a long since_days to backfill."
+        default: ""
       discover:
         description: "probe only: space-separated page URLs to scan for feed links"
         default: ""
@@ -44,6 +47,7 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       MODE: ${{ inputs.mode || 'scheduled' }}
       DISCOVER: ${{ inputs.discover }}
+      SOURCE: ${{ inputs.source }}
       SINCE_DAYS: ${{ inputs.since_days || '30' }}
     steps:
       - uses: actions/checkout@v4
@@ -58,7 +62,7 @@ jobs:
       - name: Probe live feeds (no DB)
         if: env.MODE == 'probe'
         run: |
-          python -m hapi_pipeline.cli watch probe --since-days "$SINCE_DAYS"
+          python -m hapi_pipeline.cli watch probe --since-days "$SINCE_DAYS" ${SOURCE:+--source "$SOURCE"}
           if [ -n "$DISCOVER" ]; then
             # shellcheck disable=SC2086 — word-split the URL list on purpose
             python -m hapi_pipeline.cli watch probe --discover $DISCOVER
@@ -93,7 +97,7 @@ jobs:
 
       - name: Fetch + triage new items
         if: steps.plan.outputs.run == 'true'
-        run: python -m hapi_pipeline.cli watch fetch --live --since-days "$SINCE_DAYS"
+        run: python -m hapi_pipeline.cli watch fetch --live --since-days "$SINCE_DAYS" ${SOURCE:+--source "$SOURCE"}
         working-directory: pipeline
 
       - name: Build weekly digest

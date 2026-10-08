@@ -242,8 +242,13 @@ def _clip(s: str, limit: int = 600) -> str:
     return s if len(s) <= limit else s[:limit].rsplit(" ", 1)[0] + " …"
 
 
+# Publishers that don't follow RFC 822 in <pubDate> (e.g. the NS Legislature
+# writes "September 17, 2026").
+_LOOSE_DATE_FORMATS = ("%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%B %d %Y")
+
+
 def parse_date(value: str) -> datetime | None:
-    """Parse RFC 822 (RSS), ISO 8601 (Atom) or a bare date."""
+    """Parse RFC 822 (RSS), ISO 8601 (Atom), a bare date or "Month D, YYYY"."""
     v = (value or "").strip()
     if not v:
         return None
@@ -255,6 +260,15 @@ def parse_date(value: str) -> datetime | None:
         try:
             dt = datetime.fromisoformat(v.replace("Z", "+00:00"))
         except ValueError:
+            dt = None
+    if dt is None:
+        for fmt in _LOOSE_DATE_FORMATS:
+            try:
+                dt = datetime.strptime(v, fmt)
+                break
+            except ValueError:
+                continue
+        else:
             return None
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)

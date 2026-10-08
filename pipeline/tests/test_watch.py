@@ -107,6 +107,8 @@ def test_parse_date_formats():
     assert src.parse_date("2026-09-08T10:00:00.000").tzinfo is not None
     assert src.parse_date("2026-09-08").date() == date(2026, 9, 8)
     assert src.parse_date("") is None and src.parse_date("not a date") is None
+    # NS Legislature's non-RFC pubDate
+    assert src.parse_date("September 17, 2026") == datetime(2026, 9, 17, tzinfo=timezone.utc)
 
 
 def test_window_keeps_undated_drops_old():
@@ -142,7 +144,9 @@ def test_keywords_keep_aging_policy_and_drop_decoys():
         "C-250, An Act to amend the Old Age Security Act (minimum benefit)",
         "S-230, An Act respecting the national framework on long-term care standards",
     ]  # not: Fisheries Act
-    assert _hits("ns_bills") == ["Bill 301 - Seniors' Advocate Act"]  # not: traffic safety
+    # not: traffic safety; not the 2025 LTC bill — dated, so the window drops it
+    assert _hits("ns_bills") == ["Bill 301 - Seniors' Advocate Act"]
+    assert len(_items("ns_bills")) == 3
     assert sorted(_hits("ns_news")) == [
         "Caregiver Benefit Expanded to More Families",
         "New Long-Term Care Beds Open in Kentville",

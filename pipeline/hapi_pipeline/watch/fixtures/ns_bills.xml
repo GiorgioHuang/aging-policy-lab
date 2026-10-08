@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real bills. -->
+<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real bills.
+     Mirrors the real feed: pubDate as "Month D, YYYY", stage in the description. -->
 <rss version="2.0"><channel>
   <title>Nova Scotia Legislature - Bills (sample)</title>
   <item>
     <title>Bill 301 - Seniors' Advocate Act</title>
     <link>https://example.org/fixture/nslegislature/bill-301</link>
-    <description>First reading.</description>
-    <pubDate>Thu, 24 Sep 2026 17:00:00 GMT</pubDate>
+    <description>First Reading - September 24, 2026</description>
+    <pubDate>September 24, 2026</pubDate>
   </item>
   <item>
     <title>Bill 302 - Traffic Safety Act (amended)</title>
     <link>https://example.org/fixture/nslegislature/bill-302</link>
-    <description>First reading.</description>
-    <pubDate>Thu, 24 Sep 2026 17:30:00 GMT</pubDate>
+    <description>First Reading - September 24, 2026</description>
+    <pubDate>September 24, 2026</pubDate>
+  </item>
+  <item>
+    <title>Bill 171 - Long-term Care Strategy Act</title>
+    <link>https://example.org/fixture/nslegislature/bill-171</link>
+    <description>First Reading - March 3, 2025</description>
+    <pubDate>March 3, 2025</pubDate>
   </item>
 </channel></rss>
