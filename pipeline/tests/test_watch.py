@@ -302,3 +302,18 @@ def test_render_digest_groups_and_escapes():
     assert "[New (pilot) for seniors](https://example.org/x)" in md
     assert "`funding` 0.90" in md and "> Because." in md
     assert "<details>" in md and "Aging bridges" in md
+
+
+def test_pdf_text_reads_aes_encrypted_pdf():
+    # NS Royal Gazette Part II issues are AES-encrypted with an empty user
+    # password (copy protection); pypdf needs its [crypto] extra to open them.
+    import io
+
+    from pypdf import PdfWriter
+
+    w = PdfWriter()
+    w.add_blank_page(200, 200)
+    w.encrypt(user_password="", owner_password="owner", algorithm="AES-128")
+    buf = io.BytesIO()
+    w.write(buf)
+    assert src.pdf_text(buf.getvalue(), pages=1) == ""

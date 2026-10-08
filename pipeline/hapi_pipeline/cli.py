@@ -406,7 +406,10 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
                 # Text of the first pages, to design a parser for PDF-only sources.
                 from .watch.sources import pdf_text
 
-                print(f"    PDF text (first 3 pages):\n{pdf_text(body, pages=3)[:3500]}")
+                try:
+                    print(f"    PDF text (first 3 pages):\n{pdf_text(body, pages=3)[:3500]}")
+                except Exception as exc:  # noqa: BLE001 — one bad URL must not stop the rest
+                    print(f"    ✗ PDF text extraction failed: {type(exc).__name__}: {exc}")
                 continue
             text = body.decode("utf-8", errors="replace")
             lp = src._LinkParser()
