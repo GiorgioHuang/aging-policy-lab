@@ -15,6 +15,7 @@ const ROUTES: Array<{
 }> = [
   { path: "/", changeFrequency: "daily", priority: 1.0 },
   { path: "/policies", changeFrequency: "weekly", priority: 0.9 },
+  { path: "/policies/watch", changeFrequency: "daily", priority: 0.7 },
   { path: "/hapi", changeFrequency: "weekly", priority: 0.9 },
   { path: "/data", changeFrequency: "weekly", priority: 0.8 },
   { path: "/analytics", changeFrequency: "weekly", priority: 0.8 },

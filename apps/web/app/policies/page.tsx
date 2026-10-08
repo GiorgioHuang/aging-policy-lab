@@ -94,6 +94,10 @@ export default async function Policies() {
         its department, budget, lifecycle, themes, and the outcome indicators it is
         intended to move.
       </p>
+      <p className="meta">
+        Newly published federal and Nova Scotia aging policy is picked up daily and queued
+        for review in <Link href="/policies/watch">Policy Watch →</Link>
+      </p>
 
       {error ? (
         <div className="panel error">
