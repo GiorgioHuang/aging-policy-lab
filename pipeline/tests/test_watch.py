@@ -103,6 +103,24 @@ def test_with_details_prefers_longer_og_title():
     assert d.title == "A much longer & fuller title" and d.summary == "Desc"
 
 
+def test_http_get_reports_firewall_block_page(tmp_path, monkeypatch):
+    import pytest
+    page = tmp_path / "blocked.html"
+    page.write_bytes(b"<html><head><title>Request Rejected</title></head><body>The requested "
+                     b"URL was rejected. Please consult with your administrator.<br><br>Your "
+                     b"support ID is: <1940417650987177324><br></body></html>")
+    monkeypatch.setattr(src.time, "sleep", lambda s: None)
+    with pytest.raises(src.BlockedError) as exc:
+        src.http_get(page.as_uri())
+    assert "firewall" in str(exc.value) and "1940417650987177324" in str(exc.value)
+
+
+def test_http_get_returns_normal_body(tmp_path):
+    feed = tmp_path / "feed.xml"
+    feed.write_bytes(b"<rss><channel></channel></rss>")
+    assert src.http_get(feed.as_uri()) == b"<rss><channel></channel></rss>"
+
+
 def test_xml_parse_error_shows_context():
     import pytest
     bad = b'<?xml version="1.0"?><rss><channel><item><title>A & B</title></item></channel></rss>'

@@ -44,7 +44,22 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 FIXTURE_SINCE = date(2026, 1, 1)
 
 USER_AGENT = "Mozilla/5.0 (compatible; hapi-policy-watch/1.0; +https://acp.icareu.cc)"
+# What an ordinary feed reader sends; the UA stays honest about who is asking.
+REQUEST_HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, "
+              "text/html;q=0.8, */*;q=0.5",
+    "Accept-Language": "en-CA,en;q=0.9",
+}
 _RETRY_STATUS = {429, 500, 502, 503, 504}
+# Web-application firewalls answer 200 with a short page like this instead of
+# the feed (seen from the NS Legislature site on some GitHub runner IPs).
+_BLOCK_PAGE = re.compile(rb"requested URL was rejected|support ID is|access denied|"
+                         rb"request blocked", re.IGNORECASE)
+
+
+class BlockedError(OSError):
+    """The site's firewall rejected the request (a block page, not the content)."""
 
 GC_NEWS_API = "https://api.io.canada.ca/io-server/gc/news/en/v2"
 
@@ -190,14 +205,25 @@ def get_source(name: str) -> WatchSource:
 
 # ── fetching ─────────────────────────────────────────────────────────────────
 
-def http_get(url: str, timeout: int = 30, retries: int = 2, backoff: float = 2.0) -> bytes:
-    """GET `url` with a browser-like UA, retrying transient failures."""
+def http_get(url: str, timeout: int = 30, retries: int = 2, backoff: float = 2.0,
+             block_wait: float = 20.0) -> bytes:
+    """GET `url`, retrying transient failures and (once, after `block_wait`
+    seconds) a firewall block page. Raises BlockedError if still blocked."""
     last: Exception | None = None
     for attempt in range(retries):
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        req = urllib.request.Request(url, headers=REQUEST_HEADERS)
+        wait = backoff * (2 ** attempt)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
-                return resp.read()
+                body = resp.read()
+            if len(body) < 4096 and _BLOCK_PAGE.search(body):
+                support = re.search(rb"support ID is:?\s*<?(\d+)", body)
+                last = BlockedError(
+                    f"blocked by the site's firewall ({len(body)} bytes"
+                    + (f", support ID {support.group(1).decode()}" if support else "") + ")")
+                wait = block_wait
+            else:
+                return body
         except urllib.error.HTTPError as e:  # noqa: PERF203
             last = e
             if e.code not in _RETRY_STATUS:
@@ -205,7 +231,7 @@ def http_get(url: str, timeout: int = 30, retries: int = 2, backoff: float = 2.0
         except (urllib.error.URLError, TimeoutError) as e:
             last = e
         if attempt < retries - 1:
-            time.sleep(backoff * (2 ** attempt))
+            time.sleep(wait)
     assert last is not None
     raise last
 
