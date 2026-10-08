@@ -28,13 +28,17 @@ from . import triage
 
 
 def normalize_url(url: str) -> str:
-    """Canonical form for dedup: lowercase host, no fragment or tracking params."""
+    """Canonical form for dedup: lowercase host, no tracking params.
+
+    Fragments are kept: Gazette Part I lists several notices on one page, told
+    apart only by their #anchor.
+    """
     p = urllib.parse.urlsplit(url.strip())
     query = [(k, v) for k, v in urllib.parse.parse_qsl(p.query, keep_blank_values=True)
              if not k.lower().startswith("utm_")]
     path = p.path.rstrip("/") or "/"
     return urllib.parse.urlunsplit(
-        (p.scheme.lower(), p.netloc.lower(), path, urllib.parse.urlencode(query), "")
+        (p.scheme.lower(), p.netloc.lower(), path, urllib.parse.urlencode(query), p.fragment)
     )
 
 
@@ -93,9 +97,7 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
                  client=None) -> SourceStats:
     """Run one source end to end. Raises on fetch/parse failure."""
     st = SourceStats(source.name)
-    items = src.parse(source, src.fetch_raw(source, live=live, since=since))
-    st.fetched = len(items)
-    items = [i for i in items if src.within_window(i, since)]
+    st.fetched, items = src.collect(source, live=live, since=since)
     st.in_window = len(items)
 
     matched = []

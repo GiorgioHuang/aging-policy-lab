@@ -396,7 +396,7 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
         print(f"=== {s.name} — {s.label}\n    {url}")
         try:
             raw = src.http_get(url)
-            items = src.parse(s, raw)
+            n_raw, items = src.collect(s, live=True, since=since)
         except Exception as exc:  # noqa: BLE001
             print(f"    ✗ {type(exc).__name__}: {exc}")
             continue
@@ -412,14 +412,24 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
         newest = max((i.published_at for i in dated), default=None)
         oldest = min((i.published_at for i in dated), default=None)
         hits = [i for i in items if keyword_match(i).passes]
-        print(f"    ✓ {len(raw):,} bytes · {len(items)} items · dated {len(dated)} "
-              f"({oldest and oldest.date()} → {newest and newest.date()}) · "
+        print(f"    ✓ {len(raw):,} bytes · {n_raw} feed items · {len(items)} in window"
+              f"{' (expanded from issue pages)' if s.expand_issues else ''} · dated "
+              f"{len(dated)} ({oldest and oldest.date()} → {newest and newest.date()}) · "
               f"keyword hits {len(hits)}")
-        for i in items[:3]:
+        for i in items[:5]:
             print(f"      - {i.published_at and i.published_at.date()} | "
-                  f"{i.department[:40]} | {i.title[:90]}")
-        for i in hits[:5]:
+                  f"{i.department[:30]} | {i.title[:100]}\n        {i.url}")
+        for i in hits[:8]:
             print(f"      ★ {i.title[:100]}  {keyword_match(i).terms}")
+        if s.expand_issues:
+            # Show the raw TOC blocks of the newest issue, to tune expand_issue().
+            issues = [i for i in src.parse(s, raw) if src.within_window(i, since)]
+            if issues:
+                parser = src._TocParser()
+                parser.feed(src.http_get(issues[0].url).decode("utf-8", errors="replace"))
+                print(f"    issue page {issues[0].url}: {len(parser.blocks)} linked blocks")
+                for text, link_text, href in parser.blocks[:25]:
+                    print(f"      · [{link_text[:40]}] {text[:90]} -> {href[:80]}")
     return 0 if ok else 1
 
 

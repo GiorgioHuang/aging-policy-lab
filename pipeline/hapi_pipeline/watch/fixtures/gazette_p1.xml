@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real notices. -->
+<!-- Synthetic sample for offline tests and local dev (example.org URLs). Mirrors the
+     real feed's shape: one <item> per issue; notices live on the issue page. -->
 <rss version="2.0"><channel>
-  <title>Canada Gazette, Part I (sample)</title>
+  <title>Canada Gazette - Part I (sample)</title>
   <item>
-    <title>Regulations Amending the Old Age Security Regulations</title>
-    <link>https://example.org/fixture/gazette/p1/oas-regs</link>
-    <description>Proposed amendments to the Old Age Security Regulations respecting income reporting.</description>
-    <pubDate>Fri, 05 Sep 2026 18:00:00 GMT</pubDate>
+    <title>Canada Gazette - Part I, September 5, 2026, volume 160, number 36</title>
+    <link>https://example.org/fixture/gazette/p1/2026/2026-09-05/html/index-eng.html</link>
+    <description>Weekly issue.</description>
+    <pubDate>Sat, 05 Sep 2026 00:00:00 GMT</pubDate>
   </item>
   <item>
-    <title>Order Amending Schedule 1 to the Species at Risk Act</title>
-    <link>https://example.org/fixture/gazette/p1/species-at-risk</link>
-    <description>Proposed listing of wildlife species.</description>
-    <pubDate>Fri, 05 Sep 2026 18:00:00 GMT</pubDate>
+    <title>Canada Gazette - Part I, February 1, 2019, volume 153, number 5</title>
+    <link>https://example.org/fixture/gazette/p1/2019/2019-02-01/html/index-eng.html</link>
+    <description>Old issue, outside any watch window.</description>
+    <pubDate>Fri, 01 Feb 2019 00:00:00 GMT</pubDate>
   </item>
 </channel></rss>

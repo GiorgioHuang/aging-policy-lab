@@ -18,8 +18,12 @@ def _items(name: str) -> list[src.FeedItem]:
     return src.parse(s, s.fixture_path.read_bytes())
 
 
+def _collected(name: str) -> list[src.FeedItem]:
+    return src.collect(src.get_source(name), live=False, since=date(2026, 1, 1))[1]
+
+
 def _hits(name: str) -> list[str]:
-    return [i.title for i in _items(name) if triage.keyword_match(i).passes]
+    return [i.title for i in _collected(name) if triage.keyword_match(i).passes]
 
 
 # ── parsing ──────────────────────────────────────────────────────────────────
@@ -35,18 +39,51 @@ def test_atom_parse_fields():
     assert first.jurisdiction_code == "CA-FED"
 
 
-def test_rss_parse_dates_and_default_department():
+def test_rss_parse_issue_items():
     items = _items("gazette_p1")
-    assert [i.published_at.date() for i in items] == [date(2026, 9, 5)] * 2
-    assert all(i.department == "Canada Gazette" for i in items)
+    assert [i.published_at.date() for i in items] == [date(2026, 9, 5), date(2019, 2, 1)]
+    assert all(i.department == "Canada Gazette Part I" for i in items)
 
 
-def test_socrata_parse_url_object_and_department():
+def test_gazette_issue_expands_to_notices_and_regulations():
+    items = _collected("gazette_p1")  # 2019 issue is outside the window
+    titles = [i.title for i in items]
+    assert titles == [
+        "Department of the Environment — Order Amending Schedule 1 to the Species at Risk Act",
+        "Department of Employment and Social Development — Notice of intent: consultation "
+        "on a national strategy for older persons living alone",
+        "Regulations Amending the Old Age Security Regulations",
+        "Regulations Amending the Motor Vehicle Safety Regulations",
+    ]  # not: home-page nav, PDF link, previous-issue link
+    assert items[1].url.endswith("/2026/2026-09-05/html/notice-avis-eng.html#ne2")
+    assert all(i.published_at.date() == date(2026, 9, 5) for i in items)
+    assert items[0].summary.startswith("Canada Gazette - Part I, September 5, 2026")
+
+
+def test_gazette_short_link_text_uses_row_text():
+    titles = [i.title for i in _collected("gazette_p2")]
+    assert titles == [
+        "SOR/2026-201 Regulations Amending the Canada Pension Plan Regulations",
+        "SOR/2026-202 Regulations Amending the Motor Vehicle Safety Regulations",
+    ]
+
+
+def test_socrata_parse_real_field_names():
     items = _items("ns_news")
-    assert items[0].url == "https://example.org/fixture/ns/ltc-beds-kentville"
-    assert items[0].department == "Seniors and Long-term Care"
-    assert items[0].jurisdiction_code == "CA-NS"
-    assert items[0].published_at.date() == date(2026, 9, 8)
+    first = items[0]
+    assert first.title == "New long-term care beds open in Kentville"  # `subject`
+    assert first.url == "https://example.org/fixture/ns/ltc-beds-kentville"
+    assert first.department == "Seniors and Long-term Care"
+    assert first.jurisdiction_code == "CA-NS"
+    assert first.published_at.date() == date(2026, 9, 8)  # `timestamp`
+    assert first.summary.startswith("Province adds 48") and "\n" not in first.summary
+
+
+def test_socrata_url_object_form():
+    s = src.get_source("ns_news")
+    raw = json.dumps([{"subject": "Seniors grant opens", "url": {"url": "https://x.ca/a"},
+                       "timestamp": "2026-09-01T00:00:00.000"}]).encode()
+    assert src.parse(s, raw)[0].url == "https://x.ca/a"
 
 
 def test_parse_date_formats():
@@ -71,6 +108,12 @@ def test_live_url_adds_date_filter():
         date(2026, 9, 1))
 
 
+def test_socrata_live_url_filters_and_orders_server_side():
+    url = src.get_source("ns_news").live_url(date(2026, 9, 1))
+    assert "%24where=timestamp+%3E%3D+%272026-09-01T00%3A00%3A00%27" in url
+    assert "%24order=timestamp+DESC" in url
+
+
 # ── keyword triage ───────────────────────────────────────────────────────────
 
 def test_keywords_keep_aging_policy_and_drop_decoys():
@@ -78,9 +121,17 @@ def test_keywords_keep_aging_policy_and_drop_decoys():
         "Government of Canada increases Old Age Security for seniors aged 75 and over",
         "New funding to support people living with dementia and their caregivers",
     ]  # not: aging bridges, child-care caregivers, fisheries
-    assert _hits("gazette_p1") == ["Regulations Amending the Old Age Security Regulations"]
-    assert _hits("gazette_p2") == ["Regulations Amending the Canada Pension Plan Regulations"]
-    assert len(_hits("ns_news")) == 2  # not: highway twinning
+    assert _hits("gazette_p1") == [
+        "Department of Employment and Social Development — Notice of intent: consultation "
+        "on a national strategy for older persons living alone",
+        "Regulations Amending the Old Age Security Regulations",
+    ]  # not: species at risk, motor vehicles
+    assert _hits("gazette_p2") == [
+        "SOR/2026-201 Regulations Amending the Canada Pension Plan Regulations"]
+    assert _hits("ns_news") == [
+        "New long-term care beds open in Kentville",
+        "Caregiver Benefit expanded to more families",
+    ]  # not: highway twinning, French duplicate
 
 
 def test_weak_terms_need_company():
@@ -148,11 +199,16 @@ def test_schema_is_strict():
 # ── store helpers ────────────────────────────────────────────────────────────
 
 def test_url_normalization_dedupes_variants():
-    a = "https://WWW.Canada.ca/en/news/x.html?utm_source=rss#top"
+    a = "https://WWW.Canada.ca/en/news/x.html/?utm_source=rss&utm_medium=feed"
     b = "https://www.canada.ca/en/news/x.html"
     assert normalize_url(a) == normalize_url(b)
     assert url_hash(a) == url_hash(b)
     assert url_hash(b) != url_hash("https://www.canada.ca/en/news/y.html")
+
+
+def test_url_fragments_distinguish_gazette_notices():
+    base = "https://gazette.gc.ca/rp-pr/p1/2026/2026-09-05/html/notice-avis-eng.html"
+    assert url_hash(base + "#ne1") != url_hash(base + "#ne2")
 
 
 def _cand(**kw) -> dict:
