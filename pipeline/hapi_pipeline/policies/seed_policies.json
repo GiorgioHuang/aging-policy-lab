@@ -34,7 +34,7 @@
     "department": "Employment and Social Development Canada",
     "released_at": "2004-01-01",
     "source_url": "https://www.canada.ca/en/employment-social-development/programs/new-horizons-seniors.html",
-    "full_text": "A federal grants and contributions program funding community-based projects that help seniors stay active, engaged, and socially connected, reducing isolation. Annual community and pan-Canadian funding streams support volunteerism, mentorship, and social participation for older adults.",
+    "full_text": "A federal grants and contributions program, running since 2004, that funds community-based projects helping seniors stay active, engaged and socially connected. Projects must involve seniors in leading, planning or delivering them, and address at least one of five objectives: promoting volunteerism among seniors and other generations; engaging seniors through mentoring others; expanding awareness of elder abuse, including financial abuse; supporting the social participation and inclusion of seniors; and capital assistance for community projects and programs for seniors. In the 2025–26 community-based call, organizations could receive grants of up to $25,000 for projects of up to 52 weeks. The program has funded over 45,000 projects, with total federal investment above $1 billion, and more than 900,000 seniors take part in its community-based projects each year. Funding is announced regionally, e.g. $147,854 for seven projects in southern Alberta on September 9, 2026.",
     "budget_amount": 70000000,
     "budget_currency": "CAD",
     "target_population": {
@@ -43,11 +43,15 @@
     },
     "kpis": [
       "reduce social isolation",
-      "fund community projects annually"
+      "fund community projects annually",
+      "seniors participating in community-based projects each year (900,000+)",
+      "projects funded since 2004 (45,000+)"
     ],
     "lifecycle_status": "in_effect",
     "theme": [
-      "social participation"
+      "social participation",
+      "volunteerism",
+      "elder abuse"
     ],
     "indicators": []
   },
@@ -719,25 +723,5 @@
       "digital_inclusion.virtual_care_visits_ns",
       "care_access.regular_provider_65plus"
     ]
-  },
-  {
-    "slug": "ca-fed-secretary-of-state-mclean-announces-funding-for-alberta-2026",
-    "jurisdiction_code": "CA-FED",
-    "title": "Secretary of State McLean announces funding for Alberta seniors",
-    "department": "Employment and Social Development Canada",
-    "released_at": "2026-09-09",
-    "source_url": "https://www.canada.ca/en/employment-social-development/news/2026/09/secretary-of-state-mclean-announces-funding-for-alberta-seniors0.html",
-    "full_text": "As the cost of living continues to rise, the Government of Canada is taking action to make life more affordable for seniors, and to help them stay active and connected to their communities.",
-    "budget_currency": "CAD",
-    "target_population": {
-      "age": "65+",
-      "group": "older adults"
-    },
-    "kpis": [],
-    "lifecycle_status": "announced",
-    "theme": [
-      "seniors"
-    ],
-    "indicators": []
   }
 ]
