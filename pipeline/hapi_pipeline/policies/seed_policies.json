@@ -717,5 +717,45 @@
       "digital_inclusion.virtual_care_visits_ns",
       "care_access.regular_provider_65plus"
     ]
+  },
+  {
+    "slug": "ca-fed-secretary-of-state-mclean-announces-funding-for-alberta-seni-2026",
+    "jurisdiction_code": "CA-FED",
+    "title": "Secretary of State McLean announces funding for Alberta seniors",
+    "department": "Employment and Social Development Canada",
+    "released_at": "2026-09-09",
+    "source_url": "https://www.canada.ca/en/employment-social-development/news/2026/09/secretary-of-state-mclean-announces-funding-for-alberta-seniors0.html",
+    "full_text": "As the cost of living continues to rise, the Government of Canada is taking action to make life more affordable for seniors, and to help them stay active and connected to their communities.",
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "older adults"
+    },
+    "kpis": [],
+    "lifecycle_status": "announced",
+    "theme": [
+      "seniors"
+    ],
+    "indicators": []
+  },
+  {
+    "slug": "ca-ns-community-projects-helping-seniors-age-well-stay-healthy-2026",
+    "jurisdiction_code": "CA-NS",
+    "title": "Community Projects Helping Seniors Age Well, Stay Healthy",
+    "released_at": "2026-10-08",
+    "source_url": "https://news.novascotia.ca/en/2026/10/08/community-projects-helping-seniors-age-well-stay-healthy",
+    "full_text": "Cans of food on the shelves of VETS Canada’s community pantry in Dartmouth. (Province of Nova Scotia) Seniors are staying healthy, active, and connected in their communities through 44 projects supported by the Age-Friendly Communities Grant program.",
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "older adults"
+    },
+    "kpis": [],
+    "lifecycle_status": "announced",
+    "theme": [
+      "seniors",
+      "age-friendly"
+    ],
+    "indicators": []
   }
 ]
