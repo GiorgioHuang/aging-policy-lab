@@ -133,10 +133,12 @@ python -m hapi_pipeline.cli watch digest --days 7  # Markdown digest (weekly iss
 ```
 
 - `watch/sources.py` — sources (GC news API, Canada Gazette I/II expanded per
-  issue, NS news releases read from the site's listing) and their parsers; `watch/triage.py` — weighted keywords
+  issue, LEGISinfo and NS Legislature bill feeds, NS news releases read from the
+  site's listing) and their parsers; `watch/triage.py` — weighted keywords
   + optional Claude structured-output triage; `watch/store.py` — dedup, storage
   (`policy_candidate`), review → `seed_policies.json` drafts, digest.
-- Tests: `pip install pytest && python -m pytest tests/` (pure; no DB or network).
+- Tests: `pip install pytest && python -m pytest tests/` (pure; no DB or network);
+  CI runs them on every push touching `pipeline/` (`pipeline-tests.yml`).
 - Scheduling and review workflows: RUNBOOK.md §G; design: docs/04 §9.
 
 ## Setup

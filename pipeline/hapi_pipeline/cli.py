@@ -451,6 +451,10 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
                 print(f"    item summary used: {items[0].summary[:300]!r}")
         else:
             print(f"    first bytes: {raw[:300]!r}")
+            m = _re.search(rb"<(item|entry)\b.*?</\1>", raw, _re.DOTALL)
+            if m:  # one raw item, to see which fields the publisher fills in
+                first_item = _re.sub(rb"\s+", b" ", m.group(0))[:700]
+                print(f"    first item: {first_item!r}")
         dated = [i for i in items if i.published_at]
         newest = max((i.published_at for i in dated), default=None)
         oldest = min((i.published_at for i in dated), default=None)

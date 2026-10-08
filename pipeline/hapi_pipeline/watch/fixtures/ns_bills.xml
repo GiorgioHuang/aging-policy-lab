@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real bills. -->
+<rss version="2.0"><channel>
+  <title>Nova Scotia Legislature - Bills (sample)</title>
+  <item>
+    <title>Bill 301 - Seniors' Advocate Act</title>
+    <link>https://example.org/fixture/nslegislature/bill-301</link>
+    <description>First reading.</description>
+    <pubDate>Thu, 24 Sep 2026 17:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>Bill 302 - Traffic Safety Act (amended)</title>
+    <link>https://example.org/fixture/nslegislature/bill-302</link>
+    <description>First reading.</description>
+    <pubDate>Thu, 24 Sep 2026 17:30:00 GMT</pubDate>
+  </item>
+</channel></rss>

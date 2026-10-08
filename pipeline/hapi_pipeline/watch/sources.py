@@ -9,7 +9,8 @@ Every source below was checked against the live site with `hapi watch probe`
   * ``rss``  — Canada Gazette Part I (notices, proposed regulations) and Part II
                (enacted regulations). The feed lists whole *issues*, so each
                in-window issue page is opened and its table of contents
-               expanded into one item per notice / regulation.
+               expanded into one item per notice / regulation. Also the bill
+               feeds of Parliament (LEGISinfo) and the NS Legislature.
   * ``html`` — Nova Scotia news releases. The province's legacy RSS
                (novascotia.ca/news/rss/rss.asp) returns an empty stub, its
                open-data copy (data.novascotia.ca xcif-vvr3) stopped updating in
@@ -141,6 +142,24 @@ SOURCES: list[WatchSource] = [
         department="Canada Gazette Part II",
         expand_issues=True,
         issue_fixture="gazette_p2_issue.html",
+    ),
+    WatchSource(
+        name="legisinfo_bills",
+        label="Federal bills — LEGISinfo (House of Commons and Senate)",
+        kind="rss",
+        jurisdiction_code="CA-FED",
+        fixture_name="legisinfo_bills.xml",
+        url="https://www.parl.ca/legisinfo/en/bills/rss",
+        department="Parliament of Canada",
+    ),
+    WatchSource(
+        name="ns_bills",
+        label="Nova Scotia bills — Legislature of Nova Scotia",
+        kind="rss",
+        jurisdiction_code="CA-NS",
+        fixture_name="ns_bills.xml",
+        url="https://nslegislature.ca/legislative-business/bills-statutes/rss",
+        department="Nova Scotia Legislature",
     ),
     WatchSource(
         name="ns_news",

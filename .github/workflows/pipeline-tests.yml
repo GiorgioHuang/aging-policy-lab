@@ -1,0 +1,27 @@
+name: Pipeline tests
+
+# Unit tests for the Python pipeline (no DB, no network, no secrets).
+on:
+  push:
+    paths: ["pipeline/**", ".github/workflows/pipeline-tests.yml"]
+  pull_request:
+    paths: ["pipeline/**"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: pipeline
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest tests/ -q

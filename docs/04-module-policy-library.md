@@ -8,7 +8,7 @@
 - **每条政策记录的字段**:发布时间、发布部门、政策全文、AI 摘要、预算、目标人群、KPI、生命周期状态、主题标签。
 - **AI 自动整理**:抓取原文 → Claude 生成摘要、抽取预算/目标人群/KPI/主题 → 人工复核 → 入库。所有 AI 字段可溯源到原文。
 - **生命周期**:announced → funded → in_effect → amended → retired,用 `PolicyVersion` 留存修订史。
-- **Policy Watch(持续跟进)**:每天轮询联邦新闻 API、Canada Gazette I/II、NS 新闻稿 → 关键词 + Claude 两级筛选 → 候选队列 → 每周 GitHub Issue 摘要 → 人工接受后起草进种子文件并开 PR(见 §9)。
+- **Policy Watch(持续跟进)**:每天轮询联邦新闻 API、Canada Gazette I/II、联邦与 NS 议会法案、NS 新闻稿 → 关键词 + Claude 两级筛选 → 候选队列 → 每周 GitHub Issue 摘要 → 人工接受后起草进种子文件并开 PR(见 §9)。
 
 ---
 
@@ -134,6 +134,8 @@ machine-readable feeds, chosen by where a policy first becomes public:
 | Government of Canada news API (`api.io.canada.ca`), all departments + ESDC / PHAC backstops | announcements, funding | Atom |
 | Canada Gazette Part I | proposed regulations, notices | RSS |
 | Canada Gazette Part II | enacted regulations | RSS |
+| Federal bills — LEGISinfo (House and Senate) | legislation | RSS |
+| Nova Scotia bills — Legislature of Nova Scotia | legislation | RSS |
 | Nova Scotia news releases (`news.novascotia.ca` listing + each release page) | provincial announcements, funding | HTML |
 
 Every source was verified live with `hapi watch probe` from a GitHub runner.
@@ -184,7 +186,9 @@ indicators before merging; the next ingest loads it. The library therefore
 remains a curated, version-controlled seed — every record has a reviewed diff.
 
 **Limits.** Feeds report announcements, not implementation: a funded program
-can lapse without a release. Coverage is what the feeds carry — Nova Scotia
-legislation and the NS Royal Gazette, federal bills (LEGISinfo), budgets and
-FPT Seniors Forum communiqués are not yet watched. Keyword triage favours
-recall; Claude's verdict is advisory, never final.
+can lapse without a release. Dedup is by URL, so a bill becomes a candidate
+once, when first seen; its later stages (second reading, royal assent) are
+lifecycle updates to track on the library record, not new candidates. Not yet
+watched: the NS Royal Gazette Part II (published only as PDF issues), budgets,
+and FPT Seniors Forum communiqués. Keyword triage favours recall; Claude's
+verdict is advisory, never final.

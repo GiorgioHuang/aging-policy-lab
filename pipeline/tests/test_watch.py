@@ -138,6 +138,11 @@ def test_keywords_keep_aging_policy_and_drop_decoys():
     ]  # not: species at risk, motor vehicles
     assert _hits("gazette_p2") == [
         "SOR/2026-201 Regulations Amending the Canada Pension Plan Regulations"]
+    assert _hits("legisinfo_bills") == [
+        "C-250, An Act to amend the Old Age Security Act (minimum benefit)",
+        "S-230, An Act respecting the national framework on long-term care standards",
+    ]  # not: Fisheries Act
+    assert _hits("ns_bills") == ["Bill 301 - Seniors' Advocate Act"]  # not: traffic safety
     assert sorted(_hits("ns_news")) == [
         "Caregiver Benefit Expanded to More Families",
         "New Long-Term Care Beds Open in Kentville",
