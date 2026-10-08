@@ -224,7 +224,10 @@ def list_candidates(status: str | None = "new", limit: int = 50) -> list[dict]:
 
 def _slugify(text: str, limit: int = 60) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    return s[:limit].rstrip("-")
+    if len(s) <= limit:
+        return s
+    cut = s[:limit + 1]  # keep whole words: cut at the last hyphen in range
+    return cut[:cut.rfind("-")] if "-" in cut else s[:limit]
 
 
 def draft_seed_entry(c: dict) -> dict:

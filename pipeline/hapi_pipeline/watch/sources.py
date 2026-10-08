@@ -577,6 +577,12 @@ def page_meta(page: bytes) -> _MetaParser:
     return parser
 
 
+# A photo caption ends with its credit, e.g. "(Province of Nova Scotia)" or
+# "(Province of Nova Scotia / File)"; it is not the release's text.
+_PHOTO_CREDIT = re.compile(r"\((?:Province of Nova Scotia|Communications Nova Scotia)"
+                           r"[^()]*\)\s*$")
+
+
 def with_details(item: FeedItem, page: bytes) -> FeedItem:
     """Fill summary (and a better title) from an item page.
 
@@ -588,7 +594,8 @@ def with_details(item: FeedItem, page: bytes) -> FeedItem:
     meta = parsed.meta
     summary = meta.get("og:description") or meta.get("description") or ""
     if not summary:
-        summary = " ".join([p for p in parsed.paragraphs if len(p) >= 60][:2])
+        body = [p for p in parsed.paragraphs if len(p) >= 60 and not _PHOTO_CREDIT.search(p)]
+        summary = " ".join(body[:2])
     title = meta.get("og:title") or ""
     return FeedItem(
         source=item.source,

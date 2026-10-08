@@ -369,3 +369,23 @@ def test_render_digest_progress_section():
 def test_only_bill_sources_track_updates():
     tracked = {s.name for s in src.all_sources() if s.track_updates}
     assert tracked == {"legisinfo_bills", "ns_bills"}
+
+
+def test_with_details_skips_photo_captions():
+    item = src.FeedItem("ns_news", "https://x/en/2026/10/08/a", "Community Projects Helping Seniors")
+    page = ("<html><body>"
+            "<p>Cans of food on the shelves of VETS Canada's community pantry in Dartmouth. "
+            "(Province of Nova Scotia)</p>"
+            "<p>The Highway 102 interchange in Halifax is seen in 2020. (Province of Nova Scotia / File)</p>"
+            "<p>Seniors are staying healthy, active, and connected in their communities through 44 "
+            "projects supported by the Age-Friendly Communities Grant program.</p>"
+            "</body></html>").encode()
+    assert src.with_details(item, page).summary.startswith("Seniors are staying healthy")
+
+
+def test_slug_cuts_at_word_boundary():
+    from hapi_pipeline.watch.store import _slugify
+    s = _slugify("Secretary of State McLean announces funding for Alberta seniors")
+    assert s == "secretary-of-state-mclean-announces-funding-for-alberta"
+    assert len(s) <= 60 and not s.endswith("-")
+    assert _slugify("Short title") == "short-title"
