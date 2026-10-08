@@ -147,7 +147,15 @@ SOURCES: list[WatchSource] = [
     ),
     WatchSource(
         name="ns_news",
-        label="Nova Scotia government news releases (data.novascotia.ca xcif-vvr3)",
+        label="Nova Scotia government news releases (all departments, RSS)",
+        kind="rss",
+        jurisdiction_code="CA-NS",
+        fixture_name="ns_news.xml",
+        url="https://novascotia.ca/news/rss/rss.asp",
+    ),
+    WatchSource(
+        name="ns_news_opendata",
+        label="Nova Scotia news releases on data.novascotia.ca (xcif-vvr3; lags)",
         kind="socrata",
         jurisdiction_code="CA-NS",
         fixture_name="ns_news.json",

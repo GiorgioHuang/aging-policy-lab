@@ -69,7 +69,7 @@ def test_gazette_short_link_text_uses_row_text():
 
 
 def test_socrata_parse_real_field_names():
-    items = _items("ns_news")
+    items = _items("ns_news_opendata")
     first = items[0]
     assert first.title == "New long-term care beds open in Kentville"  # `subject`
     assert first.url == "https://example.org/fixture/ns/ltc-beds-kentville"
@@ -80,7 +80,7 @@ def test_socrata_parse_real_field_names():
 
 
 def test_socrata_url_object_form():
-    s = src.get_source("ns_news")
+    s = src.get_source("ns_news_opendata")
     raw = json.dumps([{"subject": "Seniors grant opens", "url": {"url": "https://x.ca/a"},
                        "timestamp": "2026-09-01T00:00:00.000"}]).encode()
     assert src.parse(s, raw)[0].url == "https://x.ca/a"
@@ -109,7 +109,7 @@ def test_live_url_adds_date_filter():
 
 
 def test_socrata_live_url_filters_and_orders_server_side():
-    url = src.get_source("ns_news").live_url(date(2026, 9, 1))
+    url = src.get_source("ns_news_opendata").live_url(date(2026, 9, 1))
     assert "%24where=timestamp+%3E%3D+%272026-09-01T00%3A00%3A00%27" in url
     assert "%24order=timestamp+DESC" in url
 
@@ -128,7 +128,8 @@ def test_keywords_keep_aging_policy_and_drop_decoys():
     ]  # not: species at risk, motor vehicles
     assert _hits("gazette_p2") == [
         "SOR/2026-201 Regulations Amending the Canada Pension Plan Regulations"]
-    assert _hits("ns_news") == [
+    assert _hits("ns_news") == ["New Long-Term Care Beds Open in Kentville"]  # not: highway
+    assert _hits("ns_news_opendata") == [
         "New long-term care beds open in Kentville",
         "Caregiver Benefit expanded to more families",
     ]  # not: highway twinning, French duplicate
