@@ -391,19 +391,32 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
     from .watch.triage import keyword_match
 
     if args.discover:
-        # List feed-like links on a page (e.g. a ministry's "RSS feeds" page),
-        # to find the URL of a new source before adding it to sources.py.
+        # Size up a candidate source before adding it to sources.py: what the URL
+        # returns, the feed-like links on it, and a sample of its other links
+        # (to design an HTML listing's item_pattern).
         for page in args.discover:
-            print(f"=== feed links on {page}")
+            print(f"=== {page}")
             try:
-                html_text = src.http_get(page).decode("utf-8", errors="replace")
+                body = src.http_get(page)
             except Exception as exc:  # noqa: BLE001
                 print(f"    ✗ {type(exc).__name__}: {exc}")
                 continue
-            pat = r'<(?:a|link)\b[^>]*href=["\']([^"\']+)["\'][^>]*>([^<]*)'
-            for href, text in _re.findall(pat, html_text, flags=_re.IGNORECASE):
-                if _re.search(r"rss|atom|\.xml|feed", href, _re.IGNORECASE):
-                    print(f"    {text.strip()[:60]!r:62} {urllib.parse.urljoin(page, href)}")
+            text = body.decode("utf-8", errors="replace")
+            print(f"    {len(body):,} bytes · first bytes: {body[:240]!r}")
+            lp = src._LinkParser()
+            lp.feed(text)
+            feeds, others = [], {}
+            for href, label in lp.links:
+                url = urllib.parse.urljoin(page, href)
+                if _re.search(r"rss|atom|\.xml|feed|json", href, _re.IGNORECASE):
+                    feeds.append((label, url))
+                elif href and not href.startswith(("#", "mailto:", "javascript:")):
+                    others.setdefault(urllib.parse.urlsplit(url).path, label)
+            for label, url in feeds:
+                print(f"    feed? {label[:50]!r:52} {url}")
+            print(f"    {len(lp.links)} links; sample of other paths:")
+            for path, label in list(others.items())[:40]:
+                print(f"      {path[:90]:92} {label[:60]!r}")
         return 0
 
     since = src.default_since(args.since_days)
