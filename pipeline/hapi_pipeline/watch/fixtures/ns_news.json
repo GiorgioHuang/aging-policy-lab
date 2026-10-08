@@ -1,0 +1,17 @@
+[
+  {"title": "New long-term care beds open in Kentville",
+   "department": "Seniors and Long-term Care",
+   "release_date": "2026-09-08T10:00:00.000",
+   "url": {"url": "https://example.org/fixture/ns/ltc-beds-kentville"},
+   "summary": "Province adds 48 long-term care beds to reduce wait times for older Nova Scotians."},
+  {"title": "Caregiver Benefit expanded to more families",
+   "department": "Seniors and Long-term Care",
+   "release_date": "2026-09-09T10:00:00.000",
+   "url": {"url": "https://example.org/fixture/ns/caregiver-benefit"},
+   "summary": "More caregivers of seniors with high care needs will qualify."},
+  {"title": "Highway 101 twinning project begins",
+   "department": "Public Works",
+   "release_date": "2026-09-09T11:00:00.000",
+   "url": {"url": "https://example.org/fixture/ns/highway-101"},
+   "summary": "Construction starts on a new section of highway."}
+]

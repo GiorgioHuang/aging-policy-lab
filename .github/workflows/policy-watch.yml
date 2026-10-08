@@ -1,0 +1,109 @@
+name: Policy Watch
+
+# Discover new aging policy as it is published (docs/04 §9). Daily: poll the
+# federal news API, Canada Gazette I/II and Nova Scotia news releases, keep
+# aging-relevant items (keywords, then Claude if ANTHROPIC_API_KEY is set), and
+# store them as candidates in Neon. Mondays: open a GitHub issue digest of the
+# week's candidates for review (see policy-watch-review.yml).
+#
+# Secrets: DATABASE_URL (required; job is skipped without it), ANTHROPIC_API_KEY
+# (optional; without it triage is keyword-only and every match is listed).
+# Manual runs: mode=probe checks the live feeds without touching the DB.
+
+on:
+  schedule:
+    - cron: "41 11 * * *" # daily 11:41 UTC (~08:41 Atlantic, after morning releases)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: What to run
+        type: choice
+        options: [fetch-and-digest, fetch, probe]
+        default: fetch-and-digest
+      since_days:
+        description: Ignore items published more than this many days ago
+        default: "30"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: policy-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      MODE: ${{ inputs.mode || 'scheduled' }}
+      SINCE_DAYS: ${{ inputs.since_days || '30' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pipeline
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Probe live feeds (no DB)
+        if: env.MODE == 'probe'
+        run: python -m hapi_pipeline.cli watch probe --since-days "$SINCE_DAYS"
+        working-directory: pipeline
+
+      - name: Decide what to run
+        id: plan
+        if: env.MODE != 'probe'
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DATABASE_URL secret not set — skipping Policy Watch. See RUNBOOK.md §G."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          # Digest on scheduled Mondays, or when asked for explicitly.
+          if [ "$MODE" = "fetch-and-digest" ] || { [ "$MODE" = "scheduled" ] && [ "$(date -u +%u)" = 1 ]; }; then
+            echo "digest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "digest=false" >> "$GITHUB_OUTPUT"
+          fi
+          [ -n "$ANTHROPIC_API_KEY" ] || echo "::notice::ANTHROPIC_API_KEY not set — keyword-only triage."
+
+      - name: Install psql client
+        if: steps.plan.outputs.run == 'true'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Apply migrations
+        if: steps.plan.outputs.run == 'true'
+        run: bash db/migrate.sh
+
+      - name: Fetch + triage new items
+        if: steps.plan.outputs.run == 'true'
+        run: python -m hapi_pipeline.cli watch fetch --live --since-days "$SINCE_DAYS"
+        working-directory: pipeline
+
+      - name: Build weekly digest
+        if: steps.plan.outputs.digest == 'true'
+        run: python -m hapi_pipeline.cli watch digest --days 7 --out "$RUNNER_TEMP/digest.md"
+        working-directory: pipeline
+
+      - name: Open digest issue
+        if: steps.plan.outputs.digest == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f "$RUNNER_TEMP/digest.md" ]; then
+            echo "No new candidates this week — no issue opened."
+            exit 0
+          fi
+          gh label create policy-watch --color 1d76db \
+            --description "Policy Watch weekly digest" --force
+          gh issue create --label policy-watch \
+            --title "Policy Watch digest — $(date -u +%F)" \
+            --body-file "$RUNNER_TEMP/digest.md"
+          cat "$RUNNER_TEMP/digest.md" >> "$GITHUB_STEP_SUMMARY"

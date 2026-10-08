@@ -8,6 +8,7 @@
 - **每条政策记录的字段**:发布时间、发布部门、政策全文、AI 摘要、预算、目标人群、KPI、生命周期状态、主题标签。
 - **AI 自动整理**:抓取原文 → Claude 生成摘要、抽取预算/目标人群/KPI/主题 → 人工复核 → 入库。所有 AI 字段可溯源到原文。
 - **生命周期**:announced → funded → in_effect → amended → retired,用 `PolicyVersion` 留存修订史。
+- **Policy Watch(持续跟进)**:每天轮询联邦新闻 API、Canada Gazette I/II、NS 新闻稿 → 关键词 + Claude 两级筛选 → 候选队列 → 每周 GitHub Issue 摘要 → 人工接受后起草进种子文件并开 PR(见 §9)。
 
 ---
 
@@ -109,7 +110,7 @@ The `policy_indicator` join (see [`03-data-model.md`](03-data-model.md) §3) rec
 - AI summaries + extracted fields with human review.
 - Lifecycle status on every record.
 
-Out of v1: automated continuous policy *discovery* (crawling). v1 curates a high-quality seed set; automated discovery is a later enhancement (see [`11-implementation-roadmap.md`](11-implementation-roadmap.md)).
+v1 curated a high-quality seed set by hand. Continuous discovery of *new* policy is now handled by **Policy Watch** (§9), which proposes candidates; a person still decides what enters the library.
 
 ## 8. Visualization (web)
 
@@ -119,3 +120,62 @@ dots stacked within a year. Hovering previews the title; **clicking a dot pins a
 detail card** with an explicit *open source ↗* link; the legend filters a
 jurisdiction. The same strip appears on the homepage ("Aging-policy cadence").
 See RUNBOOK §F for the component inventory and interaction details.
+
+## 9. Policy Watch — continuous discovery
+
+The seed tells us what policy *existed*; Policy Watch tells us what is *new*.
+It turns the library from a one-off curation into a monitored system.
+
+**Sources** (`pipeline/hapi_pipeline/watch/sources.py`) — official,
+machine-readable feeds, chosen by where a policy first becomes public:
+
+| Source | Stage it catches | Format |
+|---|---|---|
+| Government of Canada news API (`api.io.canada.ca`), all departments + ESDC / PHAC backstops | announcements, funding | Atom |
+| Canada Gazette Part I | proposed regulations, notices | RSS |
+| Canada Gazette Part II | enacted regulations | RSS |
+| Nova Scotia news releases (`data.novascotia.ca`, `xcif-vvr3`) | provincial announcements, funding | Socrata JSON |
+
+Adding a source means adding one `WatchSource` entry and a fixture.
+
+**Pipeline** (`hapi watch fetch`), one source at a time:
+
+```mermaid
+flowchart LR
+  F[Feed] --> W[Date window] --> K{Keyword score ≥ 2}
+  K -- no --> X[dropped]
+  K -- yes --> D{URL seen before?}
+  D -- yes --> X
+  D -- no --> C{Claude triage}
+  C -- relevant / not run --> N[candidate: new]
+  C -- not aging policy --> R[candidate: auto_rejected]
+```
+
+1. **Keywords** (free, deterministic). Weighted terms over title + summary +
+   department. Strong terms — *seniors, older adults, long-term care, home care,
+   dementia, OAS/GIS, CPP, New Horizons, age-friendly…* — pass alone; weak terms
+   — *pension, retirement, disability, caregivers, bare "aging"* — need company,
+   which keeps public-service pensions, aging infrastructure and child-care news out.
+2. **Dedup** on a hash of the normalized URL (tracking params and fragments
+   stripped), so re-polling is idempotent and Claude is never paid twice for an item.
+3. **Claude triage** (optional, `ANTHROPIC_API_KEY`). A structured-output call
+   decides whether the item is a government policy action whose main subject
+   is older adults, gives a category (*new_policy, amendment, funding,
+   regulation, consultation, report, other*) with a one-line rationale, and
+   drafts library fields (lifecycle, theme, target group, budget, HAPI
+   domains). Items judged irrelevant are kept as `auto_rejected` and still
+   listed (collapsed) in the digest, so false negatives can be caught.
+
+**Review — a person decides.** Candidates live in `policy_candidate`
+(`db/migrations/0009`). A weekly GitHub issue lists them; the *Policy Watch
+review* workflow (or `hapi watch review --accept … --reject …`) records the
+decision. Accepting drafts an entry in `seed_policies.json` and opens a PR, where
+the reviewer replaces the feed teaser with a proper `full_text` and links
+indicators before merging; the next ingest loads it. The library therefore
+remains a curated, version-controlled seed — every record has a reviewed diff.
+
+**Limits.** Feeds report announcements, not implementation: a funded program
+can lapse without a release. Coverage is what the feeds carry — Nova Scotia
+legislation and the NS Royal Gazette, federal bills (LEGISinfo), budgets and
+FPT Seniors Forum communiqués are not yet watched. Keyword triage favours
+recall; Claude's verdict is advisory, never final.

@@ -122,6 +122,23 @@ python -m hapi_pipeline.cli assistant "NS dementia policy"   # evidence pack (+ 
 > recorded as `source_version = 'fixture:…'`. Use `--live` where the network
 > allows. See [`hapi_pipeline/ingest/fixtures/README.md`](hapi_pipeline/ingest/fixtures/README.md).
 
+## Policy Watch (continuous policy discovery)
+
+```bash
+python -m hapi_pipeline.cli watch probe            # what the live feeds return (no DB)
+python -m hapi_pipeline.cli watch fetch [--live]   # poll → keywords → (Claude) → candidates
+python -m hapi_pipeline.cli watch list             # candidates awaiting review
+python -m hapi_pipeline.cli watch review --accept 12 --reject 13   # drafts seed entries
+python -m hapi_pipeline.cli watch digest --days 7  # Markdown digest (weekly issue body)
+```
+
+- `watch/sources.py` — feeds (GC news API, Canada Gazette I/II, NS news releases)
+  and tolerant RSS / Atom / Socrata parsing; `watch/triage.py` — weighted keywords
+  + optional Claude structured-output triage; `watch/store.py` — dedup, storage
+  (`policy_candidate`), review → `seed_policies.json` drafts, digest.
+- Tests: `pip install pytest && python -m pytest tests/` (pure; no DB or network).
+- Scheduling and review workflows: RUNBOOK.md §G; design: docs/04 §9.
+
 ## Setup
 
 ```bash

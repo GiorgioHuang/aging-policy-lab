@@ -5,6 +5,8 @@
     hapi ingest [--source N] [--live]  run Data Hub connectors (idempotent)
     hapi observations [--limit N] [--indicator SUBSTR]
                                        print loaded values with full lineage
+    hapi watch probe|fetch|list|review|digest
+                                       Policy Watch: discover new aging policy
 
 Later phases add indicators/analytics commands (docs/11).
 """
@@ -370,6 +372,144 @@ def _cmd_assistant(args: argparse.Namespace) -> int:
     return 0
 
 
+def _watch_sources(args: argparse.Namespace):
+    from .watch.sources import all_sources, get_source
+
+    return [get_source(args.source)] if args.source else all_sources()
+
+
+def _ids(csv: str | None) -> list[int]:
+    return [int(x) for x in (csv or "").replace(" ", "").split(",") if x]
+
+
+def _cmd_watch_probe(args: argparse.Namespace) -> int:
+    """Fetch each live feed and show what it returns — no DB, no AI."""
+    import json as _json
+
+    from .watch import sources as src
+    from .watch.triage import keyword_match
+
+    since = src.default_since(args.since_days)
+    ok = 0
+    for s in _watch_sources(args):
+        url = s.live_url(since)
+        print(f"=== {s.name} — {s.label}\n    {url}")
+        try:
+            raw = src.http_get(url)
+            items = src.parse(s, raw)
+        except Exception as exc:  # noqa: BLE001
+            print(f"    ✗ {type(exc).__name__}: {exc}")
+            continue
+        ok += 1
+        if s.kind == "socrata":
+            rows = _json.loads(raw)
+            print(f"    fields: {sorted(rows[0]) if rows else '(no rows)'}")
+            if rows:
+                print(f"    row[0]: {_json.dumps(rows[0], ensure_ascii=False)[:600]}")
+        else:
+            print(f"    first bytes: {raw[:300]!r}")
+        dated = [i for i in items if i.published_at]
+        newest = max((i.published_at for i in dated), default=None)
+        oldest = min((i.published_at for i in dated), default=None)
+        hits = [i for i in items if keyword_match(i).passes]
+        print(f"    ✓ {len(raw):,} bytes · {len(items)} items · dated {len(dated)} "
+              f"({oldest and oldest.date()} → {newest and newest.date()}) · "
+              f"keyword hits {len(hits)}")
+        for i in items[:3]:
+            print(f"      - {i.published_at and i.published_at.date()} | "
+                  f"{i.department[:40]} | {i.title[:90]}")
+        for i in hits[:5]:
+            print(f"      ★ {i.title[:100]}  {keyword_match(i).terms}")
+    return 0 if ok else 1
+
+
+def _cmd_watch_fetch(args: argparse.Namespace) -> int:
+    from datetime import date
+
+    from .watch import sources as src
+    from .watch.store import watch_source
+    from .watch.triage import make_client
+
+    # Fixtures are static samples; don't let the date window age them out.
+    since = src.default_since(args.since_days) if args.live else date(2000, 1, 1)
+    client = None if args.no_ai else make_client()
+    print(f"Policy Watch — {'live' if args.live else 'fixtures'} · since {since} · "
+          f"Claude triage {'on' if client else 'off (keywords only)'}")
+    failed, total_new = [], 0
+    for s in _watch_sources(args):
+        try:
+            st = watch_source(s, live=args.live, since=since, client=client)
+        except Exception as exc:  # noqa: BLE001 — one dead feed must not stop the others
+            failed.append(s.name)
+            # GitHub Actions annotation, so a failing feed is visible on the run page.
+            print(f"::warning title=Policy Watch source failed::{s.name}: "
+                  f"{type(exc).__name__}: {exc}")
+            continue
+        total_new += st.new
+        ai = (f" · relevant {st.ai_relevant} · auto-rejected {st.auto_rejected}"
+              if client else "")
+        print(f"{'✚' if st.new else '·'} {s.name}: {st.fetched} fetched · "
+              f"{st.in_window} in window · {st.matched} matched · {st.new} new{ai}")
+        for t in st.new_titles[:10]:
+            print(f"    + {t[:110]}")
+    print(f"done — {total_new} new candidate(s); "
+          f"{len(failed)} source(s) failed{': ' + ', '.join(failed) if failed else ''}")
+    # Fail only when every source failed (likely a network/config problem);
+    # individual feed failures are surfaced as warnings above.
+    return 1 if failed and len(failed) == len(_watch_sources(args)) else 0
+
+
+def _cmd_watch_list(args: argparse.Namespace) -> int:
+    from .watch.store import list_candidates
+
+    rows = list_candidates(None if args.status == "all" else args.status, args.limit)
+    for c in rows:
+        when = c["published_at"].date() if c["published_at"] else "undated"
+        ai = f" [{c['ai_category']} {c['ai_confidence']:.2f}]" if c["ai_category"] else ""
+        print(f"#{c['id']:<5} {c['status']:<13} {c['jurisdiction_code'] or '':<7} {when}  "
+              f"{c['title'][:80]}{ai}")
+        print(f"       {c['url']}")
+    print(f"({len(rows)} candidate(s))")
+    return 0
+
+
+def _cmd_watch_review(args: argparse.Namespace) -> int:
+    from .watch.store import review
+
+    accept, reject = _ids(args.accept), _ids(args.reject)
+    if not (accept or reject):
+        print("nothing to do — pass --accept and/or --reject ids", file=sys.stderr)
+        return 2
+    res = review(accept, reject, note=args.note, write_seed=not args.no_seed)
+    print(f"accepted {res.accepted or '—'} · rejected {res.rejected or '—'}")
+    for slug in res.seed_added:
+        print(f"  ✚ drafted seed entry: {slug}")
+    if res.seed_added:
+        print("  → edit the drafted entries in policies/seed_policies.json (full_text, KPIs, "
+              "indicators), then commit and run `hapi policies seed`.")
+    if res.missing:
+        print(f"  ⚠ no such candidate id(s): {res.missing}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def _cmd_watch_digest(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from .watch.store import digest
+
+    text, n = digest(args.days)
+    if not args.out:
+        print(text)
+    elif n:
+        Path(args.out).write_text(text, encoding="utf-8")
+        print(f"wrote {args.out} — {n} new candidate(s)")
+    else:
+        # No file → the workflow posts no issue (a quiet week stays quiet).
+        print(f"no new candidates in the last {args.days} day(s) — {args.out} not written")
+    return 0
+
+
 def _cmd_inspect(args: argparse.Namespace) -> int:
     from .ingest.registry import all_connectors, get_connector
 
@@ -448,6 +588,39 @@ def main(argv: list[str] | None = None) -> int:
     p_as.add_argument("topic", help="research topic, e.g. 'NS dementia policy'")
     p_as.add_argument("--model", help="Claude model id (default: HAPI_SUMMARY_MODEL or opus)")
     p_as.set_defaults(func=_cmd_assistant)
+
+    p_w = sub.add_parser("watch", help="Policy Watch: discover new aging-policy items")
+    w_sub = p_w.add_subparsers(dest="watch_cmd", required=True)
+    w_probe = w_sub.add_parser("probe", help="fetch live feeds and show what they return "
+                                             "(no DB, no AI)")
+    w_probe.add_argument("--source", help="probe only this source (e.g. gazette_p1)")
+    w_probe.add_argument("--since-days", type=int, default=30)
+    w_probe.set_defaults(func=_cmd_watch_probe)
+    w_fetch = w_sub.add_parser("fetch", help="poll feeds, triage, store new candidates")
+    w_fetch.add_argument("--source", help="run only this source")
+    w_fetch.add_argument("--live", action="store_true",
+                         help="fetch real feeds (default: vendored sample fixtures)")
+    w_fetch.add_argument("--since-days", type=int, default=30,
+                         help="ignore items published before this many days ago (live)")
+    w_fetch.add_argument("--no-ai", action="store_true",
+                         help="keyword triage only, even if ANTHROPIC_API_KEY is set")
+    w_fetch.set_defaults(func=_cmd_watch_fetch)
+    w_list = w_sub.add_parser("list", help="list candidates")
+    w_list.add_argument("--status", default="new",
+                        choices=["new", "accepted", "rejected", "auto_rejected", "all"])
+    w_list.add_argument("--limit", type=int, default=50)
+    w_list.set_defaults(func=_cmd_watch_list)
+    w_rev = w_sub.add_parser("review", help="accept / reject candidates by id")
+    w_rev.add_argument("--accept", help="comma-separated ids to accept (drafts seed entries)")
+    w_rev.add_argument("--reject", help="comma-separated ids to reject")
+    w_rev.add_argument("--note", help="review note stored on the candidates")
+    w_rev.add_argument("--no-seed", action="store_true",
+                       help="mark accepted without drafting seed_policies.json entries")
+    w_rev.set_defaults(func=_cmd_watch_review)
+    w_dig = w_sub.add_parser("digest", help="Markdown digest of recent candidates")
+    w_dig.add_argument("--days", type=int, default=7)
+    w_dig.add_argument("--out", help="write to this file instead of stdout")
+    w_dig.set_defaults(func=_cmd_watch_digest)
 
     args = parser.parse_args(argv)
     return args.func(args)

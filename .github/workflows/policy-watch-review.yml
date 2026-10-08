@@ -1,0 +1,97 @@
+name: Policy Watch review
+
+# Act on a Policy Watch digest: accept and/or reject candidates by id.
+# Accepting drafts entries in pipeline/hapi_pipeline/policies/seed_policies.json
+# and opens a PR, so every new Policy Library record is checked (and its
+# full_text / KPIs / indicators filled in) before it is merged and loaded.
+# Requires secret DATABASE_URL. If repository settings block Actions from
+# opening PRs, the branch is still pushed and the run summary links to it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      accept:
+        description: Candidate ids to accept, comma-separated (e.g. 12,15)
+        default: ""
+      reject:
+        description: Candidate ids to reject, comma-separated
+        default: ""
+      note:
+        description: Optional review note stored on the candidates
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: policy-watch-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ACCEPT: ${{ inputs.accept }}
+      REJECT: ${{ inputs.reject }}
+      NOTE: ${{ inputs.note }}
+    steps:
+      - name: Validate input
+        run: |
+          [ -n "$DATABASE_URL" ] || { echo "::error::DATABASE_URL secret not set."; exit 1; }
+          for v in "$ACCEPT" "$REJECT"; do
+            echo "$v" | grep -Eq '^[0-9, ]*$' || { echo "::error::ids must be digits and commas: '$v'"; exit 1; }
+          done
+          [ -n "$ACCEPT$REJECT" ] || { echo "::error::give at least one id to accept or reject."; exit 1; }
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pipeline
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Record review
+        run: |
+          args=()
+          [ -n "$ACCEPT" ] && args+=(--accept "$ACCEPT")
+          [ -n "$REJECT" ] && args+=(--reject "$REJECT")
+          [ -n "$NOTE" ] && args+=(--note "$NOTE")
+          python -m hapi_pipeline.cli watch review "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+        working-directory: pipeline
+
+      - name: Open PR with drafted seed entries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SEED=pipeline/hapi_pipeline/policies/seed_policies.json
+          if git diff --quiet -- "$SEED"; then
+            echo "No seed changes (only rejections, or entries already present)."
+            exit 0
+          fi
+          BRANCH="policy-watch/accept-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add "$SEED"
+          git commit -m "Policy Library: draft entries from Policy Watch candidates ${ACCEPT}"
+          git push -u origin "$BRANCH"
+          BODY="Drafted by Policy Watch from candidate(s) ${ACCEPT}.
+
+          Before merging, check each new entry in \`seed_policies.json\`:
+          - \`full_text\`: replace the feed teaser with a proper description
+          - \`budget_amount\`, \`kpis\`, \`lifecycle_status\`, \`theme\`
+          - \`indicators\`: link the HAPI indicators the policy is meant to move
+
+          After merge, the next Data Hub ingest run loads it (\`hapi policies seed\`)."
+          if ! gh pr create --base "${{ github.event.repository.default_branch }}" \
+                --head "$BRANCH" --title "Policy Watch: add candidate(s) ${ACCEPT}" \
+                --body "$BODY"; then
+            URL="${{ github.server_url }}/${{ github.repository }}/compare/${BRANCH}?expand=1"
+            echo "::warning::Could not open the PR (Actions may not be allowed to create PRs). Open it here: $URL"
+            echo "Open the PR manually: $URL" >> "$GITHUB_STEP_SUMMARY"
+          fi

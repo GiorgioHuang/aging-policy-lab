@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real regulations. -->
+<rss version="2.0"><channel>
+  <title>Canada Gazette, Part II (sample)</title>
+  <item>
+    <title>Regulations Amending the Canada Pension Plan Regulations</title>
+    <link>https://example.org/fixture/gazette/p2/cpp-regs</link>
+    <description>Amendments to the Canada Pension Plan Regulations.</description>
+    <pubDate>Wed, 10 Sep 2026 13:00:00 GMT</pubDate>
+  </item>
+  <item>
+    <title>Regulations Amending the Motor Vehicle Safety Regulations</title>
+    <link>https://example.org/fixture/gazette/p2/mvsr</link>
+    <description>Technical amendments.</description>
+    <pubDate>Wed, 10 Sep 2026 13:00:00 GMT</pubDate>
+  </item>
+</channel></rss>

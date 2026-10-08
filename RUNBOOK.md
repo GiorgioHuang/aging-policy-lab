@@ -307,3 +307,50 @@ jurisdiction label (`CA-NS → Nova Scotia`, `CA → Canada`), e.g. *"Sense of
 community belonging (strong), population 65+ · Nova Scotia"*; the raw indicator
 code stays in the card meta as a technical reference. ITS titles are curated
 per `REAL_ITS` / the illustrative example in `runner.py`.
+
+## G — Policy Watch (continuous policy discovery)
+
+Finds new aging policy as it is published and queues it for review (docs/04 §9).
+
+### 1. Secrets
+
+- `DATABASE_URL` — same Neon secret as §C (required).
+- `ANTHROPIC_API_KEY` — optional repo secret. With it, Claude triages each
+  keyword match; without it, triage is keyword-only and every match is listed.
+
+### 2. Check the feeds (no DB)
+
+Actions → **Policy Watch** → Run workflow → `mode: probe`. Prints, per source,
+the live URL, item count, date range, fields and keyword hits. Run it first, and
+again whenever a source starts failing (the daily run flags a dead feed with a
+`::warning::` annotation but keeps going with the others).
+
+### 3. The schedule
+
+- **Daily 11:41 UTC** — fetch + triage → new rows in `policy_candidate`.
+- **Mondays** — also opens an issue labelled `policy-watch` listing the week's
+  candidates (skipped when there are none). `mode: fetch-and-digest` does both now.
+
+### 4. Review
+
+Actions → **Policy Watch review** → Run workflow with `accept` / `reject` ids from
+the digest. Accepted candidates are drafted into `seed_policies.json` on a branch
+and a PR is opened; finish the entry (`full_text`, `kpis`, `indicators`) and merge.
+If the repo doesn't let Actions open PRs (Settings → Actions → General →
+*Allow GitHub Actions to create and approve pull requests*), the branch is still
+pushed and the run summary links to it.
+
+Locally (with `DATABASE_URL` set):
+
+```bash
+cd pipeline
+python -m hapi_pipeline.cli watch probe                 # live feeds, no DB
+python -m hapi_pipeline.cli watch fetch --live          # store new candidates
+python -m hapi_pipeline.cli watch list                  # pending review
+python -m hapi_pipeline.cli watch review --accept 12,15 --reject 13
+python -m hapi_pipeline.cli watch digest --days 7
+```
+
+Without `--live`, `watch fetch` reads synthetic sample feeds (example.org URLs)
+under `hapi_pipeline/watch/fixtures/` — for tests and local dev only.
+

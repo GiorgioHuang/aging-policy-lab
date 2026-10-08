@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample for offline tests and local dev (example.org URLs). Not real releases. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Canada News Centre (sample)</title>
+  <entry>
+    <title>Government of Canada increases Old Age Security for seniors aged 75 and over</title>
+    <link rel="alternate" href="https://example.org/fixture/gc/oas-increase-75"/>
+    <published>2026-09-02T14:00:00Z</published>
+    <author><name>Employment and Social Development Canada</name></author>
+    <summary type="html">&lt;p&gt;The Minister announced an increase to Old Age Security pension payments for older Canadians.&lt;/p&gt;</summary>
+  </entry>
+  <entry>
+    <title>New funding to support people living with dementia and their caregivers</title>
+    <link rel="alternate" href="https://example.org/fixture/gc/dementia-fund"/>
+    <published>2026-09-10T15:30:00Z</published>
+    <author><name>Public Health Agency of Canada</name></author>
+    <summary>Investment of $20 million through the Dementia Strategic Fund to improve quality of life for people living with dementia.</summary>
+  </entry>
+  <entry>
+    <title>Federal investment to replace aging bridges in Atlantic Canada</title>
+    <link rel="alternate" href="https://example.org/fixture/gc/aging-bridges"/>
+    <published>2026-09-11T13:00:00Z</published>
+    <author><name>Infrastructure Canada</name></author>
+    <summary>Funding to rehabilitate aging infrastructure on regional highways.</summary>
+  </entry>
+  <entry>
+    <title>More affordable child care spaces for families and caregivers</title>
+    <link rel="alternate" href="https://example.org/fixture/gc/child-care"/>
+    <published>2026-09-12T13:00:00Z</published>
+    <author><name>Employment and Social Development Canada</name></author>
+    <summary>New spaces under the Canada-wide early learning and child care system.</summary>
+  </entry>
+  <entry>
+    <title>Minister announces fisheries science investment</title>
+    <link rel="alternate" href="https://example.org/fixture/gc/fisheries"/>
+    <published>2026-09-12T16:00:00Z</published>
+    <author><name>Fisheries and Oceans Canada</name></author>
+    <summary>Support for ocean research.</summary>
+  </entry>
+</feed>
