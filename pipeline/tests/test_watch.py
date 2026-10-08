@@ -19,7 +19,7 @@ def _items(name: str) -> list[src.FeedItem]:
 
 
 def _collected(name: str) -> list[src.FeedItem]:
-    return src.collect(src.get_source(name), live=False, since=date(2026, 1, 1))[1]
+    return src.collect(src.get_source(name), live=False, since=src.FIXTURE_SINCE)[1]
 
 
 def _hits(name: str) -> list[str]:

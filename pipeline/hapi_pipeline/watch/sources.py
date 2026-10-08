@@ -36,6 +36,9 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+# Fixture items are dated 2026 and never change; a fixed window keeps them in
+# scope forever while still exercising the filter (the sample 2019 issue).
+FIXTURE_SINCE = date(2026, 1, 1)
 
 USER_AGENT = "Mozilla/5.0 (compatible; hapi-policy-watch/1.0; +https://acp.icareu.cc)"
 _RETRY_STATUS = {429, 500, 502, 503, 504}

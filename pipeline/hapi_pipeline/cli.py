@@ -434,14 +434,12 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
 
 
 def _cmd_watch_fetch(args: argparse.Namespace) -> int:
-    from datetime import date
-
     from .watch import sources as src
     from .watch.store import watch_source
     from .watch.triage import make_client
 
     # Fixtures are static samples; don't let the date window age them out.
-    since = src.default_since(args.since_days) if args.live else date(2000, 1, 1)
+    since = src.default_since(args.since_days) if args.live else src.FIXTURE_SINCE
     client = None if args.no_ai else make_client()
     print(f"Policy Watch — {'live' if args.live else 'fixtures'} · since {since} · "
           f"Claude triage {'on' if client else 'off (keywords only)'}")
