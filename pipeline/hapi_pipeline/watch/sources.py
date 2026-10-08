@@ -76,6 +76,7 @@ class WatchSource:
     issue_fixture: str = ""            # offline stand-in for an issue page
     # html: which links on the listing page are items; named groups y, m, d
     item_pattern: str = ""
+    pages: int = 1                     # html: listing pages to read (?page=0..n-1)
     detail_fixture: str = ""           # fixture dir of item pages, named <slug>.html
 
     def live_url(self, since: date) -> str:
@@ -147,7 +148,9 @@ SOURCES: list[WatchSource] = [
         kind="html",
         jurisdiction_code="CA-NS",
         fixture_name="ns_news.html",
-        url="https://news.novascotia.ca/",
+        # The full newest-first listing; the home page shows only a selection.
+        url="https://news.novascotia.ca/search/all",
+        pages=2,
         item_pattern=r"/en/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})/[^/?#]+/?$",
         detail_fixture="ns_news_pages",
     ),
@@ -189,9 +192,15 @@ def http_get(url: str, timeout: int = 30, retries: int = 2, backoff: float = 2.0
 
 
 def fetch_raw(source: WatchSource, *, live: bool, since: date) -> bytes:
-    if live:
-        return http_get(source.live_url(since))
-    return source.fixture_path.read_bytes()
+    if not live:
+        return source.fixture_path.read_bytes()
+    url = source.live_url(since)
+    if source.kind == "html" and source.pages > 1:
+        # Concatenated pages parse fine as one link soup.
+        sep = "&" if "?" in url else "?"
+        return b"\n".join(http_get(url if i == 0 else f"{url}{sep}page={i}")
+                          for i in range(source.pages))
+    return http_get(url)
 
 
 # ── parsing helpers ──────────────────────────────────────────────────────────
@@ -419,13 +428,15 @@ def parse_html_listing(source: WatchSource, raw: bytes) -> list[FeedItem]:
 
 
 class _MetaParser(HTMLParser):
-    """<meta name|property=... content=...> pairs and the page <title>."""
+    """<meta name|property=... content=...> pairs, the <title>, and <p> texts."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.meta: dict[str, str] = {}
         self.title = ""
+        self.paragraphs: list[str] = []
         self._in_title = False
+        self._p: list[str] | None = None
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -435,14 +446,23 @@ class _MetaParser(HTMLParser):
                 self.meta[key] = a["content"]
         elif tag == "title":
             self._in_title = True
+        elif tag == "p":
+            self._p = []
 
     def handle_data(self, data):
         if self._in_title:
             self.title += data
+        if self._p is not None:
+            self._p.append(data)
 
     def handle_endtag(self, tag):
         if tag == "title":
             self._in_title = False
+        elif tag == "p" and self._p is not None:
+            text = " ".join("".join(self._p).split())
+            if text:
+                self.paragraphs.append(text)
+            self._p = None
 
 
 def page_meta(page: bytes) -> _MetaParser:
@@ -452,9 +472,17 @@ def page_meta(page: bytes) -> _MetaParser:
 
 
 def with_details(item: FeedItem, page: bytes) -> FeedItem:
-    """Fill summary (and a better title) from an item page's meta tags."""
-    meta = page_meta(page).meta
+    """Fill summary (and a better title) from an item page.
+
+    Uses the description meta tags when present; NS release pages have none, so
+    otherwise the opening paragraphs of the body (short ones — bylines, photo
+    credits — skipped).
+    """
+    parsed = page_meta(page)
+    meta = parsed.meta
     summary = meta.get("og:description") or meta.get("description") or ""
+    if not summary:
+        summary = " ".join([p for p in parsed.paragraphs if len(p) >= 60][:2])
     title = meta.get("og:title") or ""
     return FeedItem(
         source=item.source,

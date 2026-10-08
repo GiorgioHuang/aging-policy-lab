@@ -87,7 +87,11 @@ def test_html_listing_details_fill_summary():
     assert "winter-driving-reminder" not in items  # 2025: outside the window
     assert items["new-long-term-care-beds-open-kentville"].summary.startswith(
         "The Province is adding 48 long-term care beds")
-    assert items["caregiver-benefit-expanded"].summary.startswith("More caregivers of seniors")
+    # NS release pages have no description meta: the opening body paragraphs are
+    # used, skipping short ones ("NEWS RELEASE", "Quotes:").
+    caregiver = items["caregiver-benefit-expanded"].summary
+    assert caregiver.startswith("More caregivers of seniors")
+    assert "$400 a month" in caregiver and "NEWS RELEASE" not in caregiver
 
 
 def test_with_details_prefers_longer_og_title():

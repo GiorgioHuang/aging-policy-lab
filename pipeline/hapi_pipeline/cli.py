@@ -432,6 +432,10 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
                 meta = src.page_meta(src.http_get(items[0].url))
                 print(f"    item page <title>: {meta.title.strip()[:120]!r}")
                 print(f"    item page meta: {dict(list(meta.meta.items())[:15])}")
+                long_ps = [x for x in meta.paragraphs if len(x) >= 60]
+                print(f"    item page: {len(meta.paragraphs)} <p>, {len(long_ps)} long; "
+                      f"first long: {[x[:160] for x in long_ps[:3]]}")
+                print(f"    item summary used: {items[0].summary[:300]!r}")
         else:
             print(f"    first bytes: {raw[:300]!r}")
         dated = [i for i in items if i.published_at]
