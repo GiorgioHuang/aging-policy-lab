@@ -304,8 +304,21 @@ def existing_matches(c: dict, seed: list[dict]) -> list[tuple[str, str]]:
     return hits
 
 
+def _page_text(url: str) -> str:
+    """Body text of an item's web page, for matching only (not stored). Feed
+    summaries are often a one-sentence teaser that never names the program;
+    the release body usually does. Empty on any failure, and for PDFs."""
+    if urllib.parse.urlsplit(url).path.lower().endswith(".pdf"):
+        return ""
+    try:
+        return " ".join(src.page_meta(src.http_get(url, retries=1)).paragraphs)
+    except Exception:  # noqa: BLE001 — matching falls back to the stored text
+        return ""
+
+
 def review(accept: list[int], reject: list[int], *, note: str | None = None,
-           write_seed: bool = True, seed_path: Path = SEED_PATH) -> ReviewResult:
+           write_seed: bool = True, seed_path: Path = SEED_PATH,
+           fetch_pages: bool = True) -> ReviewResult:
     """Accept / reject candidates. Accepting drafts seed entries (write_seed)."""
     ids = list(dict.fromkeys(accept + reject))
     with connect() as conn, conn.cursor() as cur:
@@ -318,8 +331,13 @@ def review(accept: list[int], reject: list[int], *, note: str | None = None,
         # update to it (a new funding round, an amendment): record the link and
         # leave the edit to the reviewer instead of drafting a duplicate.
         seed = json.loads(seed_path.read_text(encoding="utf-8"))
+        def with_page(c: dict) -> dict:
+            if not fetch_pages:
+                return c
+            return {**c, "summary": f"{c.get('summary') or ''} {_page_text(c['url'])}"}
+
         existing = {i: m for i in accept if i in found
-                    for m in [existing_matches(found[i], seed)] if m}
+                    for m in [existing_matches(with_page(found[i]), seed)] if m}
         drafts = {i: draft_seed_entry(found[i]) for i in accept
                   if i in found and i not in existing}
         seed_added = _append_to_seed(list(drafts.values()), seed_path) if write_seed else []

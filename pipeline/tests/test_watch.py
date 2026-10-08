@@ -410,3 +410,32 @@ def test_existing_matches_finds_program_already_in_library():
         ("ns-age-friendly-communities-grant-2017", "Age-Friendly Communities Grant Program")]
     unrelated = _cand(jurisdiction_code="CA-NS", title="Highway 101 twinning", summary="Roads.")
     assert existing_matches(unrelated, seed) == []
+
+
+def test_review_matching_reads_the_release_body(monkeypatch):
+    # The real case #1: the feed summary is a teaser; only the release body
+    # names the New Horizons for Seniors Program already in the library.
+    from hapi_pipeline.watch import store
+    body = (b"<html><body><p>As the cost of living continues to rise, the Government of Canada "
+            b"is taking action.</p><p>Today the Secretary of State announced an investment of "
+            b"$147,854 under the New Horizons for Seniors Program (NHSP) for seven projects.</p>"
+            b"</body></html>")
+    monkeypatch.setattr(store.src, "http_get", lambda url, **kw: body)
+    seed = [{"slug": "ca-fed-new-horizons-seniors", "jurisdiction_code": "CA-FED",
+             "title": "New Horizons for Seniors Program"}]
+    c = _cand(title="Secretary of State McLean announces funding for Alberta seniors",
+              summary="As the cost of living continues to rise, the Government of Canada is "
+                      "taking action to make life more affordable for seniors.")
+    assert store.existing_matches(c, seed) == []  # the teaser alone misses it
+    enriched = {**c, "summary": f"{c['summary']} {store._page_text(c['url'])}"}
+    assert store.existing_matches(enriched, seed) == [
+        ("ca-fed-new-horizons-seniors", "New Horizons for Seniors Program")]
+
+
+def test_page_text_skips_pdfs_and_failures(monkeypatch):
+    from hapi_pipeline.watch import store
+    def boom(url, **kw):
+        raise OSError("down")
+    monkeypatch.setattr(store.src, "http_get", boom)
+    assert store._page_text("https://x/a.html") == ""
+    assert store._page_text("https://x/RG2-2026-08-07.pdf#nsreg-1-2026") == ""
