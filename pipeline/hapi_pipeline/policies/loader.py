@@ -19,6 +19,7 @@ class LoadResult:
     updated: int
     links: int
     missing_indicators: list[str]
+    versioned: int = 0  # existing policies whose seed content changed
 
 
 def _jurisdiction_ids(cur) -> dict[str, int]:
@@ -83,17 +84,31 @@ def load_policies(conn, path: Path = SEED_PATH) -> LoadResult:
                 policy_id = cur.fetchone()[0]
                 res.inserted += 1
 
-            # Ensure an initial version snapshot exists.
+            # Version the seed content: v1 on first import, then a new version
+            # whenever the seed entry differs from the last seed snapshot, so an
+            # edited record keeps its history (docs/04 §5 — append-only). Only
+            # seed snapshots are compared; AI-summary versions are a separate kind.
             cur.execute(
-                "SELECT 1 FROM policy_version WHERE policy_id=%s AND version_no=1",
+                "SELECT version_no, snapshot FROM policy_version WHERE policy_id=%s "
+                "AND change_summary IN ('Seed import', 'Seed update') "
+                "ORDER BY version_no DESC LIMIT 1",
                 (policy_id,),
             )
-            if not cur.fetchone():
+            last_seed = cur.fetchone()
+            if last_seed is None or last_seed[1] != p:
+                cur.execute(
+                    "SELECT COALESCE(MAX(version_no), 0) + 1 FROM policy_version WHERE policy_id=%s",
+                    (policy_id,),
+                )
+                (next_no,) = cur.fetchone()
                 cur.execute(
                     "INSERT INTO policy_version (policy_id, version_no, change_summary, snapshot) "
-                    "VALUES (%s, 1, %s, %s)",
-                    (policy_id, "Seed import", json.dumps(p)),
+                    "VALUES (%s, %s, %s, %s)",
+                    (policy_id, next_no, "Seed import" if next_no == 1 else "Seed update",
+                     json.dumps(p)),
                 )
+                if next_no > 1:
+                    res.versioned += 1
 
             # Link to indicators that exist (skip + report unknown ones).
             wanted_ids: list[int] = []

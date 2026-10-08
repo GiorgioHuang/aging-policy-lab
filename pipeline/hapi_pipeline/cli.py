@@ -218,7 +218,8 @@ def _cmd_policies_seed(_args: argparse.Namespace) -> int:
 
     with connect() as conn:
         r = load_policies(conn)
-    print(f"✓ policies: +{r.inserted} inserted, {r.updated} updated, {r.links} indicator link(s)")
+    print(f"✓ policies: +{r.inserted} inserted, {r.updated} updated, {r.links} indicator link(s)"
+          + (f", {r.versioned} with changed content (new version recorded)" if r.versioned else ""))
     if r.missing_indicators:
         print(f"  · referenced indicators not yet in DB (skipped): {', '.join(r.missing_indicators)}")
     return 0
@@ -553,6 +554,10 @@ def _cmd_watch_review(args: argparse.Namespace) -> int:
     print(f"accepted {res.accepted or '—'} · rejected {res.rejected or '—'}")
     for slug in res.seed_added:
         print(f"  ✚ drafted seed entry: {slug}")
+    for cid, matches in res.existing.items():
+        for slug, title in matches:
+            print(f"  ⚠ #{cid} names an entry already in the library — {slug} ({title}). "
+                  "No new entry drafted: update that entry from the source instead.")
     if res.seed_added:
         print("  → edit the drafted entries in policies/seed_policies.json (full_text, KPIs, "
               "indicators), then commit and run `hapi policies seed`.")

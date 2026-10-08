@@ -61,7 +61,8 @@ jobs:
           [ -n "$ACCEPT" ] && args+=(--accept "$ACCEPT")
           [ -n "$REJECT" ] && args+=(--reject "$REJECT")
           [ -n "$NOTE" ] && args+=(--note "$NOTE")
-          python -m hapi_pipeline.cli watch review "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+          python -m hapi_pipeline.cli watch review "${args[@]}" | tee "$RUNNER_TEMP/review.txt"
+          cat "$RUNNER_TEMP/review.txt" >> "$GITHUB_STEP_SUMMARY"
         working-directory: pipeline
 
       - name: Open PR with drafted seed entries
@@ -87,7 +88,13 @@ jobs:
           - \`budget_amount\`, \`kpis\`, \`lifecycle_status\`, \`theme\`
           - \`indicators\`: link the HAPI indicators the policy is meant to move
 
-          After merge, the next Data Hub ingest run loads it (\`hapi policies seed\`)."
+          After merge, the next Data Hub ingest run loads it (\`hapi policies seed\`).
+
+          Review output (a ⚠ line means the candidate names an entry already in the
+          library: update that entry instead of adding a new one):
+          \`\`\`
+          $(cat "$RUNNER_TEMP/review.txt")
+          \`\`\`"
           if ! gh pr create --base "${{ github.event.repository.default_branch }}" \
                 --head "$BRANCH" --title "Policy Watch: add candidate(s) ${ACCEPT}" \
                 --body "$BODY"; then

@@ -186,6 +186,16 @@ the reviewer replaces the feed teaser with a proper `full_text` and links
 indicators before merging; the next ingest loads it. The library therefore
 remains a curated, version-controlled seed — every record has a reviewed diff.
 
+**Updates to programs already in the library.** Many releases announce a new
+round of an existing program rather than a new policy (the first live review
+found exactly this: a 2026 grant round of the Age-Friendly Communities Grant
+Program, in the library since 2017). On accept, a candidate whose title or
+summary names an existing entry of the same jurisdiction is linked to it and
+no new entry is drafted; the review output says which entry to update. Seed
+edits are versioned: whenever an entry's content changes, the loader appends a
+`policy_version` ("Seed update") with the full snapshot, so the record keeps
+its history.
+
 **Following items after discovery.** Bills keep moving after they are found.
 For sources whose feeds restate an item's current stage — LEGISinfo ("Latest
 activity: Second reading…") and the NS Legislature ("Royal Assent - …") — each

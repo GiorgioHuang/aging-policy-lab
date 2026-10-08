@@ -389,3 +389,24 @@ def test_slug_cuts_at_word_boundary():
     assert s == "secretary-of-state-mclean-announces-funding-for-alberta"
     assert len(s) <= 60 and not s.endswith("-")
     assert _slugify("Short title") == "short-title"
+
+
+def test_existing_matches_finds_program_already_in_library():
+    # The real case: candidate #9 announced the 2026 round of a program the
+    # library already held; it must link to that entry, not draft a duplicate.
+    seed = [
+        {"slug": "ns-age-friendly-communities-grant-2017", "jurisdiction_code": "CA-NS",
+         "title": "Age-Friendly Communities Grant Program"},
+        {"slug": "ca-fed-age-friendly-communities-2007", "jurisdiction_code": "CA-FED",
+         "title": "Age-Friendly Communities (Public Health Agency of Canada)"},
+        {"slug": "ns-short", "jurisdiction_code": "CA-NS", "title": "Seniors Grant"},
+    ]
+    c = _cand(jurisdiction_code="CA-NS", title="Community Projects Helping Seniors Age Well, Stay Healthy",
+              summary="Seniors are staying healthy through 44 projects supported by the "
+                      "Age-Friendly Communities Grant program.")
+    from hapi_pipeline.watch.store import existing_matches
+    # same jurisdiction only; the federal entry and the 2-word title don't match
+    assert existing_matches(c, seed) == [
+        ("ns-age-friendly-communities-grant-2017", "Age-Friendly Communities Grant Program")]
+    unrelated = _cand(jurisdiction_code="CA-NS", title="Highway 101 twinning", summary="Roads.")
+    assert existing_matches(unrelated, seed) == []

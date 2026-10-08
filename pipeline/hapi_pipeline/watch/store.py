@@ -280,6 +280,28 @@ class ReviewResult:
     rejected: list[int]
     seed_added: list[str]
     missing: list[int]
+    # accepted candidates that name an entry already in the library:
+    # candidate id -> [(slug, title)]; no new entry is drafted for these
+    existing: dict[int, list[tuple[str, str]]] = field(default_factory=dict)
+
+
+def _words(text: str) -> str:
+    return " ".join(re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).split())
+
+
+def existing_matches(c: dict, seed: list[dict]) -> list[tuple[str, str]]:
+    """Library entries (same jurisdiction) whose title appears in the candidate's
+    title or summary — e.g. a release announcing a new round of a program the
+    library already holds. Titles under three words are too generic to match."""
+    text = f" {_words(c.get('title', ''))} {_words(c.get('summary', ''))} "
+    hits = []
+    for e in seed:
+        if e.get("jurisdiction_code") != c.get("jurisdiction_code"):
+            continue
+        title = _words(re.sub(r"\([^)]*\)", " ", e.get("title", "")))  # drop "(PHAC)" etc.
+        if len(title.split()) >= 3 and f" {title} " in text:
+            hits.append((e["slug"], e["title"]))
+    return hits
 
 
 def review(accept: list[int], reject: list[int], *, note: str | None = None,
@@ -292,18 +314,27 @@ def review(accept: list[int], reject: list[int], *, note: str | None = None,
         found = {r["id"]: r for r in _rows(cur)}
         missing = [i for i in ids if i not in found]
 
-        drafts = {i: draft_seed_entry(found[i]) for i in accept if i in found}
+        # A candidate that names an existing library entry is most likely an
+        # update to it (a new funding round, an amendment): record the link and
+        # leave the edit to the reviewer instead of drafting a duplicate.
+        seed = json.loads(seed_path.read_text(encoding="utf-8"))
+        existing = {i: m for i in accept if i in found
+                    for m in [existing_matches(found[i], seed)] if m}
+        drafts = {i: draft_seed_entry(found[i]) for i in accept
+                  if i in found and i not in existing}
         seed_added = _append_to_seed(list(drafts.values()), seed_path) if write_seed else []
 
         now = datetime.now(timezone.utc)
-        for i, entry in drafts.items():
+        slugs = {i: e["slug"] for i, e in drafts.items()}
+        slugs.update({i: m[0][0] for i, m in existing.items()})
+        for i, slug in slugs.items():
             cur.execute(
                 "UPDATE policy_candidate SET status='accepted', seed_slug=%s, "
                 "review_note=%s, reviewed_at=%s WHERE id=%s",
-                (entry["slug"], note, now, i),
+                (slug, note, now, i),
             )
         for i in reject:
-            if i in found and i not in drafts:
+            if i in found and i not in slugs:
                 cur.execute(
                     "UPDATE policy_candidate SET status='rejected', review_note=%s, "
                     "reviewed_at=%s WHERE id=%s",
@@ -312,9 +343,10 @@ def review(accept: list[int], reject: list[int], *, note: str | None = None,
         conn.commit()
     return ReviewResult(
         accepted=[i for i in accept if i in found],
-        rejected=[i for i in reject if i in found and i not in drafts],
+        rejected=[i for i in reject if i in found and i not in slugs],
         seed_added=seed_added,
         missing=missing,
+        existing=existing,
     )
 
 
