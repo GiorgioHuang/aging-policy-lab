@@ -342,3 +342,14 @@ def test_ns_gazette_toc_without_contents_is_empty():
     s = src.get_source("ns_gazette_p2")
     issue = src.FeedItem(s.name, "https://x/RG2-2026-01-09.pdf", "Issue No. 1")
     assert src.parse_gazette_toc(s, issue, "no table of contents here") == []
+
+
+def test_ns_gazette_toc_line_is_linear_time():
+    # Regression: a dotted line that doesn't end in a reg. number made the first
+    # (nested-quantifier) regex backtrack exponentially and hang a live run.
+    import time
+    t = time.time()
+    assert src._toc_entry("Some Regulations–amendment " + ". " * 200 + "(continued") is None
+    assert src._toc_entry("Title . . . . 179/2026 405") == ("Title", "179/2026")
+    assert src._toc_entry("Volume 50, No. 16 2026 400") is None  # no leaders
+    assert time.time() - t < 0.5

@@ -49,6 +49,8 @@ jobs:
       DISCOVER: ${{ inputs.discover }}
       SOURCE: ${{ inputs.source }}
       SINCE_DAYS: ${{ inputs.since_days || '30' }}
+      # Stream output as it happens, so a stalled source is visible in the log.
+      PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
 

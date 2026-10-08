@@ -600,7 +600,22 @@ def with_details(item: FeedItem, page: bytes) -> FeedItem:
 
 # A contents entry ends with dot leaders, the regulation number and the page:
 #   "Bulk Haulage Regulations–amendment . . . . . . 174/2026 400"
-_TOC_ENTRY = re.compile(r"^(?P<title>.*?)[\s.]*?(?:\s*\.\s*){2,}\s*(?P<reg>\d{1,4}/\d{4})\s+\d+\s*$")
+# Only the tail is matched by regex (anchored, no nested quantifiers); the
+# title is what precedes it with the leaders stripped. An earlier single regex
+# with overlapping `.*?` / `(\s*\.\s*){2,}` backtracked exponentially on dotted
+# lines that don't end in a number and hung a live run.
+_TOC_TAIL = re.compile(r"(?P<reg>\d{1,4}/\d{4})\s+\d+\s*$")
+
+
+def _toc_entry(line: str) -> tuple[str, str] | None:
+    """(title, reg no.) if `line` is a contents entry, else None."""
+    m = _TOC_TAIL.search(line)
+    if not m:
+        return None
+    head = line[:m.start()].rstrip()
+    if not head.endswith("."):  # entries always have dot leaders
+        return None
+    return head.rstrip(" ."), m["reg"]
 
 
 def parse_gazette_toc(source: WatchSource, issue: FeedItem, text: str) -> list[FeedItem]:
@@ -621,11 +636,11 @@ def parse_gazette_toc(source: WatchSource, issue: FeedItem, text: str) -> list[F
             continue
         if ln.startswith("N.S. Reg.") or ln.isdigit():
             break  # end of contents: page number / first regulation header
-        m = _TOC_ENTRY.match(ln)
-        if m:
-            title = " ".join(f"{carry} {m['title']}".split()).rstrip(" .")
+        entry = _toc_entry(ln)
+        if entry:
+            title = " ".join(f"{carry} {entry[0]}".split()).rstrip(" .")
             carry = ""
-            reg = m["reg"]
+            reg = entry[1]
             items.append(FeedItem(
                 source=source.name,
                 url=f"{issue.url}#nsreg-{reg.replace('/', '-')}",

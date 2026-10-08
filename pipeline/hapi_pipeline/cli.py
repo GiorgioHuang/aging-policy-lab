@@ -450,7 +450,7 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
                      if not rx.search(urllib.parse.urlsplit(urllib.parse.urljoin(s.url, h)).path)]
             print(f"    {len(lp.links)} links on the listing page, {len(lp.links) - len(other)} "
                   f"match item_pattern; others e.g.: {sorted(set(other))[:30]}")
-            if items:
+            if items and not s.pdf_toc:  # PDF issues have no HTML meta to show
                 meta = src.page_meta(src.http_get(items[0].url))
                 print(f"    item page <title>: {meta.title.strip()[:120]!r}")
                 print(f"    item page meta: {dict(list(meta.meta.items())[:15])}")
