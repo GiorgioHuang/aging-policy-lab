@@ -385,9 +385,27 @@ def _ids(csv: str | None) -> list[int]:
 def _cmd_watch_probe(args: argparse.Namespace) -> int:
     """Fetch each live feed and show what it returns — no DB, no AI."""
     import json as _json
+    import re as _re
+    import urllib.parse
 
     from .watch import sources as src
     from .watch.triage import keyword_match
+
+    if args.discover:
+        # List feed-like links on a page (e.g. a ministry's "RSS feeds" page),
+        # to find the URL of a new source before adding it to sources.py.
+        for page in args.discover:
+            print(f"=== feed links on {page}")
+            try:
+                html_text = src.http_get(page).decode("utf-8", errors="replace")
+            except Exception as exc:  # noqa: BLE001
+                print(f"    ✗ {type(exc).__name__}: {exc}")
+                continue
+            pat = r'<(?:a|link)\b[^>]*href=["\']([^"\']+)["\'][^>]*>([^<]*)'
+            for href, text in _re.findall(pat, html_text, flags=_re.IGNORECASE):
+                if _re.search(r"rss|atom|\.xml|feed", href, _re.IGNORECASE):
+                    print(f"    {text.strip()[:60]!r:62} {urllib.parse.urljoin(page, href)}")
+        return 0
 
     since = src.default_since(args.since_days)
     ok = 0
@@ -406,6 +424,12 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
             print(f"    fields: {sorted(rows[0]) if rows else '(no rows)'}")
             if rows:
                 print(f"    row[0]: {_json.dumps(rows[0], ensure_ascii=False)[:600]}")
+            if s.date_field:
+                # Freshness check independent of the window: newest rows overall.
+                q = urllib.parse.urlencode({"$select": f"{s.date_field},subject,department",
+                                            "$order": f"{s.date_field} DESC", "$limit": "5"})
+                for r in _json.loads(src.http_get(f"{s.url}?{q}")):
+                    print(f"      newest: {r}")
         else:
             print(f"    first bytes: {raw[:300]!r}")
         dated = [i for i in items if i.published_at]
@@ -603,6 +627,8 @@ def main(argv: list[str] | None = None) -> int:
                                              "(no DB, no AI)")
     w_probe.add_argument("--source", help="probe only this source (e.g. gazette_p1)")
     w_probe.add_argument("--since-days", type=int, default=30)
+    w_probe.add_argument("--discover", nargs="+", metavar="URL",
+                         help="instead of probing sources, list feed links found on these pages")
     w_probe.set_defaults(func=_cmd_watch_probe)
     w_fetch = w_sub.add_parser("fetch", help="poll feeds, triage, store new candidates")
     w_fetch.add_argument("--source", help="run only this source")

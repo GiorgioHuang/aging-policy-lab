@@ -23,6 +23,9 @@ on:
       since_days:
         description: Ignore items published more than this many days ago
         default: "30"
+      discover:
+        description: "probe only: space-separated page URLs to scan for feed links"
+        default: ""
 
 permissions:
   contents: read
@@ -40,6 +43,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       MODE: ${{ inputs.mode || 'scheduled' }}
+      DISCOVER: ${{ inputs.discover }}
       SINCE_DAYS: ${{ inputs.since_days || '30' }}
     steps:
       - uses: actions/checkout@v4
@@ -53,7 +57,12 @@ jobs:
 
       - name: Probe live feeds (no DB)
         if: env.MODE == 'probe'
-        run: python -m hapi_pipeline.cli watch probe --since-days "$SINCE_DAYS"
+        run: |
+          python -m hapi_pipeline.cli watch probe --since-days "$SINCE_DAYS"
+          if [ -n "$DISCOVER" ]; then
+            # shellcheck disable=SC2086 — word-split the URL list on purpose
+            python -m hapi_pipeline.cli watch probe --discover $DISCOVER
+          fi
         working-directory: pipeline
 
       - name: Decide what to run
