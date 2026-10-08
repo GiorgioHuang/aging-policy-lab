@@ -1,0 +1,29 @@
+Fixture: the extracted text of the Royal Gazette Part II contents page, as pypdf
+returns it (Vol. 50, No. 16, August 7, 2026), plus ONE SYNTHETIC entry under the
+Homes for Special Care Act (N.S. Reg. 179/2026) to exercise keyword matching.
+Text above the "Contents" line is ignored by the parser.
+Part II – Regulations
+Volume 50, No. 16
+August 7, 2026
+Halifax, Nova Scotia
+Published Under the Authority of the Attorney General
+Contents
+Act Reg. No. Page
+Dairy Industry Act
+Bulk Haulage Regulations–amendment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 174/2026 400
+Financial Measures (2026) Act
+Proclamation, S. 133(1), S.N.S. 2026, c. 3–S. 65 to 70 (re amendments to the Insurance
+Act). . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 176/2026 402
+Homes for Special Care Act
+Homes for Special Care Regulations–amendment . . . . . . . . . . . . . . . . . . . . . . . . . . . . 179/2026 405
+Insurance Act
+Automobile Insurance Contract Mandatory Conditions Regulations–amendment . . . . . . 177/2026 403
+Petroleum Products Pricing Act
+Prescribed Petroleum Products Prices (dispensed from publication) . . . . . . . . . . . . . . . . . 173/2026 400
+Prescribed Petroleum Products Prices (dispensed from publication) . . . . . . . . . . . . . . . . . 175/2026 401
+Summary Proceedings Act
+Summary Offence Tickets Regulations–amendment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 178/2026 404
+399
+N.S. Reg. 173/2026 - 174/2026 Royal Gazette Part II - Regulations Vol. 50, No. 16
+N.S. Reg. 173/2026
+Made: July 16, 2026

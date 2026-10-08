@@ -136,6 +136,7 @@ machine-readable feeds, chosen by where a policy first becomes public:
 | Canada Gazette Part II | enacted regulations | RSS |
 | Federal bills — LEGISinfo (House and Senate) | legislation | RSS |
 | Nova Scotia bills — Legislature of Nova Scotia | legislation | RSS |
+| NS Royal Gazette Part II (issue list → each issue's PDF contents) | regulations | HTML + PDF |
 | Nova Scotia news releases (`news.novascotia.ca` listing + each release page) | provincial announcements, funding | HTML |
 
 Every source was verified live with `hapi watch probe` from a GitHub runner.
@@ -189,6 +190,7 @@ remains a curated, version-controlled seed — every record has a reviewed diff.
 can lapse without a release. Dedup is by URL, so a bill becomes a candidate
 once, when first seen; its later stages (second reading, royal assent) are
 lifecycle updates to track on the library record, not new candidates. Not yet
-watched: the NS Royal Gazette Part II (published only as PDF issues), budgets,
-and FPT Seniors Forum communiqués. Keyword triage favours recall; Claude's
-verdict is advisory, never final.
+watched: budgets, and the FPT Seniors Forum's own pages — CICS has no feed, and
+the forum's communiqués usually also appear as canada.ca (ESDC) news releases,
+which are watched. Keyword triage favours recall; Claude's verdict is advisory,
+never final.

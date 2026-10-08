@@ -66,6 +66,13 @@ export const WATCH_SOURCES: Array<{
     href: "https://nslegislature.ca/legislative-business/bills-statutes/bills",
   },
   {
+    key: ["ns_gazette_p2"],
+    label: "Royal Gazette Part II — Nova Scotia regulations",
+    jurisdiction: "Nova Scotia",
+    stage: "regulations",
+    href: "https://novascotia.ca/just/regulations/rg2issues.htm",
+  },
+  {
     key: ["ns_news"],
     label: "Nova Scotia government news releases",
     jurisdiction: "Nova Scotia",

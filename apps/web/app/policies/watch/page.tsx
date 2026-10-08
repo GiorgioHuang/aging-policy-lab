@@ -79,8 +79,8 @@ export default async function PolicyWatch() {
       <h1>Policy Watch</h1>
       <p className="lede">
         New aging policy as it is published. Every day the observatory reads federal and
-        Nova Scotia news releases, the Canada Gazette, and the bills before Parliament and
-        the Nova Scotia Legislature, and keeps the items that concern older adults —
+        Nova Scotia news releases, the Canada Gazette and Nova Scotia's Royal Gazette, and the
+        bills before Parliament and the Nova Scotia Legislature, and keeps the items that concern older adults —
         long-term care, home care, dementia, caregivers, retirement income and more.
       </p>
       <p className="meta">

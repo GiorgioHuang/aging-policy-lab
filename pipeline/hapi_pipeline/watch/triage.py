@@ -32,7 +32,8 @@ TERMS: list[tuple[str, str, int]] = [
                       r"|ag(?:e)?ing (?:population|in place|well|canadians)", 2),
     ("aging", r"ag(?:e)?ing", 1),  # alone also fits "aging infrastructure"
     ("age-friendly", r"age[- ]friendly", 2),
-    ("long-term care", r"long[- ]term care|nursing homes?|residential care", 2),
+    ("long-term care", r"long[- ]term care|nursing homes?|residential care"
+                       r"|homes? for special care", 2),  # NS: Homes for Special Care Act
     ("home care", r"home (?:care|support|and community care)|continuing care", 2),
     ("assisted living", r"assisted living|retirement homes?|seniors'? housing", 2),
     ("dementia", r"dementia|alzheimer'?s?", 2),

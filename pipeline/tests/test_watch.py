@@ -317,3 +317,28 @@ def test_pdf_text_reads_aes_encrypted_pdf():
     buf = io.BytesIO()
     w.write(buf)
     assert src.pdf_text(buf.getvalue(), pages=1) == ""
+
+
+def test_ns_gazette_toc_one_item_per_regulation():
+    items = _collected("ns_gazette_p2")  # 2025 issue and annual index are not items
+    assert len(items) == 7
+    by_reg = {i.url.rsplit("#", 1)[-1]: i for i in items}
+    assert by_reg["nsreg-174-2026"].title == "Bulk Haulage Regulations–amendment (Dairy Industry Act)"
+    # a title wrapped over two lines is joined; the Act heading is not taken
+    # for its continuation ("...the Insurance" / "Act). . . 176/2026 402")
+    assert by_reg["nsreg-176-2026"].title.startswith("Proclamation, S. 133(1)")
+    assert by_reg["nsreg-176-2026"].title.endswith("(re amendments to the Insurance Act) "
+                                                   "(Financial Measures (2026) Act)")
+    assert all(i.published_at.date() == date(2026, 8, 7) for i in items)
+    assert by_reg["nsreg-177-2026"].summary.startswith("N.S. Reg. 177/2026")
+
+
+def test_ns_gazette_keyword_hit_is_homes_for_special_care():
+    assert _hits("ns_gazette_p2") == [
+        "Homes for Special Care Regulations–amendment (Homes for Special Care Act)"]
+
+
+def test_ns_gazette_toc_without_contents_is_empty():
+    s = src.get_source("ns_gazette_p2")
+    issue = src.FeedItem(s.name, "https://x/RG2-2026-01-09.pdf", "Issue No. 1")
+    assert src.parse_gazette_toc(s, issue, "no table of contents here") == []

@@ -11,7 +11,9 @@ Every source below was checked against the live site with `hapi watch probe`
                in-window issue page is opened and its table of contents
                expanded into one item per notice / regulation. Also the bill
                feeds of Parliament (LEGISinfo) and the NS Legislature.
-  * ``html`` — Nova Scotia news releases. The province's legacy RSS
+  * ``html`` — the NS Royal Gazette Part II issue list (issues are PDFs; each
+               in-window issue's table of contents becomes one item per
+               regulation), and Nova Scotia news releases. The province's legacy RSS
                (novascotia.ca/news/rss/rss.asp) returns an empty stub, its
                open-data copy (data.novascotia.ca xcif-vvr3) stopped updating in
                July 2026, and news.novascotia.ca exposes no feed. Release URLs
@@ -92,7 +94,11 @@ class WatchSource:
     issue_fixture: str = ""            # offline stand-in for an issue page
     # html: which links on the listing page are items; named groups y, m, d
     item_pattern: str = ""
+    min_title: int = 15                # html: shorter link texts are navigation, not items
     pages: int = 1                     # html: listing pages to read (?page=0..n-1)
+    # html: items are PDF issues — read each issue's table of contents
+    pdf_toc: bool = False
+    pdf_fixture: str = ""              # offline stand-in: extracted text of an issue
     detail_fixture: str = ""           # fixture dir of item pages, named <slug>.html
 
     def live_url(self, since: date) -> str:
@@ -175,6 +181,19 @@ SOURCES: list[WatchSource] = [
         fixture_name="ns_bills.xml",
         url="https://nslegislature.ca/legislative-business/bills-statutes/rss",
         department="Nova Scotia Legislature",
+    ),
+    WatchSource(
+        name="ns_gazette_p2",
+        label="Royal Gazette Part II — Nova Scotia regulations",
+        kind="html",
+        jurisdiction_code="CA-NS",
+        fixture_name="ns_gazette_p2.html",
+        url="https://novascotia.ca/just/regulations/rg2issues.htm",
+        department="NS Royal Gazette Part II",
+        item_pattern=r"/rg2/\d{4}/RG2-(?P<y>\d{4})-(?P<m>\d{2})-(?P<d>\d{2})\.pdf$",
+        min_title=5,  # links read "Issue No. 16"
+        pdf_toc=True,
+        pdf_fixture="ns_gazette_p2_issue.txt",
     ),
     WatchSource(
         name="ns_news",
@@ -494,7 +513,7 @@ def parse_html_listing(source: WatchSource, raw: bytes) -> list[FeedItem]:
         FeedItem(source=source.name, url=url, title=text, published_at=published,
                  jurisdiction_code=source.jurisdiction_code, department=source.department)
         for url, (text, published) in best.items()
-        if len(text) >= 15
+        if len(text) >= source.min_title
     ]
 
 
@@ -577,6 +596,52 @@ def with_details(item: FeedItem, page: bytes) -> FeedItem:
     )
 
 
+# ── PDF issues (NS Royal Gazette Part II) ────────────────────────────────────
+
+# A contents entry ends with dot leaders, the regulation number and the page:
+#   "Bulk Haulage Regulations–amendment . . . . . . 174/2026 400"
+_TOC_ENTRY = re.compile(r"^(?P<title>.*?)[\s.]*?(?:\s*\.\s*){2,}\s*(?P<reg>\d{1,4}/\d{4})\s+\d+\s*$")
+
+
+def parse_gazette_toc(source: WatchSource, issue: FeedItem, text: str) -> list[FeedItem]:
+    """One item per regulation in an NS Royal Gazette Part II issue's contents.
+
+    The contents list each enabling Act on its own line, followed by the
+    regulations made under it; a long title wraps onto the next line, so lines
+    that are neither an entry nor an Act heading are carried forward.
+    """
+    lines = [ln.strip() for ln in text.splitlines()]
+    try:
+        start = next(i for i, ln in enumerate(lines) if ln == "Contents")
+    except StopIteration:
+        return []
+    items, act, carry = [], "", ""
+    for ln in lines[start + 1:]:
+        if not ln or ln.startswith("Act Reg. No."):
+            continue
+        if ln.startswith("N.S. Reg.") or ln.isdigit():
+            break  # end of contents: page number / first regulation header
+        m = _TOC_ENTRY.match(ln)
+        if m:
+            title = " ".join(f"{carry} {m['title']}".split()).rstrip(" .")
+            carry = ""
+            reg = m["reg"]
+            items.append(FeedItem(
+                source=source.name,
+                url=f"{issue.url}#nsreg-{reg.replace('/', '-')}",
+                title=f"{title} ({act})" if act else title,
+                summary=f"N.S. Reg. {reg} — {issue.title}",
+                published_at=issue.published_at,
+                jurisdiction_code=source.jurisdiction_code,
+                department=source.department,
+            ))
+        elif not carry and re.search(r"\bAct\b[^.]*$", ln) and ln.endswith(("Act", "Act)")):
+            act = ln  # an enabling Act heading
+        else:
+            carry = f"{carry} {ln}"  # first part of a wrapped title
+    return items
+
+
 # ── collection ───────────────────────────────────────────────────────────────
 
 PARSERS = {"rss": parse_rss, "atom": parse_atom, "html": parse_html_listing}
@@ -609,6 +674,13 @@ def collect(source: WatchSource, *, live: bool, since: date) -> tuple[int, list[
                     else (FIXTURES_DIR / source.issue_fixture).read_bytes())
             expanded.extend(expand_issue(source, issue, page))
         items = expanded
+    if source.pdf_toc:
+        regs = []
+        for issue in items:
+            text = (pdf_text(http_get(issue.url), pages=2) if live
+                    else (FIXTURES_DIR / source.pdf_fixture).read_text(encoding="utf-8"))
+            regs.extend(parse_gazette_toc(source, issue, text))
+        items = regs
     if source.detail_fixture:
         detailed = []
         for item in items:
