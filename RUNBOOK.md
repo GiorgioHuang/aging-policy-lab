@@ -335,6 +335,14 @@ probe lists the feed-like links on those pages (`watch probe --discover URL…`)
 - **Mondays** — also opens an issue labelled `policy-watch` listing the week's
   candidates (skipped when there are none). `mode: fetch-and-digest` does both now.
 
+**Blocked sources.** `nslegislature.ca` sits behind a web-application firewall
+that starts rejecting a client after several requests in a short time (seen
+2026-10-08 after ~6 probes in 10 minutes). Policy Watch asks once a day and, if
+blocked, logs `ns_bills: BlockedError: blocked by the site's firewall (…,
+support ID …)` and carries on with the other sources. Don't re-run in a tight
+loop; if it persists for days, send the support ID to the Legislature's web
+team and ask them to allow the bills RSS feed.
+
 **Backfill.** Daily runs only look back `since_days` (30). To pull in older items
 once — e.g. the aging bills already before the Legislature when a source is
 added — run `mode: fetch` with `source: ns_bills` (or `legisinfo_bills`) and a
