@@ -1,28 +1,30 @@
 """Feed sources for Policy Watch: where new aging policy first appears.
 
-Each source is an official, machine-readable feed. Three shapes are supported:
+Every source below was checked against the live site with `hapi watch probe`
+(run from a GitHub runner, since the dev sandbox cannot reach .gc.ca / .ns.ca):
 
-  * ``atom``    — Government of Canada news API (api.io.canada.ca), one feed
-                  for all departments' news releases plus targeted department
-                  feeds as a backstop.
-  * ``rss``     — Canada Gazette Part I (proposed regulations, notices) and
-                  Part II (enacted regulations). The Gazette feed lists whole
-                  *issues*, so each in-window issue page is opened and its table
-                  of contents expanded into one item per notice / regulation.
-  * ``socrata`` — Nova Scotia news releases on data.novascotia.ca (xcif-vvr3),
-                  filtered and ordered server-side on its ``timestamp`` column.
+  * ``atom`` — Government of Canada news API (api.io.canada.ca): one feed for
+               all departments' news releases (100 items ≈ 10 days, so a daily
+               poll is safe) plus ESDC / PHAC department feeds as a backstop.
+  * ``rss``  — Canada Gazette Part I (notices, proposed regulations) and Part II
+               (enacted regulations). The feed lists whole *issues*, so each
+               in-window issue page is opened and its table of contents
+               expanded into one item per notice / regulation.
+  * ``html`` — Nova Scotia news releases. The province's legacy RSS
+               (novascotia.ca/news/rss/rss.asp) returns an empty stub, its
+               open-data copy (data.novascotia.ca xcif-vvr3) stopped updating in
+               July 2026, and news.novascotia.ca exposes no feed. Release URLs
+               carry their date (/en/YYYY/MM/DD/slug), so the site's listing
+               page is read directly and each release page fetched for its
+               description.
 
-Like the Data Hub connectors, every source has a vendored fixture so offline
+Like the Data Hub connectors, every source has vendored fixtures so offline
 runs are deterministic. Fixtures are synthetic samples (example.org URLs) used
 only for tests and local dev; production runs always use ``--live``.
-
-Field names in feeds differ by publisher, so parsing is deliberately tolerant
-(first matching key wins). `hapi watch probe` dumps what a live feed actually
-returns, to confirm or correct these assumptions from a networked runner.
 """
 from __future__ import annotations
 
-import json
+import html
 import re
 import time
 import urllib.error
@@ -48,7 +50,7 @@ GC_NEWS_API = "https://api.io.canada.ca/io-server/gc/news/en/v2"
 
 @dataclass(frozen=True)
 class FeedItem:
-    """One item from a feed, normalized across RSS / Atom / Socrata."""
+    """One item from a source, normalized across Atom / RSS / HTML listings."""
 
     source: str
     url: str
@@ -63,27 +65,24 @@ class FeedItem:
 class WatchSource:
     name: str
     label: str
-    kind: str  # atom | rss | socrata
+    kind: str  # atom | rss | html
     jurisdiction_code: str
     fixture_name: str
-    url: str = ""                      # fixed feed URL (rss)
-    params: dict = field(default_factory=dict)  # query params (atom / socrata)
-    department: str = ""               # default department when the feed has none
-    expand_issues: bool = False        # rss items are issues: expand each issue's TOC
+    url: str = ""                      # feed / listing URL (rss, html)
+    params: dict = field(default_factory=dict)  # query params (atom)
+    department: str = ""               # default department when the source has none
+    # rss: items are Gazette issues — expand each issue page's table of contents
+    expand_issues: bool = False
     issue_fixture: str = ""            # offline stand-in for an issue page
-    date_field: str = ""               # socrata column to filter / order by
+    # html: which links on the listing page are items; named groups y, m, d
+    item_pattern: str = ""
+    detail_fixture: str = ""           # fixture dir of item pages, named <slug>.html
 
     def live_url(self, since: date) -> str:
         if self.kind == "atom":
             params = dict(self.params)
             params["publishedDate>"] = since.isoformat()
             return f"{GC_NEWS_API}?{urllib.parse.urlencode(params)}"
-        if self.kind == "socrata":
-            params = dict(self.params)
-            if self.date_field:
-                params["$where"] = f"{self.date_field} >= '{since.isoformat()}T00:00:00'"
-                params["$order"] = f"{self.date_field} DESC"
-            return f"{self.url}?{urllib.parse.urlencode(params)}"
         return self.url
 
     @property
@@ -113,11 +112,8 @@ def _gc_news(name: str, label: str, dept: str | None, department: str = "") -> W
 
 
 SOURCES: list[WatchSource] = [
-    # All federal departments' news releases in one feed; keyword triage
-    # narrows it to aging policy. Polled daily, 100 items covers a day.
     _gc_news("gc_news", "Government of Canada news releases (all departments)", None),
-    # Department backstops for the main aging-policy portfolios, in case the
-    # all-departments feed is capped or paginated differently.
+    # Backstops: the all-departments feed holds ~10 days, these hold months.
     _gc_news("gc_news_esdc", "ESDC news releases (seniors, OAS/GIS, CPP)",
              "departmentofemploymentandsocialdevelopment",
              "Employment and Social Development Canada"),
@@ -147,21 +143,13 @@ SOURCES: list[WatchSource] = [
     ),
     WatchSource(
         name="ns_news",
-        label="Nova Scotia government news releases (all departments, RSS)",
-        kind="rss",
+        label="Nova Scotia government news releases (news.novascotia.ca)",
+        kind="html",
         jurisdiction_code="CA-NS",
-        fixture_name="ns_news.xml",
-        url="https://novascotia.ca/news/rss/rss.asp",
-    ),
-    WatchSource(
-        name="ns_news_opendata",
-        label="Nova Scotia news releases on data.novascotia.ca (xcif-vvr3; lags)",
-        kind="socrata",
-        jurisdiction_code="CA-NS",
-        fixture_name="ns_news.json",
-        url="https://data.novascotia.ca/resource/xcif-vvr3.json",
-        params={"$limit": "500"},
-        date_field="timestamp",
+        fixture_name="ns_news.html",
+        url="https://news.novascotia.ca/",
+        item_pattern=r"/en/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})/[^/?#]+/?$",
+        detail_fixture="ns_news_pages",
     ),
 ]
 
@@ -206,7 +194,7 @@ def fetch_raw(source: WatchSource, *, live: bool, since: date) -> bytes:
     return source.fixture_path.read_bytes()
 
 
-# ── parsing ──────────────────────────────────────────────────────────────────
+# ── parsing helpers ──────────────────────────────────────────────────────────
 
 _ATOM = "{http://www.w3.org/2005/Atom}"
 
@@ -217,15 +205,17 @@ def _text(el: ET.Element | None) -> str:
 
 def _strip_html(s: str) -> str:
     """Feed summaries often carry HTML; keep the words only."""
-    import html
-    import re
-
     s = re.sub(r"<[^>]+>", " ", s)
     return re.sub(r"\s+", " ", html.unescape(s)).strip()
 
 
+def _clip(s: str, limit: int = 600) -> str:
+    """Keep a teaser-sized summary."""
+    return s if len(s) <= limit else s[:limit].rsplit(" ", 1)[0] + " …"
+
+
 def parse_date(value: str) -> datetime | None:
-    """Parse RFC 822 (RSS), ISO 8601 (Atom / Socrata) or a bare date."""
+    """Parse RFC 822 (RSS), ISO 8601 (Atom) or a bare date."""
     v = (value or "").strip()
     if not v:
         return None
@@ -242,6 +232,8 @@ def parse_date(value: str) -> datetime | None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
 
+
+# ── Atom / RSS ───────────────────────────────────────────────────────────────
 
 def parse_rss(source: WatchSource, raw: bytes) -> list[FeedItem]:
     root = ET.fromstring(raw)
@@ -290,48 +282,10 @@ def parse_atom(source: WatchSource, raw: bytes) -> list[FeedItem]:
     return items
 
 
-def _pick(row: dict, *keys: str) -> str:
-    """First non-empty value among `keys` (exact, then substring match on key)."""
-    for k in keys:
-        v = row.get(k)
-        if v:
-            return v.get("url", "") if isinstance(v, dict) else str(v)
-    lower = {k.lower(): v for k, v in row.items()}
-    for k in keys:
-        for rk, v in lower.items():
-            if k in rk and v:
-                return v.get("url", "") if isinstance(v, dict) else str(v)
-    return ""
-
-
-def _clip(s: str, limit: int = 600) -> str:
-    """Bodies can be whole releases; keep a teaser-sized summary."""
-    return s if len(s) <= limit else s[:limit].rsplit(" ", 1)[0] + " …"
-
-
-def parse_socrata(source: WatchSource, raw: bytes) -> list[FeedItem]:
-    rows = json.loads(raw.decode("utf-8"))
-    items = []
-    for r in rows:
-        url = _pick(r, "url", "link", "release_url", "web_link")
-        title = _strip_html(_pick(r, "subject", "title", "headline"))
-        if not (url and title):
-            continue
-        items.append(FeedItem(
-            source=source.name,
-            url=url,
-            title=title,
-            summary=_clip(_strip_html(_pick(r, "contents", "summary", "description"))),
-            published_at=parse_date(_pick(r, "timestamp", "release_date", "date")),
-            jurisdiction_code=source.jurisdiction_code,
-            department=_pick(r, "department", "dept", "organization", "ministry")
-            or source.department,
-        ))
-    return items
-
+# ── Gazette issue pages ──────────────────────────────────────────────────────
 
 class _TocParser(HTMLParser):
-    """Collect (block text, first link) for each table row / list item / para.
+    """Collect (block text, link text, first link) per table row / list item / para.
 
     Gazette issue pages list each notice or regulation as a row or list entry
     whose link may carry only a registration number ("SOR/2026-201"), so the
@@ -409,7 +363,113 @@ def expand_issue(source: WatchSource, issue: FeedItem, page: bytes) -> list[Feed
     return items
 
 
-PARSERS = {"rss": parse_rss, "atom": parse_atom, "socrata": parse_socrata}
+# ── HTML listing pages ───────────────────────────────────────────────────────
+
+class _LinkParser(HTMLParser):
+    """All (href, text) anchors on a page."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self._href = dict(attrs).get("href") or ""
+            self._text = []
+
+    def handle_data(self, data):
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._href is not None:
+            self.links.append((self._href, " ".join("".join(self._text).split())))
+            self._href = None
+
+
+def parse_html_listing(source: WatchSource, raw: bytes) -> list[FeedItem]:
+    """Items = links whose path matches `item_pattern`; date comes from the URL.
+
+    A listing often links one item twice (image + headline); the longest link
+    text wins.
+    """
+    parser = _LinkParser()
+    parser.feed(raw.decode("utf-8", errors="replace"))
+    pattern = re.compile(source.item_pattern)
+    best: dict[str, tuple[str, datetime]] = {}
+    for href, text in parser.links:
+        url = urllib.parse.urljoin(source.url, href).split("#")[0]
+        m = pattern.search(urllib.parse.urlsplit(url).path)
+        if not m:
+            continue
+        try:
+            published = datetime(int(m["y"]), int(m["m"]), int(m["d"]), tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if url not in best or len(text) > len(best[url][0]):
+            best[url] = (text, published)
+    return [
+        FeedItem(source=source.name, url=url, title=text, published_at=published,
+                 jurisdiction_code=source.jurisdiction_code, department=source.department)
+        for url, (text, published) in best.items()
+        if len(text) >= 15
+    ]
+
+
+class _MetaParser(HTMLParser):
+    """<meta name|property=... content=...> pairs and the page <title>."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.meta: dict[str, str] = {}
+        self.title = ""
+        self._in_title = False
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "meta":
+            key = (a.get("property") or a.get("name") or "").lower()
+            if key and a.get("content") and key not in self.meta:
+                self.meta[key] = a["content"]
+        elif tag == "title":
+            self._in_title = True
+
+    def handle_data(self, data):
+        if self._in_title:
+            self.title += data
+
+    def handle_endtag(self, tag):
+        if tag == "title":
+            self._in_title = False
+
+
+def page_meta(page: bytes) -> _MetaParser:
+    parser = _MetaParser()
+    parser.feed(page.decode("utf-8", errors="replace"))
+    return parser
+
+
+def with_details(item: FeedItem, page: bytes) -> FeedItem:
+    """Fill summary (and a better title) from an item page's meta tags."""
+    meta = page_meta(page).meta
+    summary = meta.get("og:description") or meta.get("description") or ""
+    title = meta.get("og:title") or ""
+    return FeedItem(
+        source=item.source,
+        url=item.url,
+        title=_strip_html(title) if len(title) > len(item.title) else item.title,
+        summary=_clip(_strip_html(summary)),
+        published_at=item.published_at,
+        jurisdiction_code=item.jurisdiction_code,
+        department=item.department,
+    )
+
+
+# ── collection ───────────────────────────────────────────────────────────────
+
+PARSERS = {"rss": parse_rss, "atom": parse_atom, "html": parse_html_listing}
 
 
 def parse(source: WatchSource, raw: bytes) -> list[FeedItem]:
@@ -424,9 +484,10 @@ def within_window(item: FeedItem, since: date) -> bool:
 
 
 def collect(source: WatchSource, *, live: bool, since: date) -> tuple[int, list[FeedItem]]:
-    """Fetch + parse + date-window a source, expanding Gazette issues.
+    """Fetch, parse and date-window a source; expand Gazette issues; fetch each
+    HTML-listing item's page for its description (a listing holds a few dozen).
 
-    Returns (items in the raw feed, in-window items ready for triage).
+    Returns (items in the raw feed / listing, in-window items ready for triage).
     """
     items = parse(source, fetch_raw(source, live=live, since=since))
     raw_count = len(items)
@@ -438,6 +499,20 @@ def collect(source: WatchSource, *, live: bool, since: date) -> tuple[int, list[
                     else (FIXTURES_DIR / source.issue_fixture).read_bytes())
             expanded.extend(expand_issue(source, issue, page))
         items = expanded
+    if source.detail_fixture:
+        detailed = []
+        for item in items:
+            try:
+                if live:
+                    page = http_get(item.url)
+                else:
+                    slug = urllib.parse.urlsplit(item.url).path.rstrip("/").rsplit("/", 1)[-1]
+                    page = (FIXTURES_DIR / source.detail_fixture / f"{slug}.html").read_bytes()
+            except Exception:  # noqa: BLE001 — keep the item with its title only
+                detailed.append(item)
+                continue
+            detailed.append(with_details(item, page))
+        items = detailed
     return raw_count, items
 
 

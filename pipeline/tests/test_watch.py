@@ -68,22 +68,34 @@ def test_gazette_short_link_text_uses_row_text():
     ]
 
 
-def test_socrata_parse_real_field_names():
-    items = _items("ns_news_opendata")
-    first = items[0]
-    assert first.title == "New long-term care beds open in Kentville"  # `subject`
-    assert first.url == "https://example.org/fixture/ns/ltc-beds-kentville"
-    assert first.department == "Seniors and Long-term Care"
-    assert first.jurisdiction_code == "CA-NS"
-    assert first.published_at.date() == date(2026, 9, 8)  # `timestamp`
-    assert first.summary.startswith("Province adds 48") and "\n" not in first.summary
+def test_html_listing_items_dated_from_url():
+    items = _items("ns_news")
+    by_url = {i.url.rsplit("/", 1)[-1]: i for i in items}
+    # image link + headline link collapse to one item, headline text wins;
+    # French release, "Read more" duplicate and nav links are not items.
+    assert sorted(by_url) == ["caregiver-benefit-expanded", "highway-101-twinning-begins",
+                              "new-long-term-care-beds-open-kentville",
+                              "winter-driving-reminder"]
+    beds = by_url["new-long-term-care-beds-open-kentville"]
+    assert beds.title == "New Long-Term Care Beds Open in Kentville"
+    assert beds.published_at == datetime(2026, 9, 8, tzinfo=timezone.utc)
+    assert beds.jurisdiction_code == "CA-NS"
 
 
-def test_socrata_url_object_form():
-    s = src.get_source("ns_news_opendata")
-    raw = json.dumps([{"subject": "Seniors grant opens", "url": {"url": "https://x.ca/a"},
-                       "timestamp": "2026-09-01T00:00:00.000"}]).encode()
-    assert src.parse(s, raw)[0].url == "https://x.ca/a"
+def test_html_listing_details_fill_summary():
+    items = {i.url.rsplit("/", 1)[-1]: i for i in _collected("ns_news")}
+    assert "winter-driving-reminder" not in items  # 2025: outside the window
+    assert items["new-long-term-care-beds-open-kentville"].summary.startswith(
+        "The Province is adding 48 long-term care beds")
+    assert items["caregiver-benefit-expanded"].summary.startswith("More caregivers of seniors")
+
+
+def test_with_details_prefers_longer_og_title():
+    item = src.FeedItem("ns_news", "https://x/en/2026/09/01/a", "Short title")
+    page = (b'<html><head><meta property="og:title" content="A much longer &amp; fuller title">'
+            b'<meta name="description" content="Desc"></head></html>')
+    d = src.with_details(item, page)
+    assert d.title == "A much longer & fuller title" and d.summary == "Desc"
 
 
 def test_parse_date_formats():
@@ -108,12 +120,6 @@ def test_live_url_adds_date_filter():
         date(2026, 9, 1))
 
 
-def test_socrata_live_url_filters_and_orders_server_side():
-    url = src.get_source("ns_news_opendata").live_url(date(2026, 9, 1))
-    assert "%24where=timestamp+%3E%3D+%272026-09-01T00%3A00%3A00%27" in url
-    assert "%24order=timestamp+DESC" in url
-
-
 # ── keyword triage ───────────────────────────────────────────────────────────
 
 def test_keywords_keep_aging_policy_and_drop_decoys():
@@ -128,11 +134,10 @@ def test_keywords_keep_aging_policy_and_drop_decoys():
     ]  # not: species at risk, motor vehicles
     assert _hits("gazette_p2") == [
         "SOR/2026-201 Regulations Amending the Canada Pension Plan Regulations"]
-    assert _hits("ns_news") == ["New Long-Term Care Beds Open in Kentville"]  # not: highway
-    assert _hits("ns_news_opendata") == [
-        "New long-term care beds open in Kentville",
-        "Caregiver Benefit expanded to more families",
-    ]  # not: highway twinning, French duplicate
+    assert sorted(_hits("ns_news")) == [
+        "Caregiver Benefit Expanded to More Families",
+        "New Long-Term Care Beds Open in Kentville",
+    ]  # not: highway twinning (its page says nothing about seniors)
 
 
 def test_weak_terms_need_company():

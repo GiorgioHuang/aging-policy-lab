@@ -132,8 +132,8 @@ python -m hapi_pipeline.cli watch review --accept 12 --reject 13   # drafts seed
 python -m hapi_pipeline.cli watch digest --days 7  # Markdown digest (weekly issue body)
 ```
 
-- `watch/sources.py` — feeds (GC news API, Canada Gazette I/II, NS news releases)
-  and tolerant RSS / Atom / Socrata parsing; `watch/triage.py` — weighted keywords
+- `watch/sources.py` — sources (GC news API, Canada Gazette I/II expanded per
+  issue, NS news releases read from the site's listing) and their parsers; `watch/triage.py` — weighted keywords
   + optional Claude structured-output triage; `watch/store.py` — dedup, storage
   (`policy_candidate`), review → `seed_policies.json` drafts, digest.
 - Tests: `pip install pytest && python -m pytest tests/` (pure; no DB or network).

@@ -321,9 +321,13 @@ Finds new aging policy as it is published and queues it for review (docs/04 §9)
 ### 2. Check the feeds (no DB)
 
 Actions → **Policy Watch** → Run workflow → `mode: probe`. Prints, per source,
-the live URL, item count, date range, fields and keyword hits. Run it first, and
-again whenever a source starts failing (the daily run flags a dead feed with a
-`::warning::` annotation but keeps going with the others).
+the live URL, item count, date range, keyword hits and source-specific detail
+(Gazette issue TOC blocks; NS listing links and release-page meta tags). Run it
+first, and again whenever a source starts failing (the daily run flags a dead
+feed with a `::warning::` annotation but keeps going with the others).
+
+To find a feed for a new source, set `discover` to one or more page URLs: the
+probe lists the feed-like links on those pages (`watch probe --discover URL…`).
 
 ### 3. The schedule
 

@@ -134,7 +134,16 @@ machine-readable feeds, chosen by where a policy first becomes public:
 | Government of Canada news API (`api.io.canada.ca`), all departments + ESDC / PHAC backstops | announcements, funding | Atom |
 | Canada Gazette Part I | proposed regulations, notices | RSS |
 | Canada Gazette Part II | enacted regulations | RSS |
-| Nova Scotia news releases (`data.novascotia.ca`, `xcif-vvr3`) | provincial announcements, funding | Socrata JSON |
+| Nova Scotia news releases (`news.novascotia.ca` listing + each release page) | provincial announcements, funding | HTML |
+
+Every source was verified live with `hapi watch probe` from a GitHub runner.
+That check changed the design twice. The Gazette feed lists whole *issues*, so
+each issue's table of contents is expanded into one item per notice or
+regulation. Nova Scotia has no working feed: the legacy RSS returns an empty
+stub, the open-data copy of its releases (`xcif-vvr3`) stopped updating in July
+2026, and the new news site advertises none. Its release URLs carry their date
+(`/en/YYYY/MM/DD/slug`), so the listing page is read directly and each release
+page's description fetched.
 
 Adding a source means adding one `WatchSource` entry and a fixture.
 

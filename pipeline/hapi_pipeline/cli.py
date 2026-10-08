@@ -384,7 +384,6 @@ def _ids(csv: str | None) -> list[int]:
 
 def _cmd_watch_probe(args: argparse.Namespace) -> int:
     """Fetch each live feed and show what it returns — no DB, no AI."""
-    import json as _json
     import re as _re
     import urllib.parse
 
@@ -419,17 +418,20 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
             print(f"    ✗ {type(exc).__name__}: {exc}")
             continue
         ok += 1
-        if s.kind == "socrata":
-            rows = _json.loads(raw)
-            print(f"    fields: {sorted(rows[0]) if rows else '(no rows)'}")
-            if rows:
-                print(f"    row[0]: {_json.dumps(rows[0], ensure_ascii=False)[:600]}")
-            if s.date_field:
-                # Freshness check independent of the window: newest rows overall.
-                q = urllib.parse.urlencode({"$select": f"{s.date_field},subject,department",
-                                            "$order": f"{s.date_field} DESC", "$limit": "5"})
-                for r in _json.loads(src.http_get(f"{s.url}?{q}")):
-                    print(f"      newest: {r}")
+        if s.kind == "html":
+            # Which links matched item_pattern, and a sample of those that didn't,
+            # to tune the pattern or spot a fuller listing page.
+            lp = src._LinkParser()
+            lp.feed(raw.decode("utf-8", errors="replace"))
+            rx = _re.compile(s.item_pattern)
+            other = [h for h, _ in lp.links
+                     if not rx.search(urllib.parse.urlsplit(urllib.parse.urljoin(s.url, h)).path)]
+            print(f"    {len(lp.links)} links on the listing page, {len(lp.links) - len(other)} "
+                  f"match item_pattern; others e.g.: {sorted(set(other))[:30]}")
+            if items:
+                meta = src.page_meta(src.http_get(items[0].url))
+                print(f"    item page <title>: {meta.title.strip()[:120]!r}")
+                print(f"    item page meta: {dict(list(meta.meta.items())[:15])}")
         else:
             print(f"    first bytes: {raw[:300]!r}")
         dated = [i for i in items if i.published_at]
