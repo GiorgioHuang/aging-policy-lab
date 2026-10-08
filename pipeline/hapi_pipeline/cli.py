@@ -535,6 +535,8 @@ def _cmd_watch_list(args: argparse.Namespace) -> int:
         ai = f" [{c['ai_category']} {c['ai_confidence']:.2f}]" if c["ai_category"] else ""
         print(f"#{c['id']:<5} {c['status']:<13} {c['jurisdiction_code'] or '':<7} {when}  "
               f"{c['title'][:80]}{ai}")
+        if c["summary"]:
+            print(f"       {' '.join(c['summary'].split())[:200]}")
         print(f"       {c['url']}")
     print(f"({len(rows)} candidate(s))")
     return 0

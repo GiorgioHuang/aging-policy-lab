@@ -8,7 +8,8 @@ name: Policy Watch
 #
 # Secrets: DATABASE_URL (required; job is skipped without it), ANTHROPIC_API_KEY
 # (optional; without it triage is keyword-only and every match is listed).
-# Manual runs: mode=probe checks the live feeds without touching the DB.
+# Manual runs: mode=probe checks the live feeds without touching the DB;
+# mode=list prints the review queue (all statuses, with each item's current stage).
 
 on:
   schedule:
@@ -18,7 +19,7 @@ on:
       mode:
         description: What to run
         type: choice
-        options: [fetch-and-digest, fetch, probe]
+        options: [fetch-and-digest, fetch, probe, list]
         default: fetch-and-digest
       since_days:
         description: Ignore items published more than this many days ago
@@ -71,9 +72,14 @@ jobs:
           fi
         working-directory: pipeline
 
+      - name: Show the review queue
+        if: env.MODE == 'list'
+        run: python -m hapi_pipeline.cli watch list --status all --limit 200
+        working-directory: pipeline
+
       - name: Decide what to run
         id: plan
-        if: env.MODE != 'probe'
+        if: env.MODE != 'probe' && env.MODE != 'list'
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "::warning::DATABASE_URL secret not set — skipping Policy Watch. See RUNBOOK.md §G."

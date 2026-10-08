@@ -330,6 +330,11 @@ def _fmt_candidate(c: dict) -> list[str]:
     lines = [f"- **#{c['id']}** [{title}]({c['url']}) — {' · '.join(meta)}"]
     if c.get("ai_rationale"):
         lines.append(f"  > {c['ai_rationale']}")
+    if c.get("summary") and not c["source"].startswith("gazette_"):
+        # For bills this is the current stage ("Royal Assent - …"), which is
+        # what decides whether to accept; for news, the opening of the release.
+        summary = " ".join(c["summary"].split())
+        lines.append(f"  > {summary[:280]}{'…' if len(summary) > 280 else ''}")
     if c.get("matched_terms"):
         lines.append(f"  <sub>matched: {', '.join(c['matched_terms'])}</sub>")
     return lines
