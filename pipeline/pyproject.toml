@@ -12,6 +12,8 @@ dependencies = [
     "statsmodels>=0.14",
     # Claude API (AI summaries + research assistant; Phase 3/4):
     "anthropic>=1.12",
+    # Policy Watch: PDF-only sources (NS Royal Gazette Part II):
+    "pypdf>=5.0",
 ]
 
 [project.scripts]

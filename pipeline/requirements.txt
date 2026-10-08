@@ -6,3 +6,4 @@ requests>=2.32
 pandas>=2.2
 statsmodels>=0.14
 anthropic>=1.12  # 1.12+: server-side refusal fallbacks (Policy Watch triage)
+pypdf>=5.0  # Policy Watch: PDF-only sources (NS Royal Gazette Part II)

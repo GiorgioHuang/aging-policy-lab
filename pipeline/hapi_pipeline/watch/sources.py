@@ -536,6 +536,17 @@ class _MetaParser(HTMLParser):
             self._p = None
 
 
+def pdf_text(data: bytes, pages: int | None = None) -> str:
+    """Plain text of a PDF's first `pages` pages (all when None)."""
+    import io
+
+    from pypdf import PdfReader  # lazy: only PDF sources need it
+
+    reader = PdfReader(io.BytesIO(data))
+    chosen = reader.pages if pages is None else reader.pages[:pages]
+    return "\n".join(page.extract_text() or "" for page in chosen)
+
+
 def page_meta(page: bytes) -> _MetaParser:
     parser = _MetaParser()
     parser.feed(page.decode("utf-8", errors="replace"))

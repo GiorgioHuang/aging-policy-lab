@@ -401,8 +401,14 @@ def _cmd_watch_probe(args: argparse.Namespace) -> int:
             except Exception as exc:  # noqa: BLE001
                 print(f"    ✗ {type(exc).__name__}: {exc}")
                 continue
-            text = body.decode("utf-8", errors="replace")
             print(f"    {len(body):,} bytes · first bytes: {body[:240]!r}")
+            if body.startswith(b"%PDF"):
+                # Text of the first pages, to design a parser for PDF-only sources.
+                from .watch.sources import pdf_text
+
+                print(f"    PDF text (first 3 pages):\n{pdf_text(body, pages=3)[:3500]}")
+                continue
+            text = body.decode("utf-8", errors="replace")
             lp = src._LinkParser()
             lp.feed(text)
             feeds, others = [], {}
