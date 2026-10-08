@@ -353,3 +353,19 @@ def test_ns_gazette_toc_line_is_linear_time():
     assert src._toc_entry("Title . . . . 179/2026 405") == ("Title", "179/2026")
     assert src._toc_entry("Volume 50, No. 16 2026 400") is None  # no leaders
     assert time.time() - t < 0.5
+
+
+def test_render_digest_progress_section():
+    bill = _cand(id=82, title="Bill 301 - Seniors' Advocate Act", status="accepted",
+                 summary="Royal Assent - October 6, 2026")
+    md = render_digest([], [], backlog=0, days=7, today=date(2026, 10, 8), progressed=[bill])
+    assert "### Progress on followed items" in md
+    assert "**#82** [Bill 301 - Seniors' Advocate Act](https://example.org/x) — accepted" in md
+    assert "> now: Royal Assent - October 6, 2026" in md
+    # no section when nothing progressed
+    assert "Progress on followed items" not in render_digest([], [], 0, 7, date(2026, 10, 8))
+
+
+def test_only_bill_sources_track_updates():
+    tracked = {s.name for s in src.all_sources() if s.track_updates}
+    assert tracked == {"legisinfo_bills", "ns_bills"}

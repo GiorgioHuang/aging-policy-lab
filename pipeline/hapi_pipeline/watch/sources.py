@@ -89,6 +89,9 @@ class WatchSource:
     url: str = ""                      # feed / listing URL (rss, html)
     params: dict = field(default_factory=dict)  # query params (atom)
     department: str = ""               # default department when the source has none
+    # The feed restates an item's current stage (bills: "Second reading…",
+    # "Royal Assent…"): record changes on followed candidates as progress.
+    track_updates: bool = False
     # rss: items are Gazette issues — expand each issue page's table of contents
     expand_issues: bool = False
     issue_fixture: str = ""            # offline stand-in for an issue page
@@ -172,6 +175,7 @@ SOURCES: list[WatchSource] = [
         fixture_name="legisinfo_bills.xml",
         url="https://www.parl.ca/legisinfo/en/bills/rss",
         department="Parliament of Canada",
+        track_updates=True,
     ),
     WatchSource(
         name="ns_bills",
@@ -181,6 +185,7 @@ SOURCES: list[WatchSource] = [
         fixture_name="ns_bills.xml",
         url="https://nslegislature.ca/legislative-business/bills-statutes/rss",
         department="Nova Scotia Legislature",
+        track_updates=True,
     ),
     WatchSource(
         name="ns_gazette_p2",

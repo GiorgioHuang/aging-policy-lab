@@ -19,6 +19,13 @@ function day(ts: string | null): string {
   return ts ? ts.slice(0, 10) : "undated";
 }
 
+const RECENT_MS = 14 * 24 * 3600 * 1000;
+
+/** True when a followed item's stage changed in the last two weeks. */
+function recentlyProgressed(c: Candidate): boolean {
+  return !!c.lastChangedAt && Date.now() - new Date(c.lastChangedAt).getTime() < RECENT_MS;
+}
+
 // Gazette items' summary is just the issue name, which the department line
 // already conveys, so it is not repeated.
 function CandidateCard({ c }: { c: Candidate }) {
@@ -32,6 +39,11 @@ function CandidateCard({ c }: { c: Candidate }) {
           </a>
           <span className="badge">{c.status === "accepted" ? "accepted" : "awaiting review"}</span>
           {c.aiCategory ? <span className="badge">{c.aiCategory}</span> : null}
+          {recentlyProgressed(c) ? (
+            <span className="badge" title="Its stage changed since it was found">
+              progressed {day(c.lastChangedAt)}
+            </span>
+          ) : null}
         </div>
         <div className="meta">
           {JURISDICTION_LABEL[c.jurisdictionCode ?? ""] ?? c.jurisdictionCode}

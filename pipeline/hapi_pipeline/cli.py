@@ -512,10 +512,13 @@ def _cmd_watch_fetch(args: argparse.Namespace) -> int:
         total_new += st.new
         ai = (f" · relevant {st.ai_relevant} · auto-rejected {st.auto_rejected}"
               if client else "")
-        print(f"{'✚' if st.new else '·'} {s.name}: {st.fetched} fetched · "
-              f"{st.in_window} in window · {st.matched} matched · {st.new} new{ai}")
+        upd = f" · {st.updated} progressed" if st.updated else ""
+        print(f"{'✚' if st.new or st.updated else '·'} {s.name}: {st.fetched} fetched · "
+              f"{st.in_window} in window · {st.matched} matched · {st.new} new{upd}{ai}")
         for t in st.new_titles[:10]:
             print(f"    + {t[:110]}")
+        for t in st.updated_titles[:10]:
+            print(f"    ↻ {t[:110]}")
     print(f"done — {total_new} new candidate(s); "
           f"{len(failed)} source(s) failed{': ' + ', '.join(failed) if failed else ''}")
     # Fail only when every source failed (likely a network/config problem);
@@ -567,10 +570,10 @@ def _cmd_watch_digest(args: argparse.Namespace) -> int:
         print(text)
     elif n:
         Path(args.out).write_text(text, encoding="utf-8")
-        print(f"wrote {args.out} — {n} new candidate(s)")
+        print(f"wrote {args.out} — {n} item(s) to report (new + progressed)")
     else:
         # No file → the workflow posts no issue (a quiet week stays quiet).
-        print(f"no new candidates in the last {args.days} day(s) — {args.out} not written")
+        print(f"nothing new or progressed in the last {args.days} day(s) — {args.out} not written")
     return 0
 
 

@@ -14,6 +14,8 @@ export type Candidate = {
   summary: string | null;
   publishedAt: string | null;
   firstSeenAt: string;
+  /** When a followed item's stated stage last changed (bills: reading → assent). */
+  lastChangedAt: string | null;
   jurisdictionCode: string | null;
   department: string | null;
   matchedTerms: string[];
@@ -93,6 +95,7 @@ export async function getWatchOverview(limit = 100): Promise<WatchOverview> {
     summary: string | null;
     published_at: string | null;
     first_seen_at: string;
+    last_changed_at: string | null;
     jurisdiction_code: string | null;
     department: string | null;
     matched_terms: string[] | null;
@@ -101,7 +104,8 @@ export async function getWatchOverview(limit = 100): Promise<WatchOverview> {
     status: Candidate["status"];
   }>(
     `SELECT c.id::text, c.source, c.url, c.title, c.summary,
-            c.published_at::text, c.first_seen_at::text, c.jurisdiction_code,
+            c.published_at::text, c.first_seen_at::text, c.last_changed_at::text,
+            c.jurisdiction_code,
             c.department, c.matched_terms, c.ai_category, c.ai_rationale, c.status
        FROM policy_candidate c
       WHERE c.status IN ('new', 'accepted')${scope.clause}
@@ -137,6 +141,7 @@ export async function getWatchOverview(limit = 100): Promise<WatchOverview> {
       summary: r.summary,
       publishedAt: r.published_at,
       firstSeenAt: r.first_seen_at,
+      lastChangedAt: r.last_changed_at,
       jurisdictionCode: r.jurisdiction_code,
       department: r.department,
       matchedTerms: r.matched_terms ?? [],

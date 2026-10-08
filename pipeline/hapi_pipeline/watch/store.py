@@ -56,8 +56,10 @@ class SourceStats:
     ai_relevant: int = 0
     auto_rejected: int = 0
     ai_skipped: int = 0
+    updated: int = 0
     error: str = ""
     new_titles: list[str] = field(default_factory=list)
+    updated_titles: list[str] = field(default_factory=list)
 
 
 def _seen_hashes(hashes: list[str]) -> set[str]:
@@ -66,6 +68,43 @@ def _seen_hashes(hashes: list[str]) -> set[str]:
     with connect() as conn, conn.cursor() as cur:
         cur.execute("SELECT url_hash FROM policy_candidate WHERE url_hash = ANY(%s)", (hashes,))
         return {r[0] for r in cur.fetchall()}
+
+
+def _norm(text: str | None) -> str:
+    return " ".join((text or "").split())
+
+
+def _record_updates(items: dict[str, src.FeedItem]) -> list[str]:
+    """For followed candidates (awaiting review / accepted) among `items`
+    (url_hash → item), record a progress event where the stated stage changed,
+    and move the candidate's summary / published_at to it. Returns the titles."""
+    if not items:
+        return []
+    changed = []
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, url_hash, summary FROM policy_candidate "
+            "WHERE url_hash = ANY(%s) AND status IN ('new', 'accepted')",
+            (list(items),),
+        )
+        for cid, h, old in cur.fetchall():
+            item = items[h]
+            if not item.summary or _norm(item.summary) == _norm(old):
+                continue
+            cur.execute(
+                "INSERT INTO policy_candidate_event (candidate_id, published_at, summary, previous) "
+                "VALUES (%s, %s, %s, %s)",
+                (cid, item.published_at, item.summary, old),
+            )
+            cur.execute(
+                "UPDATE policy_candidate SET summary = %s, "
+                "published_at = COALESCE(%s, published_at), last_changed_at = now() "
+                "WHERE id = %s",
+                (item.summary, item.published_at, cid),
+            )
+            changed.append(item.title)
+        conn.commit()
+    return changed
 
 
 def _insert(rows: list[dict]) -> int:
@@ -112,6 +151,10 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
     for item, kw in matched:
         by_hash.setdefault(url_hash(item.url), (item, kw))
     seen = _seen_hashes(list(by_hash))
+    if source.track_updates:
+        st.updated_titles = _record_updates(
+            {h: item for h, (item, _kw) in by_hash.items() if h in seen})
+        st.updated = len(st.updated_titles)
 
     rows = []
     for h, (item, kw) in by_hash.items():
@@ -159,7 +202,7 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
 _COLS = ("id", "source", "url", "title", "summary", "published_at", "jurisdiction_code",
          "department", "matched_terms", "keyword_score", "ai_relevant", "ai_category",
          "ai_confidence", "ai_rationale", "ai_fields", "ai_model", "status", "seed_slug",
-         "first_seen_at")
+         "first_seen_at", "last_changed_at")
 
 
 def _rows(cur) -> list[dict]:
@@ -293,8 +336,14 @@ def _fmt_candidate(c: dict) -> list[str]:
 
 
 def render_digest(new: list[dict], auto_rejected: list[dict], backlog: int,
-                  days: int, today: date | None = None) -> str:
-    """Markdown digest (GitHub issue body). Pure: takes rows, returns text."""
+                  days: int, today: date | None = None,
+                  progressed: list[dict] | None = None) -> str:
+    """Markdown digest (GitHub issue body). Pure: takes rows, returns text.
+
+    `progressed`: followed candidates whose stated stage changed in the window
+    (e.g. a bill reaching royal assent), shown with their current stage.
+    """
+    progressed = progressed or []
     today = today or datetime.now(timezone.utc).date()
     out = [
         f"## Policy Watch — {today.isoformat()}",
@@ -311,6 +360,16 @@ def render_digest(new: list[dict], auto_rejected: list[dict], backlog: int,
         out.append("")
         for c in by_jur[jur]:
             out.extend(_fmt_candidate(c))
+        out.append("")
+    if progressed:
+        out.append("### Progress on followed items")
+        out.append("")
+        for c in progressed:
+            title = c["title"].replace("[", "(").replace("]", ")")
+            state = "accepted" if c.get("status") == "accepted" else "awaiting review"
+            out.append(f"- **#{c['id']}** [{title}]({c['url']}) — {state}")
+            if c.get("summary"):
+                out.append(f"  > now: {c['summary']}")
         out.append("")
     if auto_rejected:
         out.append("<details><summary>"
@@ -333,9 +392,10 @@ def render_digest(new: list[dict], auto_rejected: list[dict], backlog: int,
 
 
 def digest(days: int = 7) -> tuple[str, int]:
-    """Build the digest for candidates first seen in the last `days` days.
+    """Build the digest for the last `days` days: candidates first seen, and
+    followed candidates that progressed (excluding ones first seen in the window).
 
-    Returns (markdown, number of new candidates needing review).
+    Returns (markdown, number of items worth reporting: new + progressed).
     """
     since = datetime.now(timezone.utc) - timedelta(days=days)
     order = "ORDER BY COALESCE(published_at, first_seen_at) DESC"
@@ -349,4 +409,9 @@ def digest(days: int = 7) -> tuple[str, int]:
         cur.execute("SELECT count(*) FROM policy_candidate "
                     "WHERE status='new' AND first_seen_at < %s", (since,))
         (backlog,) = cur.fetchone()
-    return render_digest(new, auto_rejected, backlog, days), len(new)
+        cur.execute(f"SELECT {', '.join(_COLS)} FROM policy_candidate "
+                    "WHERE status IN ('new', 'accepted') AND last_changed_at >= %s "
+                    "AND first_seen_at < %s ORDER BY last_changed_at DESC", (since, since))
+        progressed = _rows(cur)
+    text = render_digest(new, auto_rejected, backlog, days, progressed=progressed)
+    return text, len(new) + len(progressed)

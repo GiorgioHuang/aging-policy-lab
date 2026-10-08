@@ -186,10 +186,20 @@ the reviewer replaces the feed teaser with a proper `full_text` and links
 indicators before merging; the next ingest loads it. The library therefore
 remains a curated, version-controlled seed — every record has a reviewed diff.
 
+**Following items after discovery.** Bills keep moving after they are found.
+For sources whose feeds restate an item's current stage — LEGISinfo ("Latest
+activity: Second reading…") and the NS Legislature ("Royal Assent - …") — each
+change seen on a followed candidate (awaiting review or accepted) is recorded in
+`policy_candidate_event` (`db/migrations/0010`, append-only, with the stage it
+replaced), and the candidate's current stage and date are updated. The weekly
+digest lists these under *Progress on followed items*, and the web page marks
+them *progressed*. Updating the library record's `lifecycle_status` (e.g. to
+`in_effect` at royal assent) stays a reviewed edit to the seed. News releases are
+not followed this way: their text is a one-off announcement, not a status.
+
 **Limits.** Feeds report announcements, not implementation: a funded program
 can lapse without a release. Dedup is by URL, so a bill becomes a candidate
-once, when first seen; its later stages (second reading, royal assent) are
-lifecycle updates to track on the library record, not new candidates. Not yet
+once, when first seen. Not yet
 watched: budgets, and the FPT Seniors Forum's own pages — CICS has no feed, and
 the forum's communiqués usually also appear as canada.ca (ESDC) news releases,
 which are watched. Keyword triage favours recall; Claude's verdict is advisory,
