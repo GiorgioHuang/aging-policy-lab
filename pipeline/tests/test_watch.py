@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from datetime import date, datetime, timezone
 from types import SimpleNamespace
+import xml.etree.ElementTree as ET
 
 from hapi_pipeline.watch import sources as src
 from hapi_pipeline.watch import triage
@@ -100,6 +101,14 @@ def test_with_details_prefers_longer_og_title():
             b'<meta name="description" content="Desc"></head></html>')
     d = src.with_details(item, page)
     assert d.title == "A much longer & fuller title" and d.summary == "Desc"
+
+
+def test_xml_parse_error_shows_context():
+    import pytest
+    bad = b'<?xml version="1.0"?><rss><channel><item><title>A & B</title></item></channel></rss>'
+    with pytest.raises(ET.ParseError) as exc:
+        src.parse(src.get_source("ns_bills"), bad)
+    assert "near: b'" in str(exc.value) and "A & B" in str(exc.value)
 
 
 def test_parse_date_formats():

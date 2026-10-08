@@ -277,8 +277,20 @@ def parse_date(value: str) -> datetime | None:
 
 # ── Atom / RSS ───────────────────────────────────────────────────────────────
 
+def _xml_root(raw: bytes) -> ET.Element:
+    """Parse XML; on failure, say what the bytes around the error were, so a
+    publisher's error page or a malformed item is diagnosable from the log."""
+    try:
+        return ET.fromstring(raw)
+    except ET.ParseError as e:
+        line, col = e.position
+        lines = raw.split(b"\n")
+        near = lines[line - 1][max(0, col - 80):col + 80] if 0 < line <= len(lines) else b""
+        raise ET.ParseError(f"{e} — {len(raw):,} bytes, near: {near!r}") from e
+
+
 def parse_rss(source: WatchSource, raw: bytes) -> list[FeedItem]:
-    root = ET.fromstring(raw)
+    root = _xml_root(raw)
     items = []
     for it in root.iter("item"):
         url = _text(it.find("link")) or _text(it.find("guid"))
@@ -298,7 +310,7 @@ def parse_rss(source: WatchSource, raw: bytes) -> list[FeedItem]:
 
 
 def parse_atom(source: WatchSource, raw: bytes) -> list[FeedItem]:
-    root = ET.fromstring(raw)
+    root = _xml_root(raw)
     items = []
     for e in root.iter(f"{_ATOM}entry"):
         url = ""
