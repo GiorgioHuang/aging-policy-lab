@@ -53,7 +53,9 @@
       "volunteerism",
       "elder abuse"
     ],
-    "indicators": []
+    "indicators": [
+      "social_participation.community_belonging_65plus"
+    ]
   },
   {
     "slug": "ca-fed-gis-enhancement",
