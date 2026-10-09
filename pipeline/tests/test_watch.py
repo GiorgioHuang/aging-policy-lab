@@ -216,7 +216,8 @@ VERDICT = {
     "relevant": True, "confidence": 1.4, "category": "funding",
     "rationale": "Funds dementia care for older adults.", "lifecycle_status": "funded",
     "theme": ["dementia"], "target_group": "people living with dementia",
-    "budget_amount_cad": 20000000, "hapi_domains": ["health", "care_access"],
+    "budget_amount_cad": 20000000, "program_name": "Dementia Strategic Fund",
+    "hapi_domains": ["health", "care_access"],
 }
 
 
@@ -439,3 +440,38 @@ def test_page_text_skips_pdfs_and_failures(monkeypatch):
     monkeypatch.setattr(store.src, "http_get", boom)
     assert store._page_text("https://x/a.html") == ""
     assert store._page_text("https://x/RG2-2026-08-07.pdf#nsreg-1-2026") == ""
+
+
+def test_classify_sends_release_text_clipped():
+    client, msgs = _fake_client(VERDICT)
+    body = "Today the Secretary of State announced $147,854 under the New Horizons for Seniors Program. " * 200
+    v = triage.classify(client, _items("gc_news")[1], body=body)
+    content = msgs.calls[0]["messages"][0]["content"]
+    assert "Release text:" in content and "New Horizons for Seniors Program" in content
+    assert content.endswith(" […]")  # clipped at BODY_LIMIT
+    assert len(content) < triage.BODY_LIMIT + 1000
+    assert v.fields["program_name"] == "Dementia Strategic Fund"
+    # no body -> no release-text section
+    client2, msgs2 = _fake_client(VERDICT)
+    triage.classify(client2, _items("gc_news")[1])
+    assert "Release text:" not in msgs2.calls[0]["messages"][0]["content"]
+
+
+def test_schema_requires_program_name():
+    assert "program_name" in triage.SCHEMA["required"]
+
+
+def test_existing_matches_uses_claude_program_name():
+    from hapi_pipeline.watch.store import existing_matches
+    seed = [{"slug": "ca-fed-new-horizons-seniors", "jurisdiction_code": "CA-FED",
+             "title": "New Horizons for Seniors Program"}]
+    c = _cand(title="Secretary of State McLean announces funding for Alberta seniors",
+              summary="As the cost of living continues to rise...",
+              ai_fields={"program_name": "New Horizons for Seniors Program (NHSP)"})
+    assert existing_matches(c, seed) == [("ca-fed-new-horizons-seniors",
+                                          "New Horizons for Seniors Program")]
+
+
+def test_only_news_sources_fetch_bodies_for_triage():
+    with_body = {s.name for s in src.all_sources() if s.body_for_triage}
+    assert with_body == {"gc_news", "gc_news_esdc", "gc_news_phac", "ns_news"}

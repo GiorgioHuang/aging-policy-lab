@@ -98,8 +98,14 @@ age-friendly communities, social isolation, or healthy aging. A general measure 
 explicit, named target. Ministerial travel, awards, event notices, and routine \
 statements are not relevant.
 
-Judge only from the item given; do not assume facts it does not state. Leave \
-budget_amount_cad null unless the item states a dollar figure for the measure."""
+Judge only from what is given — title, summary and, when present, the release \
+text — and do not assume facts it does not state.
+- budget_amount_cad: the total dollar amount the item states for this measure or \
+announcement (e.g. "an investment of $147,854"); null if none is stated. Do not \
+add figures up, and do not use a program's cumulative or historical totals.
+- program_name: the named, ongoing government program the item belongs to or \
+funds through (e.g. "New Horizons for Seniors Program"), exactly as written; null \
+if the item names none."""
 
 SCHEMA = {
     "type": "object",
@@ -112,10 +118,11 @@ SCHEMA = {
         "theme": {"type": "array", "items": {"type": "string"}},
         "target_group": {"type": "string"},
         "budget_amount_cad": {"anyOf": [{"type": "number"}, {"type": "null"}]},
+        "program_name": {"anyOf": [{"type": "string"}, {"type": "null"}]},
         "hapi_domains": {"type": "array", "items": {"type": "string", "enum": HAPI_DOMAINS}},
     },
     "required": ["relevant", "confidence", "category", "rationale", "lifecycle_status",
-                 "theme", "target_group", "budget_amount_cad", "hapi_domains"],
+                 "theme", "target_group", "budget_amount_cad", "program_name", "hapi_domains"],
     "additionalProperties": False,
 }
 
@@ -141,9 +148,12 @@ def make_client():
     return Anthropic()
 
 
-def _prompt(item: FeedItem) -> str:
+BODY_LIMIT = 6000  # characters of release text sent with an item
+
+
+def _prompt(item: FeedItem, body: str = "") -> str:
     published = item.published_at.date().isoformat() if item.published_at else "unknown"
-    return (
+    text = (
         f"Jurisdiction: {item.jurisdiction_code}\n"
         f"Publisher / department: {item.department or 'unknown'}\n"
         f"Published: {published}\n"
@@ -152,10 +162,18 @@ def _prompt(item: FeedItem) -> str:
         f"Summary: {item.summary or '(none)'}\n"
         f"URL: {item.url}"
     )
+    body = " ".join(body.split())
+    if body:
+        clipped = body[:BODY_LIMIT] + (" […]" if len(body) > BODY_LIMIT else "")
+        text += f"\n\nRelease text:\n{clipped}"
+    return text
 
 
-def classify(client, item: FeedItem, model: str = DEFAULT_MODEL) -> AIVerdict | None:
-    """Classify one item. Returns None on refusal (the item stays for review)."""
+def classify(client, item: FeedItem, model: str = DEFAULT_MODEL,
+             body: str = "") -> AIVerdict | None:
+    """Classify one item, with the release's body text when available (feed
+    summaries are often a one-sentence teaser with no amount or program name).
+    Returns None on refusal (the item stays for review)."""
     resp = client.beta.messages.create(
         model=model,
         max_tokens=4000,
@@ -167,14 +185,14 @@ def classify(client, item: FeedItem, model: str = DEFAULT_MODEL) -> AIVerdict | 
             "format": {"type": "json_schema", "schema": SCHEMA},
         },
         system=SYSTEM,
-        messages=[{"role": "user", "content": _prompt(item)}],
+        messages=[{"role": "user", "content": _prompt(item, body)}],
     )
     if resp.stop_reason == "refusal":
         return None
     text = next(b.text for b in resp.content if b.type == "text")
     data = json.loads(text)
     fields = {k: data[k] for k in ("lifecycle_status", "theme", "target_group",
-                                   "budget_amount_cad", "hapi_domains")}
+                                   "budget_amount_cad", "program_name", "hapi_domains")}
     return AIVerdict(
         relevant=bool(data["relevant"]),
         category=data["category"],

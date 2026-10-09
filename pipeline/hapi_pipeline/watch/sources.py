@@ -92,6 +92,10 @@ class WatchSource:
     # The feed restates an item's current stage (bills: "Second reading…",
     # "Royal Assent…"): record changes on followed candidates as progress.
     track_updates: bool = False
+    # Fetch each new matched item's page so Claude triages the release text,
+    # not just the feed teaser (news sources; not bills — their feed text is
+    # the stage, and nslegislature.ca's firewall dislikes extra requests).
+    body_for_triage: bool = False
     # rss: items are Gazette issues — expand each issue page's table of contents
     expand_issues: bool = False
     issue_fixture: str = ""            # offline stand-in for an issue page
@@ -134,6 +138,7 @@ def _gc_news(name: str, label: str, dept: str | None, department: str = "") -> W
         fixture_name="gc_news.xml",
         params=params,
         department=department,
+        body_for_triage=True,
     )
 
 
@@ -211,6 +216,7 @@ SOURCES: list[WatchSource] = [
         pages=2,
         item_pattern=r"/en/(?P<y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})/[^/?#]+/?$",
         detail_fixture="ns_news_pages",
+        body_for_triage=True,
     ),
 ]
 

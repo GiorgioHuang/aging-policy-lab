@@ -535,7 +535,7 @@ def _cmd_watch_triage(args: argparse.Namespace) -> int:
     if client is None:
         print("✗ ANTHROPIC_API_KEY is not set (or anthropic not installed)", file=sys.stderr)
         return 2
-    results = triage_existing(client, args.limit)
+    results = triage_existing(client, args.limit, redo=args.all)
     failed = 0
     for cid, title, v in results:
         if isinstance(v, Exception):
@@ -544,9 +544,13 @@ def _cmd_watch_triage(args: argparse.Namespace) -> int:
         elif v is None:
             print(f"· #{cid} {title[:70]}: refused — left for human review")
         else:
+            extra = "".join(
+                f" · {label} {v.fields[k]}" for k, label in
+                (("program_name", "program:"), ("budget_amount_cad", "budget:"))
+                if v.fields.get(k) is not None)
             print(f"{'✓' if v.relevant else '✗'} #{cid} {title[:70]}\n"
                   f"    {'relevant' if v.relevant else 'NOT relevant'} · {v.category} · "
-                  f"{v.confidence:.2f} · {v.model}\n    {v.rationale}")
+                  f"{v.confidence:.2f} · {v.model}{extra}\n    {v.rationale}")
     print(f"done — {len(results)} triaged, {failed} failed (status unchanged)")
     return 1 if results and failed == len(results) else 0
 
@@ -708,6 +712,8 @@ def main(argv: list[str] | None = None) -> int:
     w_tri = w_sub.add_parser("triage", help="Claude-triage stored candidates that have no "
                                             "verdict yet (annotates only; status unchanged)")
     w_tri.add_argument("--limit", type=int, default=50)
+    w_tri.add_argument("--all", action="store_true",
+                       help="re-triage every followed candidate, not only those without a verdict")
     w_tri.set_defaults(func=_cmd_watch_triage)
     w_list = w_sub.add_parser("list", help="list candidates")
     w_list.add_argument("--status", default="new",

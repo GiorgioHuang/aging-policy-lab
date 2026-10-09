@@ -10,7 +10,8 @@ name: Policy Watch
 # (optional; without it triage is keyword-only and every match is listed).
 # Manual runs: mode=probe checks the live feeds without touching the DB;
 # mode=list prints the review queue (all statuses, with each item's current stage);
-# mode=triage runs Claude on stored candidates that have no verdict (status unchanged).
+# mode=triage runs Claude on stored candidates that have no verdict, triage-all on
+# every followed candidate (status unchanged either way).
 
 on:
   schedule:
@@ -20,7 +21,7 @@ on:
       mode:
         description: What to run
         type: choice
-        options: [fetch-and-digest, fetch, probe, list, triage]
+        options: [fetch-and-digest, fetch, probe, list, triage, triage-all]
         default: fetch-and-digest
       since_days:
         description: Ignore items published more than this many days ago
@@ -78,14 +79,14 @@ jobs:
         run: python -m hapi_pipeline.cli watch list --status all --limit 200
         working-directory: pipeline
 
-      - name: Claude-triage stored candidates without a verdict
-        if: env.MODE == 'triage'
-        run: python -m hapi_pipeline.cli watch triage
+      - name: Claude-triage stored candidates (without a verdict / all followed)
+        if: env.MODE == 'triage' || env.MODE == 'triage-all'
+        run: python -m hapi_pipeline.cli watch triage ${{ env.MODE == 'triage-all' && '--all' || '' }}
         working-directory: pipeline
 
       - name: Decide what to run
         id: plan
-        if: env.MODE != 'probe' && env.MODE != 'list' && env.MODE != 'triage'
+        if: env.MODE != 'probe' && env.MODE != 'list' && env.MODE != 'triage' && env.MODE != 'triage-all'
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "::warning::DATABASE_URL secret not set — skipping Policy Watch. See RUNBOOK.md §G."

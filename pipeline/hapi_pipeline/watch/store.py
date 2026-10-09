@@ -163,7 +163,8 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
         verdict = None
         if client is not None:
             try:
-                verdict = triage.classify(client, item)
+                body = _page_text(item.url) if source.body_for_triage else ""
+                verdict = triage.classify(client, item, body=body)
             except Exception as exc:  # noqa: BLE001 — one bad call must not drop the batch
                 print(f"    ⚠ triage failed for {item.url}: {exc}")
         if verdict is None:
@@ -197,17 +198,19 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
     return st
 
 
-def triage_existing(client, limit: int = 50) -> list[tuple[int, str, object]]:
+def triage_existing(client, limit: int = 50, redo: bool = False) -> list[tuple[int, str, object]]:
     """Run Claude triage on followed candidates stored without it (e.g. found
-    before ANTHROPIC_API_KEY was set). Annotates the ai_* fields only — never
-    changes status, so a reviewer's decision to keep following an item stands.
+    before ANTHROPIC_API_KEY was set), or on all of them with `redo`. Annotates
+    the ai_* fields only — never changes status, so a reviewer's decision to
+    keep following an item stands.
 
     Returns [(id, title, AIVerdict | None | Exception)].
     """
+    pending = "" if redo else "ai_relevant IS NULL AND "
     with connect() as conn, conn.cursor() as cur:
         cur.execute(
             f"SELECT {', '.join(_COLS)} FROM policy_candidate "
-            "WHERE ai_relevant IS NULL AND status IN ('new', 'accepted') ORDER BY id LIMIT %s",
+            f"WHERE {pending}status IN ('new', 'accepted') ORDER BY id LIMIT %s",
             (limit,),
         )
         rows = _rows(cur)
@@ -219,7 +222,9 @@ def triage_existing(client, limit: int = 50) -> list[tuple[int, str, object]]:
             department=c["department"] or "",
         )
         try:
-            verdict = triage.classify(client, item)  # network: no DB connection held
+            source = next((x for x in src.all_sources() if x.name == c["source"]), None)
+            body = _page_text(c["url"]) if source and source.body_for_triage else ""
+            verdict = triage.classify(client, item, body=body)  # network: no DB connection held
         except Exception as exc:  # noqa: BLE001 — report and carry on
             out.append((c["id"], c["title"], exc))
             continue
@@ -332,7 +337,11 @@ def existing_matches(c: dict, seed: list[dict]) -> list[tuple[str, str]]:
     """Library entries (same jurisdiction) whose title appears in the candidate's
     title or summary — e.g. a release announcing a new round of a program the
     library already holds. Titles under three words are too generic to match."""
-    text = f" {_words(c.get('title', ''))} {_words(c.get('summary', ''))} "
+    fields = c.get("ai_fields") or {}
+    if isinstance(fields, str):
+        fields = json.loads(fields)
+    program = fields.get("program_name") or ""  # Claude's reading of the release
+    text = f" {_words(c.get('title', ''))} {_words(c.get('summary', ''))} {_words(program)} "
     hits = []
     for e in seed:
         if e.get("jurisdiction_code") != c.get("jurisdiction_code"):
