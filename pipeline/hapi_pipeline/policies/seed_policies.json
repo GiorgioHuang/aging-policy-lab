@@ -34,7 +34,7 @@
     "department": "Employment and Social Development Canada",
     "released_at": "2004-01-01",
     "source_url": "https://www.canada.ca/en/employment-social-development/programs/new-horizons-seniors.html",
-    "full_text": "A federal grants and contributions program funding community-based projects that help seniors stay active, engaged, and socially connected, reducing isolation. Annual community and pan-Canadian funding streams support volunteerism, mentorship, and social participation for older adults.",
+    "full_text": "A federal grants and contributions program, running since 2004, that funds community-based projects helping seniors stay active, engaged and socially connected. Projects must involve seniors in leading, planning or delivering them, and address at least one of five objectives: promoting volunteerism among seniors and other generations; engaging seniors through mentoring others; expanding awareness of elder abuse, including financial abuse; supporting the social participation and inclusion of seniors; and capital assistance for community projects and programs for seniors. In the 2025–26 community-based call, organizations could receive grants of up to $25,000 for projects of up to 52 weeks. The program has funded over 45,000 projects, with total federal investment above $1 billion, and more than 900,000 seniors take part in its community-based projects each year. Funding is announced regionally, e.g. $147,854 for seven projects in southern Alberta on September 9, 2026.",
     "budget_amount": 70000000,
     "budget_currency": "CAD",
     "target_population": {
@@ -43,11 +43,15 @@
     },
     "kpis": [
       "reduce social isolation",
-      "fund community projects annually"
+      "fund community projects annually",
+      "seniors participating in community-based projects each year (900,000+)",
+      "projects funded since 2004 (45,000+)"
     ],
     "lifecycle_status": "in_effect",
     "theme": [
-      "social participation"
+      "social participation",
+      "volunteerism",
+      "elder abuse"
     ],
     "indicators": []
   },
@@ -613,7 +617,7 @@
     "department": "Department of Seniors and Long-Term Care",
     "released_at": "2017-01-01",
     "source_url": "https://novascotia.ca/age-friendly-grant/",
-    "full_text": "The Age-Friendly Communities Grant Program provides funding for projects and planning that help older Nova Scotians stay active, healthy and engaged in their communities. Project grants are typically up to $10,000 (up to $20,000 for large-scale or provincial initiatives) and planning grants are available up to $25,000. Eligible applicants include registered not-for-profit community organizations, municipalities, Mi'kmaq Band Councils, and post-secondary institutions in Nova Scotia.",
+    "full_text": "An annual Nova Scotia grant program for efforts that help seniors age well and stay active, healthy and involved in their communities. Project grants of up to $20,000 support activities such as fitness and movement classes, art and music, community meals, training, transportation and outreach; planning grants of up to $25,000 support community engagement, research and planning to identify seniors' needs. Eligible applicants are registered not-for-profit community organizations, municipalities, Mi'kmaq band councils, universities and not-for-profit post-secondary institutions, and schools applying through a regional centre for education or the Conseil scolaire acadien provincial; individuals and businesses are not eligible. The 2026 round (announced October 8, 2026) funds 44 projects — for example $20,000 to VETS Canada for food and housing support for older veterans in crisis, and $10,000 to Recreation Nova Scotia for videos on safely using recreational and adaptive equipment.",
     "budget_amount": null,
     "budget_currency": "CAD",
     "target_population": {
@@ -623,12 +627,14 @@
     "kpis": [
       "seniors social participation",
       "community-led age-friendly projects",
-      "active and healthy aging"
+      "active and healthy aging",
+      "44 projects funded in the 2026 round"
     ],
     "lifecycle_status": "in_effect",
     "theme": [
       "age-friendly",
-      "social participation"
+      "social participation",
+      "healthy aging"
     ],
     "indicators": [
       "social_participation.community_belonging_65plus"
