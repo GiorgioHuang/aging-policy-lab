@@ -197,6 +197,45 @@ def watch_source(source: src.WatchSource, *, live: bool, since: date,
     return st
 
 
+def triage_existing(client, limit: int = 50) -> list[tuple[int, str, object]]:
+    """Run Claude triage on followed candidates stored without it (e.g. found
+    before ANTHROPIC_API_KEY was set). Annotates the ai_* fields only — never
+    changes status, so a reviewer's decision to keep following an item stands.
+
+    Returns [(id, title, AIVerdict | None | Exception)].
+    """
+    with connect() as conn, conn.cursor() as cur:
+        cur.execute(
+            f"SELECT {', '.join(_COLS)} FROM policy_candidate "
+            "WHERE ai_relevant IS NULL AND status IN ('new', 'accepted') ORDER BY id LIMIT %s",
+            (limit,),
+        )
+        rows = _rows(cur)
+    out = []
+    for c in rows:
+        item = src.FeedItem(
+            source=c["source"], url=c["url"], title=c["title"], summary=c["summary"] or "",
+            published_at=c["published_at"], jurisdiction_code=c["jurisdiction_code"] or "",
+            department=c["department"] or "",
+        )
+        try:
+            verdict = triage.classify(client, item)  # network: no DB connection held
+        except Exception as exc:  # noqa: BLE001 — report and carry on
+            out.append((c["id"], c["title"], exc))
+            continue
+        if verdict is not None:
+            with connect() as conn, conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE policy_candidate SET ai_relevant=%s, ai_category=%s, ai_confidence=%s, "
+                    "ai_rationale=%s, ai_fields=%s, ai_model=%s WHERE id=%s",
+                    (verdict.relevant, verdict.category, verdict.confidence, verdict.rationale,
+                     json.dumps(verdict.fields), verdict.model, c["id"]),
+                )
+                conn.commit()
+        out.append((c["id"], c["title"], verdict))
+    return out
+
+
 # ── review ───────────────────────────────────────────────────────────────────
 
 _COLS = ("id", "source", "url", "title", "summary", "published_at", "jurisdiction_code",

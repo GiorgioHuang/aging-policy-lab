@@ -527,6 +527,30 @@ def _cmd_watch_fetch(args: argparse.Namespace) -> int:
     return 1 if failed and len(failed) == len(_watch_sources(args)) else 0
 
 
+def _cmd_watch_triage(args: argparse.Namespace) -> int:
+    from .watch.store import triage_existing
+    from .watch.triage import make_client
+
+    client = make_client()
+    if client is None:
+        print("✗ ANTHROPIC_API_KEY is not set (or anthropic not installed)", file=sys.stderr)
+        return 2
+    results = triage_existing(client, args.limit)
+    failed = 0
+    for cid, title, v in results:
+        if isinstance(v, Exception):
+            failed += 1
+            print(f"✗ #{cid} {title[:70]}: {type(v).__name__}: {v}")
+        elif v is None:
+            print(f"· #{cid} {title[:70]}: refused — left for human review")
+        else:
+            print(f"{'✓' if v.relevant else '✗'} #{cid} {title[:70]}\n"
+                  f"    {'relevant' if v.relevant else 'NOT relevant'} · {v.category} · "
+                  f"{v.confidence:.2f} · {v.model}\n    {v.rationale}")
+    print(f"done — {len(results)} triaged, {failed} failed (status unchanged)")
+    return 1 if results and failed == len(results) else 0
+
+
 def _cmd_watch_list(args: argparse.Namespace) -> int:
     from .watch.store import list_candidates
 
@@ -681,6 +705,10 @@ def main(argv: list[str] | None = None) -> int:
     w_fetch.add_argument("--no-ai", action="store_true",
                          help="keyword triage only, even if ANTHROPIC_API_KEY is set")
     w_fetch.set_defaults(func=_cmd_watch_fetch)
+    w_tri = w_sub.add_parser("triage", help="Claude-triage stored candidates that have no "
+                                            "verdict yet (annotates only; status unchanged)")
+    w_tri.add_argument("--limit", type=int, default=50)
+    w_tri.set_defaults(func=_cmd_watch_triage)
     w_list = w_sub.add_parser("list", help="list candidates")
     w_list.add_argument("--status", default="new",
                         choices=["new", "accepted", "rejected", "auto_rejected", "all"])
