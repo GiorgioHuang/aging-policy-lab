@@ -40,7 +40,7 @@ export const WATCH_SOURCES: Array<{
   href: string;
 }> = [
   {
-    key: ["gc_news", "gc_news_esdc", "gc_news_phac"],
+    key: ["gc_news", "gc_news_esdc", "gc_news_phac", "gc_news_hc"],
     label: "Government of Canada news releases",
     jurisdiction: "Federal",
     stage: "announcements, funding",

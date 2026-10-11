@@ -474,4 +474,4 @@ def test_existing_matches_uses_claude_program_name():
 
 def test_only_news_sources_fetch_bodies_for_triage():
     with_body = {s.name for s in src.all_sources() if s.body_for_triage}
-    assert with_body == {"gc_news", "gc_news_esdc", "gc_news_phac", "ns_news"}
+    assert with_body == {"gc_news", "gc_news_esdc", "gc_news_phac", "gc_news_hc", "ns_news"}

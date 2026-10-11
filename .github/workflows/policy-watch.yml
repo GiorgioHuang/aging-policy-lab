@@ -55,9 +55,9 @@ jobs:
       # Stream output as it happens, so a stalled source is visible in the log.
       PYTHONUNBUFFERED: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -135,3 +135,23 @@ jobs:
             --title "Policy Watch digest — $(date -u +%F)" \
             --body-file "$RUNNER_TEMP/digest.md"
           cat "$RUNNER_TEMP/digest.md" >> "$GITHUB_STEP_SUMMARY"
+
+  # GitHub disables scheduled workflows in a public repo after 60 days without
+  # repository activity, which would silently stop Policy Watch (and the weekly
+  # ingest). Re-enabling a workflow resets that timer, so each scheduled run does
+  # it for both. Never fails the run.
+  keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Reset the 60-day inactivity timer
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for wf in policy-watch.yml ingest.yml; do
+            gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/enable" \
+              && echo "✓ $wf enabled"
+          done

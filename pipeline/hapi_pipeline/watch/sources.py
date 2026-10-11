@@ -144,12 +144,15 @@ def _gc_news(name: str, label: str, dept: str | None, department: str = "") -> W
 
 SOURCES: list[WatchSource] = [
     _gc_news("gc_news", "Government of Canada news releases (all departments)", None),
-    # Backstops: the all-departments feed holds ~10 days, these hold months.
+    # Backstops: the all-departments feed holds ~10 days, these hold months
+    # (a run gap longer than that would otherwise lose the seniors-relevant ones).
     _gc_news("gc_news_esdc", "ESDC news releases (seniors, OAS/GIS, CPP)",
              "departmentofemploymentandsocialdevelopment",
              "Employment and Social Development Canada"),
     _gc_news("gc_news_phac", "Public Health Agency of Canada news releases",
              "publichealthagencyofcanada", "Public Health Agency of Canada"),
+    _gc_news("gc_news_hc", "Health Canada news releases (dental care, pharmacare)",
+             "departmentofhealth", "Health Canada"),
     WatchSource(
         name="gazette_p1",
         label="Canada Gazette Part I (notices, proposed regulations)",

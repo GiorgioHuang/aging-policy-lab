@@ -131,7 +131,7 @@ machine-readable feeds, chosen by where a policy first becomes public:
 
 | Source | Stage it catches | Format |
 |---|---|---|
-| Government of Canada news API (`api.io.canada.ca`), all departments + ESDC / PHAC backstops | announcements, funding | Atom |
+| Government of Canada news API (`api.io.canada.ca`), all departments + ESDC / PHAC / Health Canada backstops | announcements, funding | Atom |
 | Canada Gazette Part I | proposed regulations, notices | RSS |
 | Canada Gazette Part II | enacted regulations | RSS |
 | Federal bills — LEGISinfo (House and Senate) | legislation | RSS |

@@ -334,6 +334,14 @@ probe lists the feed-like links on those pages (`watch probe --discover URL…`)
 - **Daily 11:41 UTC** — fetch + triage → new rows in `policy_candidate`.
 - **Mondays** — also opens an issue labelled `policy-watch` listing the week's
   candidates (skipped when there are none). `mode: fetch-and-digest` does both now.
+- **Keepalive** — GitHub turns off scheduled workflows in a public repo after 60
+  days without repository activity. Each scheduled Policy Watch run re-enables
+  `policy-watch.yml` and `ingest.yml` (the `keepalive` job), which resets that
+  timer. If a schedule ever stops anyway, re-enable it under Actions → the
+  workflow → "Enable workflow".
+- Runs usually start hours after the cron time; the all-departments federal
+  feed holds ~10 days, so a missed day loses nothing (ESDC / PHAC / Health
+  Canada feeds hold months).
 
 **Blocked sources.** `nslegislature.ca` sits behind a web-application firewall
 that starts rejecting a client after several requests in a short time (seen
