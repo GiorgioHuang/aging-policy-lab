@@ -149,7 +149,7 @@ export default async function Home() {
                       <Link key={h.code} href="/hapi" className="snap-card">
                         <div className="snap-head">
                           <span className="snap-code">{h.code}</span>
-                          {h.period && <span className="snap-period">{h.period.slice(0, 4)}</span>}
+                          {h.years && <span className="snap-period" title="Data years in this composite">{h.years}</span>}
                         </div>
                         <div className="snap-overall">
                           <span className={`snap-overall-num ${scoreClass(h.overall)}`}>
@@ -173,7 +173,10 @@ export default async function Home() {
                   })}
                 </div>
                 <p className="meta" style={{ marginBottom: 0 }}>
-                  Composite index, 0–100 (higher is better). Methodology: <Link href="/hapi">HAPI →</Link>
+                  Composite of each domain&apos;s latest available score (data years shown), 0–100,
+                  higher is better. The two composites are within a few points, and their order
+                  depends on the weighting — read them as comparable, not ranked.{" "}
+                  <Link href="/hapi">HAPI →</Link>
                 </p>
               </section>
             );
@@ -208,7 +211,8 @@ export default async function Home() {
                       ))}
                     </div>
                     <p className="meta" style={{ marginBottom: 0 }}>
-                      Composite index over time, 0–100. <Link href="/hapi">All domains →</Link>
+                      Composite as of each year (each domain&apos;s latest score up to that year),
+                      0–100. <Link href="/hapi">All domains →</Link>
                     </p>
                   </section>
                 )}

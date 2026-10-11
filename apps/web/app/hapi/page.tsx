@@ -11,6 +11,7 @@ import { TrendChart, type ChartPoint, type ChartEvent } from "@/components/Trend
 import { type RadarAxis } from "@/components/DomainRadar";
 import { DomainRadarOverTime, type RadarTemporalSeries } from "@/components/DomainRadarOverTime";
 import { pageMetadata } from "@/lib/seo";
+import { type ByPeriod, compositeTrend, mergeWeights } from "@/lib/hapiComposite";
 
 export const metadata: Metadata = pageMetadata({
   title: "HAPI — Healthy Aging Policy Index",
@@ -116,7 +117,34 @@ function toEvents(evs: PolicyEvent[] | undefined): ChartEvent[] {
   }));
 }
 
-function DomainPanel({ d, events }: { d: DomainScores; events?: Record<string, PolicyEvent[]> }) {
+/** Composite-as-of-each-year per jurisdiction, from every domain's scores (see lib/hapiComposite). */
+function compositeTrends(domains: DomainScores[]): Record<string, ChartPoint[]> {
+  const byJur: Record<string, ByPeriod> = {};
+  const weightMaps: Array<Record<string, number> | undefined> = [];
+  for (const d of domains) {
+    for (const s of d.byJurisdiction) {
+      for (const r of s.rows) {
+        if (d.domain === "overall") {
+          weightMaps.push(r.inputs?.domain_weights);
+        } else if (r.score !== null) {
+          ((byJur[s.code] ??= {})[r.period] ??= {})[d.domain] = Number(r.score);
+        }
+      }
+    }
+  }
+  const weights = mergeWeights(weightMaps);
+  return Object.fromEntries(Object.entries(byJur).map(([code, bp]) => [code, compositeTrend(bp, weights)]));
+}
+
+function DomainPanel({
+  d,
+  events,
+  trends,
+}: {
+  d: DomainScores;
+  events?: Record<string, PolicyEvent[]>;
+  trends?: Record<string, ChartPoint[]>; // overrides the chart points (composite panel)
+}) {
   const method = d.byJurisdiction[0]?.rows[0]?.methodVersion ?? "v1";
   const hasEvents = events && Object.values(events).some((a) => a.length > 0);
   return (
@@ -132,12 +160,20 @@ function DomainPanel({ d, events }: { d: DomainScores; events?: Record<string, P
           policy timing against the outcome trend.
         </p>
       )}
+      {trends && (
+        <p className="meta">
+          Chart: the composite as of each year — each domain&apos;s latest score up to that year,
+          shown once every domain has data. Domains come from different survey years, so a single
+          period often holds only the newest domain; the audit table lists those stored
+          per-period composites and the domains each one covers.
+        </p>
+      )}
       <div className="charts">
         {d.byJurisdiction.map((s) => (
           <figure className="series" key={s.code}>
             <figcaption className="series-head">{s.code}</figcaption>
             <TrendChart
-              points={points(s.rows)}
+              points={trends?.[s.code] ?? points(s.rows)}
               direction="higher_is_better"
               unit="/100"
               yMin={0}
@@ -185,14 +221,14 @@ export default async function Hapi() {
       <h1>Healthy Aging Policy Index (HAPI)</h1>
       <p className="lede">
         An independent, documented index scoring how well a jurisdiction supports
-        healthy aging, 0–100, over time. v1 implements the methodology end-to-end on
-        the Care Access domain; every score is auditable to its raw inputs.
+        healthy aging, 0–100, over time, across six domains. Every score is auditable to
+        its raw inputs.
       </p>
 
       <div className="panel" style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
         HAPI measures outcome <em>states and trends</em>. It does <strong>not</strong> by
         itself prove a policy caused a change — attribution needs the quasi-experimental
-        designs in the analytics module. Other domains join as their connectors land.
+        designs in the analytics module.
       </div>
 
       {error ? (
@@ -224,7 +260,17 @@ export default async function Hapi() {
               </section>
             ) : null;
           })()}
-          {domains.map((d) => <DomainPanel key={d.domain} d={d} events={policyEvents[d.domain]} />)}
+          {(() => {
+            const trends = compositeTrends(domains);
+            return domains.map((d) => (
+              <DomainPanel
+                key={d.domain}
+                d={d}
+                events={policyEvents[d.domain]}
+                trends={d.domain === "overall" ? trends : undefined}
+              />
+            ));
+          })()}
         </>
       ) : (
         <p style={{ color: "var(--muted)" }}>

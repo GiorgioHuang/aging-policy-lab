@@ -1,5 +1,6 @@
 import { pool } from "./db";
 import { type AccessContext, orgScope } from "./access";
+import { type ByPeriod, compositeTrend, mergeWeights, profileComposite } from "./hapiComposite";
 
 export type Overview = {
   counts: {
@@ -10,7 +11,8 @@ export type Overview = {
     findings: number;
     literature: number;
   };
-  hapi: { code: string; overall: number | null; careAccess: number | null; period: string | null }[];
+  /** overall = composite of each domain's latest score; years = its data-year span. */
+  hapi: { code: string; overall: number | null; careAccess: number | null; years: string | null }[];
   hapiTrend: { code: string; points: { label: string; value: number }[] }[];
   domainProfile: { code: string; scores: Record<string, number> }[];
   domainEvolution: {
@@ -34,23 +36,11 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
   );
   const c = counts.rows[0];
 
-  // Latest overall + care_access HAPI per jurisdiction.
-  const hapiRows = await pool.query<{ code: string; domain: string; score: string; period: string }>(
-    `SELECT j.code, h.domain, h.score::text, h.period::text
-       FROM hapi_score h JOIN jurisdiction j ON j.id = h.jurisdiction_id
-      WHERE h.domain IN ('overall','care_access')
-   ORDER BY j.code, h.domain, h.period DESC`,
+  // Domain weights the scoring engine used (stored on its 'overall' rows).
+  const weightRows = await pool.query<{ w: Record<string, number> | null }>(
+    `SELECT inputs->'domain_weights' AS w FROM hapi_score WHERE domain = 'overall'`,
   );
-  const hapiMap = new Map<string, { code: string; overall: number | null; careAccess: number | null; period: string | null }>();
-  for (const r of hapiRows.rows) {
-    const e = hapiMap.get(r.code) ?? { code: r.code, overall: null, careAccess: null, period: null };
-    if (r.domain === "overall" && e.overall === null) {
-      e.overall = Number(r.score);
-      e.period = r.period;
-    }
-    if (r.domain === "care_access" && e.careAccess === null) e.careAccess = Number(r.score);
-    hapiMap.set(r.code, e);
-  }
+  const weights = mergeWeights(weightRows.rows.map((r) => r.w));
 
   // Composite HAPI trend per jurisdiction + latest score per domain (radar).
   const scoreRows = await pool.query<{ code: string; domain: string; score: string; period: string }>(
@@ -59,16 +49,15 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
       WHERE h.score IS NOT NULL
    ORDER BY j.code, h.domain, h.period`,
   );
-  const trendMap = new Map<string, { label: string; value: number }[]>();
+  const byPeriodMap = new Map<string, ByPeriod>(); // code -> period -> domain -> score
   const profileMap = new Map<string, Record<string, number>>(); // code -> domain -> latest score
   const evoMap = new Map<string, Record<string, Record<string, number>>>(); // code -> year -> domain -> score
   const yearSet = new Set<string>();
   for (const r of scoreRows.rows) {
-    if (r.domain === "overall") {
-      const arr = trendMap.get(r.code) ?? [];
-      arr.push({ label: r.period.slice(0, 4), value: Number(r.score) });
-      trendMap.set(r.code, arr);
-    } else {
+    if (r.domain !== "overall") {
+      const bp = byPeriodMap.get(r.code) ?? {};
+      (bp[r.period] ??= {})[r.domain] = Number(r.score);
+      byPeriodMap.set(r.code, bp);
       const e = profileMap.get(r.code) ?? {};
       e[r.domain] = Number(r.score); // rows ordered by period asc → last write wins = latest
       profileMap.set(r.code, e);
@@ -114,8 +103,16 @@ export async function getOverview(ctx: AccessContext): Promise<Overview> {
       findings: Number(c.findings),
       literature: Number(c.literature),
     },
-    hapi: [...hapiMap.values()],
-    hapiTrend: [...trendMap.entries()].map(([code, points]) => ({ code, points })),
+    hapi: [...byPeriodMap.entries()].map(([code, bp]) => {
+      const pc = profileComposite(bp, weights);
+      return {
+        code,
+        overall: pc?.score ?? null,
+        careAccess: profileMap.get(code)?.care_access ?? null,
+        years: pc ? (pc.fromYear === pc.toYear ? pc.fromYear : `${pc.fromYear}–${pc.toYear}`) : null,
+      };
+    }),
+    hapiTrend: [...byPeriodMap.entries()].map(([code, bp]) => ({ code, points: compositeTrend(bp, weights) })),
     domainProfile: [...profileMap.entries()].map(([code, scores]) => ({ code, scores })),
     domainEvolution: {
       years: [...yearSet].sort(),
