@@ -263,18 +263,31 @@ def _cmd_weights(_args: argparse.Namespace) -> int:
             cells += f"{(100 * w.get(d, 0.0) / tot):>10.1f}%"
         print(f"{d:<22} {cells}")
 
-    print("\n=== Composite (overall HAPI) under each scheme, latest period ===")
-    print(f"{'jurisdiction':<14} {'period':<11} " + "".join(f"{n:>11}" for n in schemes))
+    def cells(comp: dict) -> str:
+        return "".join(("—" if comp[n] is None else f"{comp[n]:.1f}").rjust(11) for n in schemes)
+
+    print("\n=== Composite under each scheme, full domain profile "
+          "(latest available score per domain) ===")
+    print(f"{'jurisdiction':<14} {'domains':>7}    " + "".join(f"{n:>11}" for n in schemes))
     max_spread = 0.0
-    for r in out["rows"]:
-        comp = r["composite"]
-        cells = "".join(("—" if comp[n] is None else f"{comp[n]:.1f}").rjust(11) for n in schemes)
-        vals = [v for v in comp.values() if v is not None]
+    for r in out["profile_rows"]:
+        vals = [v for v in r["composite"].values() if v is not None]
         if len(vals) >= 2:
             max_spread = max(max_spread, max(vals) - min(vals))
-        print(f"{r['jurisdiction']:<14} {r['period']:<11} {cells}")
+        print(f"{r['jurisdiction']:<14} {r['n_domains']:>7}    {cells(r['composite'])}")
+    order = out["ordering"]
     print(f"\nMax composite spread across schemes: {max_spread:.1f} points "
           "(smaller = more robust to the weighting choice).")
+    print("Ordering: " + "; ".join(f"{n}: {' > '.join(v)}" for n, v in order.items())
+          + (" (invariant)" if len({tuple(v) for v in order.values()}) == 1
+             else " (CHANGES with the weighting)"))
+
+    print("\n=== Composite at the latest period alone (reference) ===")
+    print(f"{'jurisdiction':<14} {'period':<11} {'domains':>7}" + "".join(f"{n:>11}" for n in schemes))
+    for r in out["rows"]:
+        print(f"{r['jurisdiction']:<14} {r['period']:<11} {r['n_domains']:>7}{cells(r['composite'])}")
+    if any(r["n_domains"] < 2 for r in out["rows"]):
+        print("(a single-domain period gives the same composite under any weights)")
     print("expert = v1 default (theory-anchored); empirical = coefficient-of-variation, "
           "indicative while coverage is NS + Federal.")
     return 0

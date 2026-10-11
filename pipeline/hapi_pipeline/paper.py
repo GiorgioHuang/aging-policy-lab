@@ -111,23 +111,45 @@ def weighting_table(conn) -> str:
             cells.append(f"{100 * w.get(d, 0.0) / tot:.1f}")
         wlines.append(f"| {DOMAIN_LABEL[d]} | " + " | ".join(cells) + " |")
 
-    # Composite under each scheme, latest period.
-    clines = ["", "**Composite (overall HAPI) under each scheme, latest period:**", "",
-              "| Jurisdiction | Period | " + " | ".join(names) + " |",
-              "|" + "|".join(["---", "---"] + ["---:"] * len(names)) + "|"]
+    # The robustness test: composite of each jurisdiction's full domain profile
+    # (latest available score per domain) under each scheme.
+    clines = ["", "**Composite under each scheme — full domain profile "
+              "(latest available score per domain):**", "",
+              "| Jurisdiction | Domains | Vintages | " + " | ".join(names) + " |",
+              "|" + "|".join(["---", "---:", "---"] + ["---:"] * len(names)) + "|"]
     max_spread = 0.0
-    for r in out["rows"]:
+    for r in out["profile_rows"]:
         comp = r["composite"]
-        cells = [_fmt(comp[n]) for n in names]
         vals = [v for v in comp.values() if v is not None]
         if len(vals) >= 2:
             max_spread = max(max_spread, max(vals) - min(vals))
-        clines.append(f"| {r['jurisdiction']} | {r['period']} | " + " | ".join(cells) + " |")
+        years = sorted({p[:4] for p in r["as_of"].values()})
+        vint = years[0] if len(years) == 1 else f"{years[0]}–{years[-1]}"
+        clines.append(f"| {r['jurisdiction']} | {r['n_domains']} | {vint} | "
+                      + " | ".join(_fmt(comp[n]) for n in names) + " |")
+    order = out["ordering"]
+    invariant = len({tuple(v) for v in order.values()}) == 1
     clines.append("")
-    clines.append(f"_Max composite spread across schemes: **{max_spread:.1f} points** "
-                  "(smaller = more robust to the weighting choice). expert = v1 default; "
-                  "empirical = coefficient-of-variation, indicative while coverage is NS + federal._")
-    return "\n".join(wlines + clines)
+    clines.append(f"_Max composite spread across schemes: **{max_spread:.1f} points**. "
+                  "Ordering (high → low): "
+                  + "; ".join(f"{n}: {' > '.join(order[n])}" for n in names)
+                  + (" — **invariant** across schemes." if invariant
+                     else " — **changes with the weighting scheme.**")
+                  + " expert = v1 default; empirical = coefficient-of-variation, "
+                  "indicative while coverage is NS + federal._")
+
+    # Latest period alone, for reference: often a single (newest) domain.
+    llines = ["", "**Composite at the latest period alone (reference):**", "",
+              "| Jurisdiction | Period | Domains | " + " | ".join(names) + " |",
+              "|" + "|".join(["---", "---", "---:"] + ["---:"] * len(names)) + "|"]
+    for r in out["rows"]:
+        llines.append(f"| {r['jurisdiction']} | {r['period']} | {r['n_domains']} | "
+                      + " | ".join(_fmt(r["composite"][n]) for n in names) + " |")
+    if any(r["n_domains"] < 2 for r in out["rows"]):
+        llines.append("")
+        llines.append("_A single-domain period gives the same composite under any "
+                      "weights; it is not evidence of robustness._")
+    return "\n".join(wlines + clines + llines)
 
 
 def its_findings(conn) -> str:

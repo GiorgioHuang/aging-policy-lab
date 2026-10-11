@@ -97,9 +97,26 @@ def load_domain_scores(conn) -> dict[str, dict[str, dict[str, float]]]:
     return out
 
 
+def latest_profile(periods: dict[str, dict[str, float]]) -> tuple[dict[str, float], dict[str, str]]:
+    """Each domain's latest available score across periods, and the period it is
+    from. Domains come from different survey vintages, so the latest *period*
+    often holds only the newest domain(s); the profile holds all of them."""
+    scores: dict[str, float] = {}
+    as_of: dict[str, str] = {}
+    for period in sorted(periods):  # ascending → later periods overwrite
+        for d, s in periods[period].items():
+            scores[d], as_of[d] = s, period
+    return scores, as_of
+
+
 def sensitivity(conn) -> dict:
-    """Compute the three weight vectors + the composite each implies for every
-    jurisdiction's latest period — a transparency / robustness report."""
+    """Compute the three weight vectors + the composite each implies — a
+    transparency / robustness report.
+
+    ``profile_rows`` (the robustness test): per jurisdiction, the composite of its
+    latest-available score in every domain. ``rows``: the composite at the latest
+    period alone, with ``n_domains`` — when that is 1, the weights cannot matter
+    and the row says nothing about robustness."""
     by_jur = load_domain_scores(conn)
 
     # Empirical weights from every cell's domain scores.
@@ -113,6 +130,7 @@ def sensitivity(conn) -> dict:
     schemes = {"equal": EQUAL, "expert": EXPERT, "empirical": empirical}
 
     rows = []
+    profile_rows = []
     for jcode, periods in sorted(by_jur.items()):
         if not periods:
             continue
@@ -121,6 +139,25 @@ def sensitivity(conn) -> dict:
         rows.append({
             "jurisdiction": jcode,
             "period": latest,
+            "n_domains": len(scores),
             "composite": {name: _composite(scores, w) for name, w in schemes.items()},
         })
-    return {"schemes": schemes, "rows": rows}
+        profile, as_of = latest_profile(periods)
+        profile_rows.append({
+            "jurisdiction": jcode,
+            "as_of": as_of,
+            "n_domains": len(profile),
+            "composite": {name: _composite(profile, w) for name, w in schemes.items()},
+        })
+    return {"schemes": schemes, "rows": rows, "profile_rows": profile_rows,
+            "ordering": ordering(profile_rows, list(schemes))}
+
+
+def ordering(rows: list[dict], schemes: list[str]) -> dict[str, list[str]]:
+    """Jurisdictions ranked high → low by composite, per scheme."""
+    out = {}
+    for name in schemes:
+        ranked = [r for r in rows if r["composite"][name] is not None]
+        ranked.sort(key=lambda r: r["composite"][name], reverse=True)
+        out[name] = [r["jurisdiction"] for r in ranked]
+    return out
