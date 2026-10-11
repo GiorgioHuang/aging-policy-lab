@@ -1,0 +1,36 @@
+name: Paper tables
+
+# Read-only: print the quantitative blocks of Paper 1 (corpus counts, HAPI
+# scores, weighting sensitivity, ITS coefficients) from the managed Postgres, so
+# the draft can be refreshed to live coverage. Does not write anything.
+# Requires the DATABASE_URL secret. See papers/paper-1-observatory-design/README.md.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  tables:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Guard on DATABASE_URL
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret not set. See RUNBOOK.md §C."
+            exit 1
+          fi
+      - run: pip install -r pipeline/requirements.txt
+      - name: Generate paper tables
+        run: |
+          python -m hapi_pipeline.cli paper-tables | tee "$RUNNER_TEMP/paper-tables.md"
+          cat "$RUNNER_TEMP/paper-tables.md" >> "$GITHUB_STEP_SUMMARY"
+        working-directory: pipeline
