@@ -82,7 +82,8 @@ export default function ResearchPage() {
             Cycle</strong> — a policy-level Learning Health System. Evaluated as a design, the
             instrument is traceable (every published value resolves to its source), reproducible
             (deterministic, idempotent), grounded (no fabricated AI citation is representable), and
-            robust (the index ordering is invariant to weighting). The design itself is the
+            honest about robustness (index levels move at most 2.3 points across weightings, and a
+            ranking the weighting can reverse is reported as a tie). The design itself is the
             contribution.
           </p>
           <div className="paper-actions">
