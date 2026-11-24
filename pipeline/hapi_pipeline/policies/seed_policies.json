@@ -725,5 +725,49 @@
       "digital_inclusion.virtual_care_visits_ns",
       "care_access.regular_provider_65plus"
     ]
+  },
+  {
+    "slug": "ca-ns-bill-282-seniors-advocate-2026",
+    "jurisdiction_code": "CA-NS",
+    "title": "Bill 282 — Seniors Advocate Act (proposed)",
+    "department": null,
+    "released_at": "2026-09-11",
+    "source_url": "https://nslegislature.ca/legislative-business/bills-statutes/bills/assembly-65-session-1/bill-282",
+    "full_text": "Private member’s bill introduced by Becky Druhan. It proposes an independent Seniors Advocate to receive complaints, investigate and make recommendations concerning services the government provides or funds for people aged 65 and older. Legislative stage: first reading; no later stage or enactment verified as of 2026-11-24. The first-reading date is provisional: published legislative trackers report September 11, while the Policy Watch digest records September 10.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "age": "65+",
+      "group": "older adults using government-provided or government-funded services"
+    },
+    "kpis": [],
+    "lifecycle_status": "announced",
+    "theme": [
+      "seniors advocacy",
+      "accountability"
+    ],
+    "indicators": []
+  },
+  {
+    "slug": "ca-ns-bill-171-long-term-care-strategy-2025",
+    "jurisdiction_code": "CA-NS",
+    "title": "Bill 171 — Long-term Care Strategy Act (proposed)",
+    "department": null,
+    "released_at": "2025-10-02",
+    "source_url": "https://nslegislature.ca/legislative-business/bills-statutes/bills/assembly-65-session-1/bill-171",
+    "full_text": "Private member’s bill introduced by Rod Wilson. It proposes a provincial long-term care strategy covering public and non-profit bed capacity, continuing care assistant staffing and time for resident care, and reporting on access and staffing. Legislative stage: first reading; no later stage or enactment verified as of 2026-11-24. The first-reading date is provisional: published legislative trackers report October 2, while the Policy Watch digest records October 1.",
+    "budget_amount": null,
+    "budget_currency": "CAD",
+    "target_population": {
+      "group": "long-term care residents and people awaiting placement"
+    },
+    "kpis": [],
+    "lifecycle_status": "announced",
+    "theme": [
+      "long-term care",
+      "care access",
+      "workforce"
+    ],
+    "indicators": []
   }
 ]
